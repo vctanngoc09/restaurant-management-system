@@ -1,0 +1,45 @@
+package vn.edu.ut.resto.security.jwt;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.MediaType;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.web.AuthenticationEntryPoint;
+import org.springframework.stereotype.Component;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
+@Component
+public class AuthEntryPointJwt implements AuthenticationEntryPoint {
+
+    private static final Logger logger = LoggerFactory.getLogger(AuthEntryPointJwt.class);
+
+    @Override
+    public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException)
+            throws IOException, ServletException {
+        // 1. Log lỗi ra Console để Dev mình dễ debug
+        logger.error("Lỗi xác thực (Unauthorized): {}", authException.getMessage());
+
+        // 2. Thiết lập phản hồi trả về cho Frontend (Dạng JSON)
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // Mã lỗi 401
+
+        // 3. Tạo nội dung lỗi chi tiết
+        final Map<String, Object> body = new HashMap<>();
+        body.put("status", HttpServletResponse.SC_UNAUTHORIZED);
+        body.put("error", "Unauthorized");
+        body.put("message", authException.getMessage()); // Thông báo lỗi cụ thể
+        body.put("path", request.getServletPath()); // Đường dẫn mà User cố truy cập
+
+        // 4. Dùng ObjectMapper để biến cái Map trên thành chuỗi JSON và gửi đi
+        final ObjectMapper mapper = new ObjectMapper();
+        mapper.writeValue(response.getOutputStream(), body);
+    }
+}
