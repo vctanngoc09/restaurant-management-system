@@ -1,7 +1,7 @@
 package vn.edu.ut.resto.security.services;
 
 import vn.edu.ut.resto.model.User;
-import vn.edu.ut.resto.repository.IUserRepository;
+import vn.edu.ut.resto.repository.UserRepository;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -12,9 +12,9 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserDetailsServiceImpl implements UserDetailsService {
 
     // Dùng final, không cần @Autowired vì Spring tự động hiểu khi có 1 Constructor
-    private final IUserRepository userRepository;
+    private final UserRepository userRepository;
 
-    public UserDetailsServiceImpl(IUserRepository userRepository) {
+    public UserDetailsServiceImpl(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
 

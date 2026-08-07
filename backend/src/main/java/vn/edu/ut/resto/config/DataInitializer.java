@@ -7,8 +7,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import vn.edu.ut.resto.model.Role;
 import vn.edu.ut.resto.model.User;
 import vn.edu.ut.resto.model.enums.ERole;
-import vn.edu.ut.resto.repository.IRoleRepository;
-import vn.edu.ut.resto.repository.IUserRepository;
+import vn.edu.ut.resto.repository.RoleRepository;
+import vn.edu.ut.resto.repository.UserRepository;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -17,8 +17,8 @@ import java.util.Set;
 public class DataInitializer {
 
     @Bean
-    public CommandLineRunner initData(IRoleRepository roleRepository,
-                                      IUserRepository userRepository,
+    public CommandLineRunner initData(RoleRepository roleRepository,
+                                      UserRepository userRepository,
                                       PasswordEncoder passwordEncoder) {
         return args -> {
 

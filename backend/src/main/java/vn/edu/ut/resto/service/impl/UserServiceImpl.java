@@ -8,21 +8,21 @@ import vn.edu.ut.resto.mapper.UserMapper;
 import vn.edu.ut.resto.model.Role;
 import vn.edu.ut.resto.model.User;
 import vn.edu.ut.resto.model.enums.ERole;
-import vn.edu.ut.resto.repository.IRoleRepository;
-import vn.edu.ut.resto.repository.IUserRepository;
-import vn.edu.ut.resto.service.IUserService;
+import vn.edu.ut.resto.repository.RoleRepository;
+import vn.edu.ut.resto.repository.UserRepository;
+import vn.edu.ut.resto.service.UserService;
 
 import java.util.HashSet;
 import java.util.Set;
 
 @Service
-public class UserServiceImpl implements IUserService {
+public class UserServiceImpl implements UserService {
 
     @Autowired
-    private IUserRepository userRepository;
+    private UserRepository userRepository;
 
     @Autowired
-    private IRoleRepository roleRepository;
+    private RoleRepository roleRepository;
 
     @Autowired
     private PasswordEncoder encoder;

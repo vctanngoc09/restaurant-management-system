@@ -1,5 +1,6 @@
 package vn.edu.ut.resto.security;
 
+import vn.edu.ut.resto.exception.CustomAccessDeniedHandler;
 import vn.edu.ut.resto.security.jwt.AuthEntryPointJwt;
 import vn.edu.ut.resto.security.jwt.AuthTokenFilter;
 import vn.edu.ut.resto.security.services.UserDetailsServiceImpl;
@@ -27,6 +28,9 @@ import java.util.List;
 @EnableWebSecurity
 @EnableMethodSecurity
 public class WebSecurityConfig {
+
+    @Autowired
+    private CustomAccessDeniedHandler accessDeniedHandler;
 
     @Autowired
     UserDetailsServiceImpl userDetailsService;
@@ -65,7 +69,10 @@ public class WebSecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
-                .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint(unauthorizedHandler)
+                        .accessDeniedHandler(accessDeniedHandler)
+                )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth ->
                         auth.requestMatchers("/api/auth/**").permitAll() // Cho phép truy cập không cần Token

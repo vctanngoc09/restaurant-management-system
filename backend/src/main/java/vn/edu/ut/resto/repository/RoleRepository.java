@@ -8,6 +8,6 @@ import vn.edu.ut.resto.model.enums.ERole;
 import java.util.Optional;
 
 @Repository
-public interface IRoleRepository extends JpaRepository<Role, Integer> {
+public interface RoleRepository extends JpaRepository<Role, Integer> {
     Optional<Role> findByName(ERole name);
 }

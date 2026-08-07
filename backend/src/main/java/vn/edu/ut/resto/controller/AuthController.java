@@ -10,7 +10,7 @@ import vn.edu.ut.resto.mapper.UserMapper;
 import vn.edu.ut.resto.model.User;
 import vn.edu.ut.resto.security.jwt.JwtUtils;
 import vn.edu.ut.resto.security.services.UserDetailsImpl;
-import vn.edu.ut.resto.service.IUserService;
+import vn.edu.ut.resto.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -21,6 +21,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 @RequestMapping("/api/auth")
@@ -30,7 +32,7 @@ public class AuthController {
     AuthenticationManager authenticationManager;
 
     @Autowired
-    IUserService userService;
+    UserService userService;
 
     @Autowired
     JwtUtils jwtUtils;
@@ -53,7 +55,7 @@ public class AuthController {
         // 2. Lưu User mới
         User newUser = userService.registerUser(signUpRequest);
 
-        java.util.List<String> roleNames = newUser.getRoles().stream()
+        List<String> roleNames = newUser.getRoles().stream()
                 .map(role -> role.getName().name())
                 .collect(java.util.stream.Collectors.toList());
 
