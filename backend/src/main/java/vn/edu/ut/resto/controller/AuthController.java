@@ -43,26 +43,16 @@ public class AuthController {
     @PostMapping("/signup")
     public ResponseEntity<ApiResponse<UserResponse>> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
 
-        // 1. Kiểm tra trùng lặp và ném Exception (GlobalExceptionHandler sẽ tự bắt)
-        if (userService.existsByUsername(signUpRequest.getUsername())) {
-            throw new DuplicateException("Lỗi: Tên đăng nhập đã tồn tại!");
-        }
-
-        if (userService.existsByPhone(signUpRequest.getPhone())) {
-            throw new DuplicateException("Lỗi: Số điện thoại đã được sử dụng!");
-        }
-
-        // 2. Lưu User mới
+        // 1. Chỉ cần gọi Service, mọi lỗi trùng lặp Service sẽ tự ném ra
         User newUser = userService.registerUser(signUpRequest);
 
+        // 2. Map Role và trả kết quả
         List<String> roleNames = newUser.getRoles().stream()
                 .map(role -> role.getName().name())
                 .collect(java.util.stream.Collectors.toList());
 
-        // 3. Truyền biến roleNames vào thay cho chữ 'null'
         UserResponse responseData = new UserResponse(newUser.getId(), newUser.getUsername(), newUser.getPhone(), roleNames);
 
-        // 4. Bọc lại bằng ApiResponse theo style của bạn bè
         return ResponseEntity.status(HttpStatus.CREATED).body(
                 new ApiResponse<>(201, "Đăng ký nhân viên thành công!", responseData)
         );
