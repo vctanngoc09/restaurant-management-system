@@ -51,7 +51,7 @@ public class AuthController {
                 .map(role -> role.getName().name())
                 .collect(java.util.stream.Collectors.toList());
 
-        UserResponse responseData = new UserResponse(newUser.getId(), newUser.getUsername(), newUser.getPhone(), roleNames);
+        UserResponse responseData = new UserResponse(newUser.getId(),newUser.getFullName(), newUser.getUsername(), newUser.getPhone(), roleNames);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(
                 new ApiResponse<>(201, "Đăng ký nhân viên thành công!", responseData)
@@ -75,7 +75,7 @@ public class AuthController {
         UserResponse userResponse = userMapper.toResponse(userDetails);
 
         // 4. Đóng gói JWT
-        JwtResponse jwtResponse = new JwtResponse(jwt, userDetails.getId(), userDetails.getUsername(), userDetails.getPhone(), userResponse.getRoles());
+        JwtResponse jwtResponse = new JwtResponse(jwt, userResponse);
 
         // 5. Trả về ApiResponse chuẩn chỉnh
         return ResponseEntity.ok(

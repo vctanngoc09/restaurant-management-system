@@ -12,10 +12,22 @@ public class JwtResponse {
     public JwtResponse() {}
 
     // Constructor tùy chỉnh tự động gói dữ liệu vào UserResponse
-    public JwtResponse(String accessToken, Long id, String username, String phone, List<String> roles) {
+    public JwtResponse(String accessToken,
+                       Long id,
+                       String fullName,
+                       String username,
+                       String phone,
+                       List<String> roles) {
+
         this.token = accessToken;
         this.type = "Bearer";
-        this.user = new UserResponse(id, username, phone, roles);
+        this.user = new UserResponse(id, fullName, username, phone, roles);
+    }
+
+    public JwtResponse(String token, UserResponse user) {
+        this.token = token;
+        this.type = "Bearer";
+        this.user = user;
     }
 
     // --- Getters và Setters ---

@@ -5,23 +5,21 @@ import java.util.List;
 public class UserResponse {
 
     private Long id;
+    private String fullName;
     private String username;
     private String phone;
     private List<String> roles;
 
-    // Constructor mặc định
     public UserResponse() {
     }
 
-    // Constructor đầy đủ tham số
-    public UserResponse(Long id, String username, String phone, List<String> roles) {
+    public UserResponse(Long id, String fullName, String username, String phone, List<String> roles) {
         this.id = id;
+        this.fullName = fullName;
         this.username = username;
         this.phone = phone;
         this.roles = roles;
     }
-
-    // --- Getters và Setters ---
 
     public Long getId() {
         return id;
@@ -29,6 +27,14 @@ public class UserResponse {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public String getFullName() {
+        return fullName;
+    }
+
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
     }
 
     public String getUsername() {
