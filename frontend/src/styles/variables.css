@@ -1,0 +1,91 @@
+:root {
+  /* =========================
+     COLORS
+  ========================= */
+
+  --color-primary: #4f46e5;
+  --color-primary-hover: #4338ca;
+  --color-primary-light: #eef2ff;
+
+  --color-secondary: #7c3aed;
+
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-danger: #ef4444;
+
+  --color-text-primary: #0f172a;
+  --color-text-secondary: #475569;
+  --color-text-muted: #94a3b8;
+
+  --color-background: #f1f5f9;
+  --color-surface: #ffffff;
+
+  --color-border: #e2e8f0;
+  --color-border-focus: #6366f1;
+
+
+  /* =========================
+     AUTH / BRAND
+  ========================= */
+
+  --brand-gradient:
+    linear-gradient(
+      145deg,
+      #4338ca 0%,
+      #3730a3 45%,
+      #26245f 100%
+    );
+
+
+  /* =========================
+     TYPOGRAPHY
+  ========================= */
+
+  --font-family:
+    Inter,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+
+  --font-size-xs: 12px;
+  --font-size-sm: 14px;
+  --font-size-md: 16px;
+  --font-size-lg: 20px;
+  --font-size-xl: 24px;
+  --font-size-2xl: 28px;
+
+
+  /* =========================
+     BORDER RADIUS
+  ========================= */
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+  --radius-2xl: 24px;
+
+
+  /* =========================
+     SHADOW
+  ========================= */
+
+  --shadow-sm:
+    0 2px 6px rgba(15, 23, 42, 0.06);
+
+  --shadow-md:
+    0 8px 20px rgba(15, 23, 42, 0.1);
+
+  --shadow-lg:
+    0 20px 45px rgba(15, 23, 42, 0.12);
+
+
+  /* =========================
+     TRANSITION
+  ========================= */
+
+  --transition-fast: 150ms ease;
+  --transition-normal: 200ms ease;
+}
