@@ -1,15 +1,26 @@
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
+
 import PublicRoute from "./PublicRoute";
 import ProtectedRoute from "./ProtectedRoute";
 import RoleRoute from "./RoleRoute";
+
 import { ROLES } from "../constants/roles";
+
 import authService from "../services/authService";
-import Login from "../pages/auth/Login/Login";
-import AdminDashboard from "../pages/admin/AdminDashboard/AdminDashboard";
-import CashierDashboard from "../pages/cashier/CashierDashboard/CashierDashboard";
-import ChefDashboard from "../pages/chef/ChefDashboard/ChefDashboard";
-import WaiterDashboard from "../pages/waiter/WaiterDashboard/WaiterDashboard";
+
 import useAuth from "../hooks/useAuth";
+
+import AppLayout from "../layouts/AppLayout";
+
+import Login from "../pages/auth/Login/Login";
+
+import AdminDashboard from "../pages/admin/AdminDashboard/AdminDashboard";
+
+import CashierDashboard from "../pages/cashier/CashierDashboard/CashierDashboard";
+
+import ChefDashboard from "../pages/chef/ChefDashboard/ChefDashboard";
+
+import WaiterDashboard from "../pages/waiter/WaiterDashboard/WaiterDashboard";
 
 function AppRoutes() {
   const { isAuthenticated, roles } = useAuth();
@@ -20,47 +31,61 @@ function AppRoutes() {
 
   return (
     <Routes>
-      {/* KHU VỰC 1: XỬ LÝ ĐƯỜNG DẪN GỐC */}
+      {/* =========================
+          ROOT
+      ========================= */}
       <Route path="/" element={<Navigate to={rootRedirect} replace />} />
 
-      {/* KHU VỰC 2: CÔNG KHAI (Chỉ dành cho khách) */}
+      {/* =========================
+          PUBLIC
+      ========================= */}
       <Route element={<PublicRoute />}>
         <Route path="/login" element={<Login />} />
       </Route>
 
-      {/* KHU VỰC 3: BẢO MẬT NGHIÊM NGẶT (Đã đăng nhập) */}
+      {/* =========================
+          PROTECTED
+      ========================= */}
       <Route element={<ProtectedRoute />}>
-        {/* Nhánh Quản lý */}
-        <Route
-          path="/admin"
-          element={<RoleRoute allowedRoles={[ROLES.ADMIN]} />}
-        >
-          <Route index element={<AdminDashboard />} />
-        </Route>
+        {/* Tất cả page phía trong đều có Header */}
+        <Route element={<AppLayout />}>
+          {/* ADMIN */}
+          <Route
+            path="/admin"
+            element={<RoleRoute allowedRoles={[ROLES.ADMIN]} />}
+          >
+            <Route index element={<AdminDashboard />} />
+          </Route>
 
-        {/* Nhánh Bếp */}
-        <Route path="/chef" element={<RoleRoute allowedRoles={[ROLES.CHEF]} />}>
-          <Route index element={<ChefDashboard />} />
-        </Route>
+          {/* CASHIER */}
+          <Route
+            path="/cashier"
+            element={<RoleRoute allowedRoles={[ROLES.CASHIER]} />}
+          >
+            <Route index element={<CashierDashboard />} />
+          </Route>
 
-        {/* Nhánh Thu ngân */}
-        <Route
-          path="/cashier"
-          element={<RoleRoute allowedRoles={[ROLES.CASHIER]} />}
-        >
-          <Route index element={<CashierDashboard />} />
-        </Route>
+          {/* CHEF */}
+          <Route
+            path="/chef"
+            element={<RoleRoute allowedRoles={[ROLES.CHEF]} />}
+          >
+            <Route index element={<ChefDashboard />} />
+          </Route>
 
-        {/* Nhánh Phục vụ */}
-        <Route
-          path="/waiter"
-          element={<RoleRoute allowedRoles={[ROLES.WAITER]} />}
-        >
-          <Route index element={<WaiterDashboard />} />
+          {/* WAITER */}
+          <Route
+            path="/waiter"
+            element={<RoleRoute allowedRoles={[ROLES.WAITER]} />}
+          >
+            <Route index element={<WaiterDashboard />} />
+          </Route>
         </Route>
       </Route>
 
-      {/* KHU VỰC 4: BẮT LỖI 404 (Gõ sai đường link) */}
+      {/* =========================
+          404
+      ========================= */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

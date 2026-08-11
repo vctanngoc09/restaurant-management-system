@@ -58,7 +58,7 @@ function LoginForm() {
 
       // 5. Redirect
       navigate(redirectPath, {
-        replace: true,
+        replace: true, 
       });
     } catch (error) {
       console.error("LOGIN ERROR:", error);

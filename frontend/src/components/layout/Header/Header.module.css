@@ -1,0 +1,504 @@
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+
+  width: 100%;
+  min-height: 60px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 24px;
+
+  padding: 8px 28px;
+
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+
+  box-shadow:
+    0 1px 3px rgba(15, 23, 42, 0.04);
+}
+
+
+/* =========================
+   LEFT
+========================= */
+
+.leftSection {
+  min-width: 0;
+
+  display: flex;
+  align-items: center;
+
+  gap: 24px;
+}
+
+
+/* =========================
+   BRAND
+========================= */
+
+.brand {
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+
+  gap: 9px;
+
+  padding: 0;
+
+  color: var(--color-text-primary);
+  background: transparent;
+
+  border: none;
+
+  cursor: pointer;
+}
+
+.logo {
+  width: 38px;
+  height: 38px;
+
+  display: grid;
+  place-items: center;
+
+  flex-shrink: 0;
+
+  color: #ffffff;
+
+  background:
+    linear-gradient(
+      135deg,
+      #4f46e5,
+      #5b3df5
+    );
+
+  border-radius: 11px;
+
+  box-shadow:
+    0 4px 10px rgba(79, 70, 229, 0.22);
+}
+
+.brandName {
+  font-size: 18px;
+  font-weight: 800;
+
+  white-space: nowrap;
+
+  letter-spacing: -0.3px;
+}
+
+.brandBadge {
+  padding: 4px 9px;
+
+  font-size: 10px;
+  font-weight: 650;
+
+  white-space: nowrap;
+
+  color: var(--color-primary);
+
+  background: #eef2ff;
+
+  border: 1px solid #dfe3ff;
+  border-radius: 999px;
+}
+
+
+/* =========================
+   ROLE NAVIGATION
+========================= */
+
+.roleNavigation {
+  display: flex;
+  align-items: center;
+
+  gap: 3px;
+
+  padding: 4px;
+
+  background: #f1f5f9;
+
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+}
+
+.roleButton {
+  min-height: 34px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 7px;
+
+  padding: 0 13px;
+
+  color: #475569;
+  background: transparent;
+
+  border: none;
+  border-radius: 8px;
+
+  font-size: 12px;
+  font-weight: 550;
+
+  white-space: nowrap;
+
+  cursor: pointer;
+
+  transition:
+    color var(--transition-fast),
+    background var(--transition-fast),
+    box-shadow var(--transition-fast);
+}
+
+.roleButton:hover {
+  color: #1e293b;
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.roleButtonActive {
+  color: var(--color-primary);
+
+  background: #ffffff;
+
+  box-shadow:
+    0 1px 4px rgba(15, 23, 42, 0.1);
+}
+
+
+/* =========================
+   RIGHT
+========================= */
+
+.rightSection {
+  display: flex;
+  align-items: center;
+
+  gap: 7px;
+
+  flex-shrink: 0;
+}
+
+
+/* =========================
+   ICON BUTTON
+========================= */
+
+.iconButton {
+  position: relative;
+
+  width: 36px;
+  height: 36px;
+
+  display: grid;
+  place-items: center;
+
+  padding: 0;
+
+  color: #64748b;
+  background: transparent;
+
+  border: none;
+  border-radius: 9px;
+
+  cursor: pointer;
+
+  transition:
+    color var(--transition-fast),
+    background var(--transition-fast);
+}
+
+.iconButton:hover {
+  color: var(--color-primary);
+
+  background: var(--color-primary-light);
+}
+
+.notificationButton {
+  position: relative;
+}
+
+.notificationDot {
+  position: absolute;
+
+  top: 7px;
+  right: 7px;
+
+  width: 7px;
+  height: 7px;
+
+  background: #ef4444;
+
+  border: 2px solid #ffffff;
+  border-radius: 50%;
+}
+
+
+/* =========================
+   CLOCK
+========================= */
+
+.clock {
+  min-width: 75px;
+
+  padding: 7px 9px;
+
+  color: #64748b;
+  background: #f8fafc;
+
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+
+  font-family:
+    "SFMono-Regular",
+    Consolas,
+    "Liberation Mono",
+    monospace;
+
+  font-size: 11px;
+  text-align: center;
+}
+
+
+/* =========================
+   PROFILE
+========================= */
+
+.profileWrapper {
+  position: relative;
+}
+
+.profileButton {
+  min-height: 38px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 8px;
+
+  padding: 4px 9px;
+
+  color: #334155;
+  background: #f8fafc;
+
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+
+  font-size: 12px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    background var(--transition-fast),
+    border-color var(--transition-fast);
+}
+
+.profileButton:hover {
+  background: #f1f5f9;
+
+  border-color: #cbd5e1;
+}
+
+.avatar {
+  width: 27px;
+  height: 27px;
+
+  display: grid;
+  place-items: center;
+
+  flex-shrink: 0;
+
+  color: var(--color-primary);
+  background: #eef2ff;
+
+  border-radius: 50%;
+
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.profileName {
+  max-width: 190px;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.profileButton svg {
+  transition: transform var(--transition-fast);
+}
+
+.chevronOpen {
+  transform: rotate(180deg);
+}
+
+
+/* =========================
+   PROFILE MENU
+========================= */
+
+.profileMenu {
+  position: absolute;
+
+  top: calc(100% + 9px);
+  right: 0;
+
+  width: 240px;
+
+  overflow: hidden;
+
+  background: #ffffff;
+
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+
+  box-shadow:
+    0 14px 35px rgba(15, 23, 42, 0.14);
+}
+
+.profileInfo {
+  display: flex;
+  flex-direction: column;
+
+  gap: 3px;
+
+  padding: 14px 15px;
+}
+
+.profileInfo strong {
+  color: #0f172a;
+
+  font-size: 13px;
+}
+
+.profileInfo span {
+  color: #94a3b8;
+
+  font-size: 11px;
+}
+
+.roleInfo {
+  display: flex;
+  flex-direction: column;
+
+  gap: 7px;
+
+  padding: 10px 15px;
+
+  background: #f8fafc;
+}
+
+.roleInfo > span {
+  color: #94a3b8;
+
+  font-size: 10px;
+  font-weight: 700;
+
+  text-transform: uppercase;
+
+  letter-spacing: 0.5px;
+}
+
+.roleBadges {
+  display: flex;
+  flex-wrap: wrap;
+
+  gap: 5px;
+}
+
+.roleBadge {
+  padding: 3px 7px;
+
+  color: var(--color-primary);
+
+  background: #eef2ff;
+
+  border-radius: 999px;
+
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.menuDivider {
+  height: 1px;
+
+  background: var(--color-border);
+}
+
+.logoutButton {
+  width: calc(100% - 12px);
+
+  display: flex;
+  align-items: center;
+
+  gap: 8px;
+
+  margin: 6px;
+  padding: 9px 10px;
+
+  color: #dc2626;
+  background: transparent;
+
+  border: none;
+  border-radius: 8px;
+
+  font-size: 12px;
+  font-weight: 600;
+
+  cursor: pointer;
+}
+
+.logoutButton:hover {
+  background: #fef2f2;
+}
+
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media (max-width: 1000px) {
+  .roleButton span {
+    display: none;
+  }
+
+  .roleButton {
+    padding: 0 10px;
+  }
+}
+
+@media (max-width: 760px) {
+  .header {
+    padding: 8px 12px;
+  }
+
+  .leftSection {
+    gap: 12px;
+  }
+
+  .brandBadge,
+  .clock {
+    display: none;
+  }
+
+  .profileName {
+    display: none;
+  }
+}
+
+@media (max-width: 520px) {
+  .roleNavigation {
+    display: none;
+  }
+
+  .brandName {
+    font-size: 16px;
+  }
+}
