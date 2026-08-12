@@ -1,5 +1,5 @@
 import { ShieldCheck, Soup } from "lucide-react";
-
+import logo1 from "../../../../assets/images/logo3.png";
 import styles from "./LoginBrandPanel.module.css";
 
 function LoginBrandPanel() {
@@ -11,7 +11,7 @@ function LoginBrandPanel() {
       <div className={styles.content}>
         <div className={styles.brand}>
           <div className={styles.logo}>
-            <Soup size={28} />
+            <img src={logo1} alt="Hủ Tiếu RESTO Logo" />
           </div>
 
           <div>

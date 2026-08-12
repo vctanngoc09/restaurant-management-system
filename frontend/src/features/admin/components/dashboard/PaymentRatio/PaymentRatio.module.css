@@ -1,0 +1,169 @@
+.panel {
+  padding: 20px;
+
+  background: var(--color-surface);
+
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+
+  box-shadow: var(--shadow-xs);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+
+  gap: 20px;
+
+  padding-bottom: 15px;
+
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.header h2 {
+  display: flex;
+  align-items: center;
+
+  gap: 7px;
+
+  font-size: var(--font-size-sm);
+}
+
+.header h2 svg {
+  color: var(--color-primary);
+}
+
+.header p {
+  margin-top: 5px;
+
+  color: var(--color-text-secondary);
+
+  font-size: 11px;
+}
+
+.total {
+  height: fit-content;
+
+  padding: 6px 10px;
+
+  color: var(--color-primary);
+  background: var(--color-primary-light);
+
+  border-radius: var(--radius-sm);
+
+  font-size: 10px;
+}
+
+.bar {
+  height: 10px;
+
+  display: flex;
+
+  overflow: hidden;
+
+  margin-top: 17px;
+
+  border-radius: var(--radius-full);
+}
+
+.cash {
+  background: #10b981;
+}
+
+.vietqr {
+  background: #4f46e5;
+}
+
+.credit {
+  background: #c026d3;
+}
+
+.grid {
+  display: grid;
+
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+
+  gap: 12px;
+
+  margin-top: 17px;
+}
+
+.grid .card {
+  padding: 15px;
+
+  background: var(--color-background-soft);
+
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+
+  gap: 10px;
+}
+
+.cardHeader > div {
+  display: flex;
+  align-items: center;
+
+  gap: 7px;
+
+  font-size: 11px;
+}
+
+.cardHeader > span {
+  padding: 3px 7px;
+
+  color: var(--color-primary);
+  background: var(--color-primary-light);
+
+  border-radius: var(--radius-sm);
+
+  font-size: 10px;
+  font-weight: bold;
+}
+
+.amount {
+  display: block;
+
+  margin-top: 13px;
+
+  font-size: 18px;
+}
+
+.progress {
+  height: 5px;
+
+  overflow: hidden;
+
+  margin-top: 10px;
+
+  background: #e2e8f0;
+
+  border-radius: var(--radius-full);
+}
+
+.progress span {
+  height: 100%;
+
+  display: block;
+}
+
+.description {
+  display: flex;
+  justify-content: space-between;
+
+  margin-top: 9px;
+
+  color: var(--color-text-secondary);
+
+  font-size: 9px;
+}
+
+@media (max-width: 900px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}

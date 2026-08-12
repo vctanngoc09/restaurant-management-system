@@ -1,32 +1,77 @@
 :root {
-  /* =========================
-     COLORS
-  ========================= */
+  /* =========================================
+     BRAND COLORS
+  ========================================= */
 
   --color-primary: #4f46e5;
   --color-primary-hover: #4338ca;
+  --color-primary-active: #3730a3;
+
   --color-primary-light: #eef2ff;
+  --color-primary-soft: #f5f3ff;
 
   --color-secondary: #7c3aed;
+  --color-secondary-hover: #6d28d9;
+
+
+  /* =========================================
+     STATUS COLORS
+  ========================================= */
 
   --color-success: #10b981;
+  --color-success-hover: #059669;
+  --color-success-light: #ecfdf5;
+
   --color-warning: #f59e0b;
+  --color-warning-hover: #d97706;
+  --color-warning-light: #fffbeb;
+
   --color-danger: #ef4444;
+  --color-danger-hover: #dc2626;
+  --color-danger-light: #fef2f2;
+
+  --color-info: #3b82f6;
+  --color-info-light: #eff6ff;
+
+
+  /* =========================================
+     TEXT COLORS
+  ========================================= */
 
   --color-text-primary: #0f172a;
   --color-text-secondary: #475569;
   --color-text-muted: #94a3b8;
+  --color-text-disabled: #cbd5e1;
+  --color-text-inverse: #ffffff;
+
+
+  /* =========================================
+     BACKGROUND / SURFACE
+  ========================================= */
 
   --color-background: #f1f5f9;
+  --color-background-soft: #f8fafc;
+
   --color-surface: #ffffff;
+  --color-surface-hover: #f8fafc;
+
+  --color-overlay: rgba(15, 23, 42, 0.45);
+
+
+  /* =========================================
+     BORDER
+  ========================================= */
 
   --color-border: #e2e8f0;
+  --color-border-light: #f1f5f9;
+  --color-border-dark: #cbd5e1;
+
   --color-border-focus: #6366f1;
 
 
-  /* =========================
-     AUTH / BRAND
-  ========================= */
+  /* =========================================
+     BRAND / AUTH
+  ========================================= */
 
   --brand-gradient:
     linear-gradient(
@@ -36,41 +81,82 @@
       #26245f 100%
     );
 
+  --brand-gradient-button:
+    linear-gradient(
+      90deg,
+      #4f46e5 0%,
+      #5138ee 100%
+    );
 
-  /* =========================
+
+  /* =========================================
      TYPOGRAPHY
-  ========================= */
+  ========================================= */
 
   --font-family:
-    Inter,
+    "Be Vietnam Pro",
     system-ui,
     -apple-system,
     BlinkMacSystemFont,
     "Segoe UI",
     sans-serif;
 
+  --font-size-2xs: 10px;
   --font-size-xs: 12px;
   --font-size-sm: 14px;
   --font-size-md: 16px;
-  --font-size-lg: 20px;
-  --font-size-xl: 24px;
-  --font-size-2xl: 28px;
+  --font-size-lg: 18px;
+  --font-size-xl: 20px;
+  --font-size-2xl: 24px;
+  --font-size-3xl: 28px;
+  --font-size-4xl: 32px;
+
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --font-weight-extrabold: 800;
+
+  --line-height-tight: 1.25;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.7;
 
 
-  /* =========================
+  /* =========================================
+     SPACING
+  ========================================= */
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+
+
+  /* =========================================
      BORDER RADIUS
-  ========================= */
+  ========================================= */
 
+  --radius-xs: 4px;
   --radius-sm: 6px;
   --radius-md: 10px;
   --radius-lg: 14px;
   --radius-xl: 20px;
   --radius-2xl: 24px;
+  --radius-full: 9999px;
 
 
-  /* =========================
+  /* =========================================
      SHADOW
-  ========================= */
+  ========================================= */
+
+  --shadow-xs:
+    0 1px 2px rgba(15, 23, 42, 0.05);
 
   --shadow-sm:
     0 2px 6px rgba(15, 23, 42, 0.06);
@@ -81,11 +167,39 @@
   --shadow-lg:
     0 20px 45px rgba(15, 23, 42, 0.12);
 
+  --shadow-xl:
+    0 25px 60px rgba(15, 23, 42, 0.16);
 
-  /* =========================
+
+  /* =========================================
      TRANSITION
-  ========================= */
+  ========================================= */
 
   --transition-fast: 150ms ease;
   --transition-normal: 200ms ease;
+  --transition-slow: 300ms ease;
+
+
+  /* =========================================
+     LAYOUT
+  ========================================= */
+
+  --header-height: 60px;
+
+  --container-sm: 640px;
+  --container-md: 768px;
+  --container-lg: 1024px;
+  --container-xl: 1280px;
+  --container-2xl: 1440px;
+
+
+  /* =========================================
+     Z-INDEX
+  ========================================= */
+
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-modal-backdrop: 900;
+  --z-modal: 1000;
+  --z-toast: 1100;
 }

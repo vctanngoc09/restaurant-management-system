@@ -17,7 +17,8 @@ import { toast } from "react-toastify";
 
 import useAuth from "../../../hooks/useAuth";
 import { ROLES } from "../../../constants/roles";
-
+import { ROLE_NAVIGATION } from "../../../constants/roleNavigation";
+import logo3 from "../../../assets/images/logo3.png";
 import styles from "./Header.module.css";
 
 function Header() {
@@ -56,41 +57,7 @@ function Header() {
   // =============================
   // ROLE NAVIGATION
   // =============================
-  const roleNavigation = useMemo(
-    () => [
-      {
-        role: ROLES.CASHIER,
-        label: "Thu Ngân",
-        path: "/cashier",
-        icon: CreditCard,
-      },
-      {
-        role: ROLES.CHEF,
-        label: "Bếp (KDS)",
-        path: "/chef",
-        icon: ChefHat,
-      },
-      {
-        role: ROLES.WAITER,
-        label: "Phục Vụ (POS)",
-        path: "/waiter",
-        icon: Smartphone,
-      },
-      {
-        role: ROLES.ADMIN,
-        label: "Admin Quản Lý",
-        path: "/admin",
-        icon: LayoutDashboard,
-      },
-    ],
-    [],
-  );
-
-  /*
-   * Chỉ hiển thị các khu vực mà tài khoản
-   * hiện tại thực sự có quyền.
-   */
-  const availableNavigation = roleNavigation.filter((item) =>
+  const availableNavigation = ROLE_NAVIGATION.filter((item) =>
     roles.includes(item.role),
   );
 
@@ -127,7 +94,7 @@ function Header() {
           type="button"
         >
           <div className={styles.logo}>
-            <Soup size={21} />
+            <img src={logo3} alt="Hủ Tiếu RESTO Logo" />
           </div>
 
           <span className={styles.brandName}>Hủ Tiếu</span>

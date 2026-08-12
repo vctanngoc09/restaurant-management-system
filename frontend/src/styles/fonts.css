@@ -1,17 +1,16 @@
-@font-face {
-  font-family: "Inter";
-  src: url("../assets/fonts/Inter-Regular.woff2")
-    format("woff2");
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
+/* =========================================
+   FONT SYSTEM
+   Primary font: Be Vietnam Pro
+========================================= */
 
-@font-face {
-  font-family: "Inter";
-  src: url("../assets/fonts/Inter-SemiBold.woff2")
-    format("woff2");
-  font-weight: 600;
-  font-style: normal;
-  font-display: swap;
-}
+@import url("https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap");
+
+/*
+  Font Weight Convention
+
+  400 → Nội dung thông thường
+  500 → Menu / Label / Input
+  600 → Button / Card title
+  700 → Heading
+  800 → Brand / Heading nổi bật
+*/

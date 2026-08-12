@@ -15,13 +15,18 @@ import AppLayout from "../layouts/AppLayout";
 import Login from "../pages/auth/Login/Login";
 
 import AdminDashboard from "../pages/admin/AdminDashboard/AdminDashboard";
+import Expenses from "../pages/admin/Expenses/Expenses";
+import Orders from "../pages/admin/Orders/Orders";
+import Menu from "../pages/admin/Menu/Menu";
+import Staff from "../pages/admin/Staff/Staff";
+import Tables from "../pages/admin/Tables/Tables";
 
 import CashierDashboard from "../pages/cashier/CashierDashboard/CashierDashboard";
 
 import ChefDashboard from "../pages/chef/ChefDashboard/ChefDashboard";
 
 import WaiterDashboard from "../pages/waiter/WaiterDashboard/WaiterDashboard";
-
+import AdminLayout from "../layouts/AdminLayout";
 function AppRoutes() {
   const { isAuthenticated, roles } = useAuth();
 
@@ -54,7 +59,19 @@ function AppRoutes() {
             path="/admin"
             element={<RoleRoute allowedRoles={[ROLES.ADMIN]} />}
           >
-            <Route index element={<AdminDashboard />} />
+            <Route element={<AdminLayout />}>
+              <Route index element={<AdminDashboard />} />
+
+              <Route path="expenses" element={<Expenses />} />
+
+              <Route path="orders" element={<Orders />} />
+
+              <Route path="menu" element={<Menu />} />
+
+              <Route path="staff" element={<Staff />} />
+
+              <Route path="tables" element={<Tables />} />
+            </Route>
           </Route>
 
           {/* CASHIER */}

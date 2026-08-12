@@ -1,0 +1,105 @@
+.header {
+  min-height: 90px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: var(--space-6);
+
+  padding: 18px 20px;
+
+  background: var(--color-surface);
+
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+
+  box-shadow: var(--shadow-xs);
+}
+
+.badge {
+  display: inline-flex;
+
+  margin-bottom: 7px;
+  padding: 4px 9px;
+
+  color: var(--color-primary);
+  background: var(--color-primary-light);
+
+  border-radius: var(--radius-sm);
+
+  font-size: var(--font-size-2xs);
+  font-weight: var(--font-weight-bold);
+
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.header h1 {
+  font-size: 21px;
+  font-weight: var(--font-weight-extrabold);
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+}
+
+.dateButton,
+.exportButton {
+  min-height: 38px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 8px;
+
+  padding: 0 13px;
+
+  background: var(--color-background-soft);
+
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+
+  transition: background var(--transition-fast);
+}
+
+.dateButton:hover,
+.exportButton:hover {
+  background: #f1f5f9;
+}
+
+.dateButton svg {
+  color: var(--color-primary);
+}
+
+.exportButton svg {
+  color: var(--color-success);
+}
+
+.dateBadge {
+  padding: 3px 6px;
+
+  color: var(--color-text-secondary);
+  background: #e2e8f0;
+
+  border-radius: var(--radius-xs);
+
+  font-size: 9px;
+}
+
+@media (max-width: 800px) {
+  .header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .actions {
+    flex-wrap: wrap;
+  }
+}

@@ -12,15 +12,13 @@
 
   gap: 24px;
 
-  padding: 8px 28px;
+  padding: 8px 18px;
 
   background: var(--color-surface);
   border-bottom: 1px solid var(--color-border);
 
-  box-shadow:
-    0 1px 3px rgba(15, 23, 42, 0.04);
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
 }
-
 
 /* =========================
    LEFT
@@ -34,7 +32,6 @@
 
   gap: 24px;
 }
-
 
 /* =========================
    BRAND
@@ -69,17 +66,11 @@
 
   color: #ffffff;
 
-  background:
-    linear-gradient(
-      135deg,
-      #4f46e5,
-      #5b3df5
-    );
+  background: linear-gradient(135deg, #4f46e5, #5b3df5);
 
   border-radius: 11px;
 
-  box-shadow:
-    0 4px 10px rgba(79, 70, 229, 0.22);
+  box-shadow: 0 4px 10px rgba(79, 70, 229, 0.22);
 }
 
 .brandName {
@@ -106,7 +97,6 @@
   border: 1px solid #dfe3ff;
   border-radius: 999px;
 }
-
 
 /* =========================
    ROLE NAVIGATION
@@ -165,10 +155,8 @@
 
   background: #ffffff;
 
-  box-shadow:
-    0 1px 4px rgba(15, 23, 42, 0.1);
+  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.1);
 }
-
 
 /* =========================
    RIGHT
@@ -182,7 +170,6 @@
 
   flex-shrink: 0;
 }
-
 
 /* =========================
    ICON BUTTON
@@ -237,7 +224,6 @@
   border-radius: 50%;
 }
 
-
 /* =========================
    CLOCK
 ========================= */
@@ -253,16 +239,11 @@
   border: 1px solid var(--color-border);
   border-radius: 8px;
 
-  font-family:
-    "SFMono-Regular",
-    Consolas,
-    "Liberation Mono",
-    monospace;
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
 
   font-size: 11px;
   text-align: center;
 }
-
 
 /* =========================
    PROFILE
@@ -339,7 +320,6 @@
   transform: rotate(180deg);
 }
 
-
 /* =========================
    PROFILE MENU
 ========================= */
@@ -359,8 +339,7 @@
   border: 1px solid var(--color-border);
   border-radius: 12px;
 
-  box-shadow:
-    0 14px 35px rgba(15, 23, 42, 0.14);
+  box-shadow: 0 14px 35px rgba(15, 23, 42, 0.14);
 }
 
 .profileInfo {
@@ -458,7 +437,6 @@
 .logoutButton:hover {
   background: #fef2f2;
 }
-
 
 /* =========================
    RESPONSIVE
