@@ -1,7 +1,7 @@
 import { NavLink } from "react-router-dom";
 import { Settings } from "lucide-react";
 
-import { ADMIN_NAVIGATION } from "../../../../constants/adminNavigation";
+import { ADMIN_NAVIGATION } from "../../../../../constants/adminNavigation";
 
 import styles from "./AdminSidebar.module.css";
 

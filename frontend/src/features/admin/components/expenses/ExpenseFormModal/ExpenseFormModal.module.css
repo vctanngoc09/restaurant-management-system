@@ -1,0 +1,163 @@
+.backdrop {
+  position: fixed;
+  inset: 0;
+
+  z-index: var(--z-modal-backdrop);
+
+  display: grid;
+  place-items: center;
+
+  padding: 20px;
+
+  background: rgba(15, 23, 42, 0.5);
+
+  backdrop-filter: blur(2px);
+}
+
+.modal {
+  width: min(460px, 100%);
+
+  padding: 22px;
+
+  background: var(--color-surface);
+
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+
+  box-shadow: var(--shadow-xl);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 20px;
+
+  padding-bottom: 13px;
+
+  border-bottom: 1px solid
+    var(--color-border-light);
+}
+
+.header h2 {
+  font-size: 16px;
+}
+
+.closeButton {
+  width: 32px;
+  height: 32px;
+
+  display: grid;
+  place-items: center;
+
+  color: var(--color-text-muted);
+
+  border-radius: var(--radius-sm);
+}
+
+.closeButton:hover {
+  color: var(--color-text-primary);
+  background: var(--color-background-soft);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+
+  gap: 14px;
+
+  padding-top: 16px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+
+  gap: 6px;
+}
+
+.field label {
+  color: var(--color-text-secondary);
+
+  font-size: 11px;
+  font-weight: var(--font-weight-bold);
+}
+
+.field input,
+.field select,
+.field textarea {
+  width: 100%;
+
+  padding: 10px 12px;
+
+  background: var(--color-background-soft);
+
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+
+  font-size: 12px;
+
+  transition:
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast);
+}
+
+.field input:focus,
+.field select:focus,
+.field textarea:focus {
+  border-color: var(--color-primary);
+
+  box-shadow:
+    0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+.field textarea {
+  min-height: 85px;
+
+  resize: vertical;
+}
+
+.footer {
+  display: flex;
+  justify-content: flex-end;
+
+  gap: 8px;
+
+  padding-top: 14px;
+
+  border-top: 1px solid
+    var(--color-border-light);
+}
+
+.cancelButton,
+.saveButton {
+  min-height: 38px;
+
+  padding: 0 16px;
+
+  border-radius: var(--radius-md);
+
+  font-size: 11px;
+  font-weight: var(--font-weight-bold);
+}
+
+.cancelButton {
+  color: var(--color-text-secondary);
+
+  border: 1px solid var(--color-border);
+}
+
+.cancelButton:hover {
+  background: var(--color-background-soft);
+}
+
+.saveButton {
+  color: #ffffff;
+
+  background: var(--color-primary);
+}
+
+.saveButton:hover {
+  background: var(--color-primary-hover);
+}

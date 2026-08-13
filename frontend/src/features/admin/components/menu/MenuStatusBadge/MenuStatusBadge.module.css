@@ -1,0 +1,24 @@
+.available,
+.unavailable {
+  display: inline-flex;
+  align-items: center;
+
+  padding: 5px 10px;
+
+  border-radius: var(--radius-full);
+
+  font-size: 9px;
+  font-weight: var(--font-weight-bold);
+
+  white-space: nowrap;
+}
+
+.available {
+  color: #047857;
+  background: #d1fae5;
+}
+
+.unavailable {
+  color: #dc2626;
+  background: #fee2e2;
+}

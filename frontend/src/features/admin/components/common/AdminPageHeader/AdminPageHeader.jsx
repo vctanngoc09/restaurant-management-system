@@ -2,12 +2,21 @@ import { CalendarDays, FileSpreadsheet } from "lucide-react";
 
 import { toast } from "react-toastify";
 
-import styles from "./DashboardHeader.module.css";
+import styles from "./AdminPageHeader.module.css";
 
-function DashboardHeader() {
+function AdminPageHeader({
+  title,
+  dateText = "01/08/2026 - 07/08/2026",
+  dayCount = "7 ngày",
+  onExport,
+}) {
   const handleExport = () => {
-    // Mock tạm thời.
-    // Sau này gọi reportService.exportRevenue(...)
+    if (onExport) {
+      onExport();
+      return;
+    }
+
+    // Mock mặc định
     toast.success("Mock: Đã xuất báo cáo Excel thành công!");
   };
 
@@ -16,16 +25,16 @@ function DashboardHeader() {
       <div>
         <span className={styles.badge}>Hệ Thống Quản Lý RESTO POS</span>
 
-        <h1>Bảng Điều Khiển & Tổng Quan Doanh Thu</h1>
+        <h1>{title}</h1>
       </div>
 
       <div className={styles.actions}>
         <button type="button" className={styles.dateButton}>
           <CalendarDays size={16} />
 
-          <span>01/08/2026 - 07/08/2026</span>
+          <span>{dateText}</span>
 
-          <span className={styles.dateBadge}>7 ngày</span>
+          <span className={styles.dateBadge}>{dayCount}</span>
         </button>
 
         <button
@@ -42,4 +51,4 @@ function DashboardHeader() {
   );
 }
 
-export default DashboardHeader;
+export default AdminPageHeader;

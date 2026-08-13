@@ -1,4 +1,4 @@
-import DashboardHeader from "../../../features/admin/components/dashboard/DashboardHeader/DashboardHeader";
+import AdminPageHeader from "../../../features/admin/components/common/AdminPageHeader/AdminPageHeader";
 import DashboardKpis from "../../../features/admin/components/dashboard/DashboardKpis/DashboardKpis";
 import RevenueChart from "../../../features/admin/components/dashboard/RevenueChart/RevenueChart";
 import TopSellingPanel from "../../../features/admin/components/dashboard/TopSellingPanel/TopSellingPanel";
@@ -10,8 +10,7 @@ import styles from "./AdminDashboard.module.css";
 function AdminDashboard() {
   return (
     <div className={styles.dashboard}>
-      <DashboardHeader />
-
+      <AdminPageHeader title="Bảng Điều Khiển & Tổng Quan Doanh Thu" />
       <DashboardKpis />
 
       <section className={styles.analytics}>

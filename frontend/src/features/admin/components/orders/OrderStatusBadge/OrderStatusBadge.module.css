@@ -1,0 +1,50 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+
+  padding: 5px 9px;
+
+  border-radius: var(--radius-full);
+
+  font-size: 10px;
+  font-weight: var(--font-weight-bold);
+
+  white-space: nowrap;
+}
+
+.new {
+  color: #b45309;
+  background: #fef3c7;
+}
+
+.cooking {
+  color: #b45309;
+  background: #fffbeb;
+
+  border: 1px solid #fde68a;
+}
+
+.ready {
+  color: var(--color-primary);
+  background: var(--color-primary-light);
+}
+
+.pendingPayment {
+  color: #c2410c;
+  background: #fff7ed;
+}
+
+.completed {
+  color: #047857;
+  background: #d1fae5;
+}
+
+.cancelled {
+  color: var(--color-danger);
+  background: var(--color-danger-light);
+}
+
+.default {
+  color: var(--color-text-secondary);
+  background: #f1f5f9;
+}
