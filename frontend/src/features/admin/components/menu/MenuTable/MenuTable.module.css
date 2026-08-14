@@ -155,53 +155,6 @@
   text-align: right !important;
 }
 
-.actions {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-
-  gap: 7px;
-}
-
-.editButton,
-.deleteButton {
-  min-height: 30px;
-
-  display: flex;
-  align-items: center;
-
-  gap: 5px;
-
-  padding: 0 10px;
-
-  border-radius: var(--radius-sm);
-
-  font-size: 10px;
-  font-weight: var(--font-weight-bold);
-}
-
-.editButton {
-  color: var(--color-text-secondary);
-
-  background: #f1f5f9;
-}
-
-.editButton:hover {
-  color: var(--color-text-primary);
-
-  background: #e2e8f0;
-}
-
-.deleteButton {
-  color: var(--color-danger);
-
-  background: var(--color-danger-light);
-}
-
-.deleteButton:hover {
-  background: #fee2e2;
-}
-
 .empty {
   padding: 40px !important;
 

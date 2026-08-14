@@ -111,13 +111,6 @@
   text-align: right !important;
 }
 
-.actions {
-  display: flex;
-  justify-content: flex-end;
-
-  gap: 5px;
-}
-
 .normalButton,
 .cancelButton {
   width: 29px;

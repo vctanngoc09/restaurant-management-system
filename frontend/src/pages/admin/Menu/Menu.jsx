@@ -1,7 +1,6 @@
 import { useMemo, useState } from "react";
-
-import { Plus } from "lucide-react";
 import { toast } from "react-toastify";
+import AddButton from "../../../components/common/AddButton";
 
 import AdminPageHeader from "../../../features/admin/components/common/AdminPageHeader/AdminPageHeader";
 
@@ -181,6 +180,23 @@ function Menu() {
     toast.success(`Đã xóa món ${item.name}.`);
   };
 
+  const handleToggleStock = (menuId) => {
+    setMenuItems((currentItems) =>
+        currentItems.map((item) =>
+            item.id === menuId
+                ? {
+                  ...item,
+
+                  status:
+                      item.status === "in_stock"
+                          ? "out_of_stock"
+                          : "in_stock",
+                }
+                : item,
+        ),
+    );
+  };
+
   return (
     <div className={styles.page}>
       {/* =========================
@@ -201,15 +217,7 @@ function Menu() {
             <p>Thêm, sửa, xóa món ăn, chỉnh sửa giá bán & hình ảnh</p>
           </div>
 
-          <button
-            type="button"
-            className={styles.addButton}
-            onClick={handleOpenAdd}
-          >
-            <Plus size={17} />
-
-            <span>Thêm Món Mới</span>
-          </button>
+          <AddButton onClick={handleOpenAdd}>Thêm Món Mới</AddButton>
         </div>
 
         <MenuFilters
@@ -217,17 +225,15 @@ function Menu() {
           onCategoryChange={setSelectedCategory}
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
+          filteredCount={filteredMenuItems.length}
+          totalCount={menuItems.length}
         />
 
-        <div className={styles.result}>
-          Hiển thị <strong>{filteredMenuItems.length}</strong> /{" "}
-          {menuItems.length} món
-        </div>
-
         <MenuTable
-          menuItems={filteredMenuItems}
-          onEdit={handleOpenEdit}
-          onDelete={handleDelete}
+            menuItems={filteredMenuItems}
+            onEdit={handleOpenEdit}
+            onDelete={handleDelete}
+            onToggleStock={handleToggleStock}
         />
       </section>
 

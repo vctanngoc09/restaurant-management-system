@@ -1,4 +1,12 @@
-import { Eye, Printer, XCircle } from "lucide-react";
+import {
+  Printer,
+  XCircle,
+} from "lucide-react";
+
+import {
+  ActionButton,
+  ActionGroup,
+} from "../../../../../components/common/ActionButton";
 
 import { ORDER_STATUS, ORDER_TYPE } from "../../../../../constants/orderStatus";
 
@@ -92,36 +100,33 @@ function OrderTable({ orders, onView, onPrint, onCancel }) {
                   </td>
 
                   <td>
-                    <div className={styles.actions}>
-                      <button
-                        type="button"
-                        title="Xem chi tiết đơn"
-                        className={styles.normalButton}
-                        onClick={() => onView(order)}
-                      >
-                        <Eye size={15} />
-                      </button>
+                    <ActionGroup>
+                      <ActionButton
+                          action="view"
+                          title={`Xem chi tiết đơn ${order.id}`}
+                          onClick={() => onView(order)}
+                      />
 
                       <button
-                        type="button"
-                        title="In hóa đơn"
-                        className={styles.normalButton}
-                        onClick={() => onPrint(order)}
+                          type="button"
+                          title="In hóa đơn"
+                          className={styles.normalButton}
+                          onClick={() => onPrint(order)}
                       >
                         <Printer size={15} />
                       </button>
 
                       {canCancel && (
-                        <button
-                          type="button"
-                          title="Hủy đơn"
-                          className={styles.cancelButton}
-                          onClick={() => onCancel(order)}
-                        >
-                          <XCircle size={15} />
-                        </button>
+                          <button
+                              type="button"
+                              title="Hủy đơn"
+                              className={styles.cancelButton}
+                              onClick={() => onCancel(order)}
+                          >
+                            <XCircle size={15} />
+                          </button>
                       )}
-                    </div>
+                    </ActionGroup>
                   </td>
                 </tr>
               );

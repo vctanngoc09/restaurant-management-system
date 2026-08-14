@@ -1,4 +1,4 @@
-import { Search } from "lucide-react";
+import SearchInput from "../../../../../components/common/SearchInput/SearchInput";
 
 import styles from "./ExpenseFilters.module.css";
 
@@ -30,16 +30,12 @@ function ExpenseFilters({
         ))}
       </div>
 
-      <div className={styles.search}>
-        <Search size={16} />
-
-        <input
-          type="text"
-          value={searchQuery}
-          onChange={(event) => onSearchChange(event.target.value)}
-          placeholder="Tìm theo hạng mục, người chi, ghi chú..."
-        />
-      </div>
+      <SearchInput
+        value={searchQuery}
+        onChange={onSearchChange}
+        placeholder="Tìm theo hạng mục, người chi, ghi chú..."
+        className={styles.searchInput}
+      />
     </div>
   );
 }

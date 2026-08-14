@@ -81,44 +81,6 @@
   text-align: right !important;
 }
 
-.actions {
-  display: flex;
-  justify-content: flex-end;
-
-  gap: 5px;
-}
-
-.editButton,
-.deleteButton {
-  width: 29px;
-  height: 29px;
-
-  display: grid;
-  place-items: center;
-
-  border-radius: var(--radius-sm);
-}
-
-.editButton {
-  color: var(--color-text-secondary);
-
-  background: #f1f5f9;
-}
-
-.editButton:hover {
-  background: #e2e8f0;
-}
-
-.deleteButton {
-  color: var(--color-danger);
-
-  background: var(--color-danger-light);
-}
-
-.deleteButton:hover {
-  background: #fee2e2;
-}
-
 .empty {
   padding: 35px !important;
 

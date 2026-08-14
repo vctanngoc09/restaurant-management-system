@@ -1,4 +1,4 @@
-import { Search } from "lucide-react";
+import SearchInput from "../../../../../components/common/SearchInput/SearchInput";
 
 import {
   ORDER_STATUS_OPTIONS,
@@ -19,16 +19,12 @@ function OrderFilters({
 }) {
   return (
     <div className={styles.filters}>
-      <div className={styles.search}>
-        <Search size={16} />
-
-        <input
-          type="text"
-          value={searchQuery}
-          onChange={(event) => onSearchChange(event.target.value)}
-          placeholder="Mã đơn / Tên bàn / Phục vụ..."
-        />
-      </div>
+      <SearchInput
+        value={searchQuery}
+        onChange={onSearchChange}
+        placeholder="Mã đơn / Tên bàn / Phục vụ..."
+        className={styles.searchInput}
+      />
 
       <select
         value={statusFilter}

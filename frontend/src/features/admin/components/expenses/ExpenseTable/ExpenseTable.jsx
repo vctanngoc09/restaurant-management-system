@@ -1,4 +1,7 @@
-import { Pencil, Trash2 } from "lucide-react";
+import {
+  ActionButton,
+  ActionGroup,
+} from "../../../../../components/common/ActionButton";
 
 import { formatCurrency } from "../../../../../utils/formatCurrency";
 
@@ -47,25 +50,19 @@ function ExpenseTable({ expenses, onEdit, onDelete }) {
                 </td>
 
                 <td>
-                  <div className={styles.actions}>
-                    <button
-                      type="button"
-                      title="Sửa khoản chi"
-                      className={styles.editButton}
-                      onClick={() => onEdit(expense)}
-                    >
-                      <Pencil size={15} />
-                    </button>
+                  <ActionGroup>
+                    <ActionButton
+                        action="edit"
+                        title="Sửa khoản chi"
+                        onClick={() => onEdit(expense)}
+                    />
 
-                    <button
-                      type="button"
-                      title="Xóa khoản chi"
-                      className={styles.deleteButton}
-                      onClick={() => onDelete(expense)}
-                    >
-                      <Trash2 size={15} />
-                    </button>
-                  </div>
+                    <ActionButton
+                        action="delete"
+                        title="Xóa khoản chi"
+                        onClick={() => onDelete(expense)}
+                    />
+                  </ActionGroup>
                 </td>
               </tr>
             ))

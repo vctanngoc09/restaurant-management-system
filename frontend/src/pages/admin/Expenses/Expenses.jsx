@@ -1,7 +1,8 @@
 import { useMemo, useState } from "react";
 
-import { Plus } from "lucide-react";
 import { toast } from "react-toastify";
+
+import AddButton from "../../../components/common/AddButton";
 
 import AdminPageHeader from "../../../features/admin/components/common/AdminPageHeader/AdminPageHeader";
 
@@ -190,15 +191,7 @@ function Expenses() {
             </p>
           </div>
 
-          <button
-            type="button"
-            className={styles.addButton}
-            onClick={handleOpenAdd}
-          >
-            <Plus size={17} />
-
-            <span>Thêm Khoản Chi</span>
-          </button>
+          <AddButton onClick={handleOpenAdd}>Thêm Khoản Chi</AddButton>
         </div>
 
         <ExpenseFilters

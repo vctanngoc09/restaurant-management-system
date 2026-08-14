@@ -1,14 +1,17 @@
-import { ImageIcon, Pencil, Trash2 } from "lucide-react";
+import { ImageIcon } from "lucide-react";
+import StockToggleButton from "../../../../../components/common/StockToggleButton";
+import {
+  ActionButton,
+  ActionGroup,
+} from "../../../../../components/common/ActionButton";
 
 import { MENU_CATEGORY_LABELS } from "../../../../../constants/menuCategories";
 
 import { formatCurrency } from "../../../../../utils/formatCurrency";
 
-import MenuStatusBadge from "../MenuStatusBadge/MenuStatusBadge";
-
 import styles from "./MenuTable.module.css";
 
-function MenuTable({ menuItems, onEdit, onDelete }) {
+function MenuTable({ menuItems, onEdit, onDelete, onToggleStock, }) {
   return (
     <div className={styles.wrapper}>
       <table className={styles.table}>
@@ -73,33 +76,30 @@ function MenuTable({ menuItems, onEdit, onDelete }) {
                 {/* STATUS */}
 
                 <td>
-                  <MenuStatusBadge status={item.status} />
+                  <StockToggleButton
+                      status={item.status}
+                      onClick={() =>
+                          onToggleStock(item.id)
+                      }
+                  />
                 </td>
 
                 {/* ACTION */}
 
                 <td>
-                  <div className={styles.actions}>
-                    <button
-                      type="button"
-                      className={styles.editButton}
-                      onClick={() => onEdit(item)}
-                    >
-                      <Pencil size={13} />
+                  <ActionGroup>
+                    <ActionButton
+                        action="edit"
+                        title={`Sửa ${item.name}`}
+                        onClick={() => onEdit(item)}
+                    />
 
-                      <span>Sửa</span>
-                    </button>
-
-                    <button
-                      type="button"
-                      className={styles.deleteButton}
-                      onClick={() => onDelete(item)}
-                    >
-                      <Trash2 size={13} />
-
-                      <span>Xóa</span>
-                    </button>
-                  </div>
+                    <ActionButton
+                        action="delete"
+                        title={`Xóa ${item.name}`}
+                        onClick={() => onDelete(item)}
+                    />
+                  </ActionGroup>
                 </td>
               </tr>
             ))

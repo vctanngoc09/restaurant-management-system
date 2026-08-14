@@ -1,0 +1,77 @@
+.button {
+  min-height: 29px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 5px;
+
+  flex-shrink: 0;
+
+  padding: 0 10px;
+
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+
+  font-size: 10px;
+  font-weight: var(--font-weight-semibold);
+
+  white-space: nowrap;
+
+  cursor: pointer;
+
+  transition:
+    background var(--transition-fast),
+    color var(--transition-fast),
+    border-color var(--transition-fast),
+    transform var(--transition-fast);
+}
+
+.button:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.button:disabled {
+  opacity: 0.5;
+
+  cursor: not-allowed;
+}
+
+
+/* =========================
+   AVAILABLE
+========================= */
+
+.available {
+  color: #047857;
+
+  background: #d1fae5;
+
+  border-color: #a7f3d0;
+}
+
+.available:hover {
+  background: #a7f3d0;
+}
+
+
+/* =========================
+   OUT OF STOCK
+========================= */
+
+.unavailable {
+  color: #dc2626;
+
+  background: #fee2e2;
+
+  border-color: #fecaca;
+}
+
+.unavailable:hover {
+  background: #fecaca;
+}

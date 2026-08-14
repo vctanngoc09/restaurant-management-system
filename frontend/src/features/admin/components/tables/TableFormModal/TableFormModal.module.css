@@ -1,0 +1,239 @@
+.backdrop {
+  position: fixed;
+  inset: 0;
+
+  z-index: var(--z-modal-backdrop);
+
+  display: grid;
+  place-items: center;
+
+  padding: 20px;
+
+  background: rgba(15, 23, 42, 0.5);
+
+  backdrop-filter: blur(2px);
+}
+
+.modal {
+  width: min(420px, 100%);
+
+  padding: 22px;
+
+  background: var(--color-surface);
+
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+
+  box-shadow: var(--shadow-xl);
+}
+
+
+/* =========================
+   HEADER
+========================= */
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 20px;
+
+  padding-bottom: 14px;
+
+  border-bottom:
+    1px solid var(--color-border-light);
+}
+
+.badge {
+  display: inline-flex;
+
+  padding: 4px 8px;
+
+  color: var(--color-primary);
+  background: var(--color-primary-light);
+
+  border-radius: var(--radius-full);
+
+  font-size: 9px;
+  font-weight: var(--font-weight-bold);
+
+  text-transform: uppercase;
+}
+
+.header h2 {
+  margin-top: 6px;
+
+  font-size: 17px;
+}
+
+.closeButton {
+  width: 32px;
+  height: 32px;
+
+  display: grid;
+  place-items: center;
+
+  color: var(--color-text-muted);
+
+  border-radius: var(--radius-sm);
+}
+
+.closeButton:hover {
+  color: var(--color-text-primary);
+
+  background: var(--color-background-soft);
+}
+
+
+/* =========================
+   FORM
+========================= */
+
+.form {
+  display: flex;
+  flex-direction: column;
+
+  gap: 16px;
+
+  padding-top: 17px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+
+  gap: 6px;
+}
+
+.field label {
+  color: var(--color-text-secondary);
+
+  font-size: 11px;
+  font-weight: var(--font-weight-bold);
+}
+
+.field input,
+.field select {
+  width: 100%;
+
+  min-height: 42px;
+
+  padding: 0 12px;
+
+  color: var(--color-text-primary);
+  background: var(--color-background-soft);
+
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+
+  font-size: 11px;
+
+  transition:
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast);
+}
+
+.field input:focus,
+.field select:focus {
+  border-color: var(--color-primary);
+
+  box-shadow:
+    0 0 0 3px
+    rgba(79, 70, 229, 0.1);
+}
+
+.numberInput {
+  font-size: 18px !important;
+  font-weight: var(--font-weight-extrabold);
+
+  text-align: center;
+
+  letter-spacing: 3px;
+}
+
+.field small {
+  color: var(--color-text-muted);
+
+  font-size: 9px;
+}
+
+
+/* =========================
+   PREVIEW
+========================= */
+
+.preview {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 12px;
+
+  background: var(--color-primary-light);
+
+  border: 1px solid #c7d2fe;
+  border-radius: var(--radius-md);
+}
+
+.preview span {
+  color: var(--color-text-secondary);
+
+  font-size: 10px;
+}
+
+.preview strong {
+  color: var(--color-primary);
+
+  font-size: 16px;
+  font-weight: var(--font-weight-extrabold);
+}
+
+
+/* =========================
+   FOOTER
+========================= */
+
+.footer {
+  display: flex;
+  justify-content: flex-end;
+
+  gap: 8px;
+
+  padding-top: 14px;
+
+  border-top:
+    1px solid var(--color-border-light);
+}
+
+.cancelButton,
+.saveButton {
+  min-height: 38px;
+
+  padding: 0 16px;
+
+  border-radius: var(--radius-md);
+
+  font-size: 11px;
+  font-weight: var(--font-weight-bold);
+}
+
+.cancelButton {
+  color: var(--color-text-secondary);
+
+  border: 1px solid var(--color-border);
+}
+
+.cancelButton:hover {
+  background: var(--color-background-soft);
+}
+
+.saveButton {
+  color: #ffffff;
+
+  background: var(--color-primary);
+}
+
+.saveButton:hover {
+  background: var(--color-primary-hover);
+}
