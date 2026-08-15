@@ -1,11 +1,10 @@
 package vn.edu.ut.resto.controller;
 
 import vn.edu.ut.resto.dto.request.LoginRequest;
-import vn.edu.ut.resto.dto.request.SignupRequest;
+import vn.edu.ut.resto.dto.request.CreateStaffRequest;
 import vn.edu.ut.resto.dto.response.ApiResponse;
 import vn.edu.ut.resto.dto.response.JwtResponse;
 import vn.edu.ut.resto.dto.response.UserResponse;
-import vn.edu.ut.resto.exception.DuplicateException;
 import vn.edu.ut.resto.mapper.UserMapper;
 import vn.edu.ut.resto.model.User;
 import vn.edu.ut.resto.security.jwt.JwtUtils;
@@ -41,7 +40,7 @@ public class AuthController {
     UserMapper userMapper;
 
     @PostMapping("/signup")
-    public ResponseEntity<ApiResponse<UserResponse>> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
+    public ResponseEntity<ApiResponse<UserResponse>> registerUser(@Valid @RequestBody CreateStaffRequest signUpRequest) {
 
         // 1. Chỉ cần gọi Service, mọi lỗi trùng lặp Service sẽ tự ném ra
         User newUser = userService.registerUser(signUpRequest);

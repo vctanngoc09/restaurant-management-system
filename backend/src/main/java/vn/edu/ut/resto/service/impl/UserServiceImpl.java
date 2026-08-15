@@ -3,7 +3,8 @@ package vn.edu.ut.resto.service.impl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import vn.edu.ut.resto.dto.request.SignupRequest;
+import vn.edu.ut.resto.dto.request.CreateStaffRequest;
+import vn.edu.ut.resto.dto.request.UpdateStaffRequest;
 import vn.edu.ut.resto.exception.DuplicateException;
 import vn.edu.ut.resto.exception.ResourceNotFoundException;
 import vn.edu.ut.resto.mapper.UserMapper;
@@ -15,6 +16,7 @@ import vn.edu.ut.resto.repository.UserRepository;
 import vn.edu.ut.resto.service.UserService;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Service
@@ -33,55 +35,30 @@ public class UserServiceImpl implements UserService {
     private UserMapper userMapper;
 
     @Override
-    public User registerUser(SignupRequest signUpRequest) {
-        if (userRepository.existsByUsername(signUpRequest.getUsername())) {
-            throw new DuplicateException("Lỗi: Tên đăng nhập đã tồn tại!");
+    public User registerUser(CreateStaffRequest request) {
+
+        if (userRepository.existsByUsername(request.getUsername())) {
+            throw new DuplicateException(
+                    "Tên đăng nhập đã tồn tại!"
+            );
         }
 
-        if (userRepository.existsByPhone(signUpRequest.getPhone())) {
-            throw new DuplicateException("Lỗi: Số điện thoại đã được sử dụng!");
+        if (userRepository.existsByPhone(request.getPhone())) {
+            throw new DuplicateException(
+                    "Số điện thoại đã được sử dụng!"
+            );
         }
 
-        User user = userMapper.toEntity(signUpRequest);
-        user.setPassword(encoder.encode(signUpRequest.getPassword()));
+        User user = userMapper.toEntity(request);
 
-        // Lấy danh sách Role dạng String từ Request
-        Set<String> strRoles = signUpRequest.getRoles();
-        Set<Role> roles = new HashSet<>();
+        user.setPassword(
+                encoder.encode(request.getPassword())
+        );
 
-        // Nếu Frontend không truyền Role, mặc định là Phục vụ (WAITER)
-        if (strRoles == null || strRoles.isEmpty()) {
-            Role waiterRole = roleRepository.findByName(ERole.ROLE_WAITER)
-                    .orElseThrow(() -> new ResourceNotFoundException("Lỗi: Không tìm thấy quyền WAITER trong DB."));
-            roles.add(waiterRole);
-        } else {
-            strRoles.forEach(role -> {
-                switch (role.toLowerCase()) {
-                    case "admin":
-                        Role adminRole = roleRepository.findByName(ERole.ROLE_ADMIN)
-                                .orElseThrow(() -> new ResourceNotFoundException("Lỗi: Không tìm thấy quyền ADMIN."));
-                        roles.add(adminRole);
-                        break;
-                    case "chef":
-                        Role chefRole = roleRepository.findByName(ERole.ROLE_CHEF)
-                                .orElseThrow(() -> new ResourceNotFoundException("Lỗi: Không tìm thấy quyền CHEF."));
-                        roles.add(chefRole);
-                        break;
-                    case "cashier":
-                        Role cashierRole = roleRepository.findByName(ERole.ROLE_CASHIER)
-                                .orElseThrow(() -> new ResourceNotFoundException("Lỗi: Không tìm thấy quyền CASHIER."));
-                        roles.add(cashierRole);
-                        break;
-                    case "waiter":
-                    default:
-                        Role waiterRole = roleRepository.findByName(ERole.ROLE_WAITER)
-                                .orElseThrow(() -> new ResourceNotFoundException("Lỗi: Không tìm thấy quyền WAITER."));
-                        roles.add(waiterRole);
-                }
-            });
-        }
+        user.setRoles(
+                resolveRoles(request.getRoles())
+        );
 
-        user.setRoles(roles);
         return userRepository.save(user);
     }
 
@@ -93,5 +70,193 @@ public class UserServiceImpl implements UserService {
     @Override
     public boolean existsByPhone(String phone) {
         return userRepository.existsByPhone(phone);
+    }
+
+    @Override
+    public void deleteStaff(Long id) {
+
+        User user = userRepository.findById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Không tìm thấy nhân viên có ID: " + id
+                        )
+                );
+
+        userRepository.delete(user);
+    }
+
+    @Override
+    public User updateStaff(
+            Long id,
+            UpdateStaffRequest request
+    ) {
+
+        User user = userRepository.findById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Không tìm thấy nhân viên có ID: " + id
+                        )
+                );
+
+
+        // =========================
+        // CHECK USERNAME
+        // =========================
+
+        if (userRepository.existsByUsernameAndIdNot(
+                request.getUsername(),
+                id
+        )) {
+
+            throw new DuplicateException(
+                    "Tên đăng nhập đã tồn tại!"
+            );
+        }
+
+
+        // =========================
+        // CHECK PHONE
+        // =========================
+
+        if (userRepository.existsByPhoneAndIdNot(
+                request.getPhone(),
+                id
+        )) {
+
+            throw new DuplicateException(
+                    "Số điện thoại đã được sử dụng!"
+            );
+        }
+
+
+        // =========================
+        // UPDATE BASIC INFORMATION
+        // =========================
+
+        userMapper.updateEntity(request, user);
+
+
+        // =========================
+        // UPDATE PASSWORD
+        // =========================
+
+        if (
+                request.getPassword() != null &&
+                        !request.getPassword().isBlank()
+        ) {
+
+            user.setPassword(
+                    encoder.encode(request.getPassword())
+            );
+        }
+
+
+        // =========================
+        // UPDATE ROLE
+        // =========================
+
+        user.setRoles(
+                resolveRoles(request.getRoles())
+        );
+
+
+        return userRepository.save(user);
+    }
+
+    @Override
+    public User getStaffById(Long id) {
+
+        return userRepository.findById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Không tìm thấy nhân viên có ID: " + id
+                        )
+                );
+    }
+
+    @Override
+    public List<User> getAllStaff() {
+        return userRepository.findAll();
+    }
+
+    private Set<Role> resolveRoles(Set<String> strRoles) {
+
+        Set<Role> roles = new HashSet<>();
+
+        if (strRoles == null || strRoles.isEmpty()) {
+
+            Role waiterRole = roleRepository
+                    .findByName(ERole.ROLE_WAITER)
+                    .orElseThrow(() ->
+                            new ResourceNotFoundException(
+                                    "Không tìm thấy quyền WAITER."
+                            )
+                    );
+
+            roles.add(waiterRole);
+
+            return roles;
+        }
+
+        strRoles.forEach(role -> {
+
+            switch (role.toLowerCase()) {
+
+                case "admin":
+                    roles.add(
+                            roleRepository
+                                    .findByName(ERole.ROLE_ADMIN)
+                                    .orElseThrow(() ->
+                                            new ResourceNotFoundException(
+                                                    "Không tìm thấy quyền ADMIN."
+                                            )
+                                    )
+                    );
+                    break;
+
+                case "cashier":
+                    roles.add(
+                            roleRepository
+                                    .findByName(ERole.ROLE_CASHIER)
+                                    .orElseThrow(() ->
+                                            new ResourceNotFoundException(
+                                                    "Không tìm thấy quyền CASHIER."
+                                            )
+                                    )
+                    );
+                    break;
+
+                case "chef":
+                    roles.add(
+                            roleRepository
+                                    .findByName(ERole.ROLE_CHEF)
+                                    .orElseThrow(() ->
+                                            new ResourceNotFoundException(
+                                                    "Không tìm thấy quyền CHEF."
+                                            )
+                                    )
+                    );
+                    break;
+
+                case "waiter":
+                    roles.add(
+                            roleRepository
+                                    .findByName(ERole.ROLE_WAITER)
+                                    .orElseThrow(() ->
+                                            new ResourceNotFoundException(
+                                                    "Không tìm thấy quyền WAITER."
+                                            )
+                                    )
+                    );
+                    break;
+
+                default:
+                    throw new IllegalArgumentException(
+                            "Vai trò không hợp lệ: " + role
+                    );
+            }
+        });
+
+        return roles;
     }
 }

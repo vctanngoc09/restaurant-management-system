@@ -1,10 +1,20 @@
 package vn.edu.ut.resto.service;
 
-import vn.edu.ut.resto.dto.request.SignupRequest;
+import vn.edu.ut.resto.dto.request.CreateStaffRequest;
+import vn.edu.ut.resto.dto.request.UpdateStaffRequest;
 import vn.edu.ut.resto.model.User;
 
+import java.util.List;
+
 public interface UserService {
-    User registerUser(SignupRequest signUpRequest);
+    User registerUser(CreateStaffRequest signUpRequest);
     boolean existsByUsername(String username);
     boolean existsByPhone(String phone);
+    List<User> getAllStaff();
+
+    User getStaffById(Long id);
+
+    User updateStaff(Long id, UpdateStaffRequest request);
+
+    void deleteStaff(Long id);
 }

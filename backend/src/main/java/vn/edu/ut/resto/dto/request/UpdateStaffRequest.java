@@ -6,7 +6,8 @@ import jakarta.validation.constraints.Size;
 
 import java.util.Set;
 
-public class SignupRequest {
+public class UpdateStaffRequest {
+
     @NotBlank(message = "Họ tên không được để trống")
     private String fullName;
 
@@ -14,25 +15,23 @@ public class SignupRequest {
     @Size(min = 6, max = 20, message = "Tên đăng nhập phải từ 6 đến 20 ký tự")
     private String username;
 
-    @NotBlank(message = "Mật khẩu không được để trống")
+    /*
+     * Không bắt buộc.
+     * Nếu null hoặc blank thì giữ mật khẩu cũ.
+     */
     @Size(min = 6, max = 40, message = "Mật khẩu phải từ 6 đến 40 ký tự")
     private String password;
 
     @NotBlank(message = "Số điện thoại không được để trống")
-    @Pattern(regexp = "(84|0[3|5|7|8|9])+([0-9]{8})\\b", message = "Số điện thoại không đúng định dạng")
+    @Pattern(
+            regexp = "(84|0[3|5|7|8|9])+([0-9]{8})\\b",
+            message = "Số điện thoại không đúng định dạng"
+    )
     private String phone;
 
     private Set<String> roles;
 
-    public SignupRequest() {
-    }
-
-    public SignupRequest(String fullName, String username, String password, String phone, Set<String> roles) {
-        this.fullName = fullName;
-        this.username = username;
-        this.password = password;
-        this.phone = phone;
-        this.roles = roles;
+    public UpdateStaffRequest() {
     }
 
     public String getFullName() {

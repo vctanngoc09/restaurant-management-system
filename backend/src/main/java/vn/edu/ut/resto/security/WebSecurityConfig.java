@@ -66,22 +66,73 @@ public class WebSecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .csrf(csrf -> csrf.disable())
-                .exceptionHandling(exception -> exception
-                        .authenticationEntryPoint(unauthorizedHandler)
-                        .accessDeniedHandler(accessDeniedHandler)
-                )
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth ->
-                        auth.requestMatchers("/api/auth/**").permitAll() // Cho phép truy cập không cần Token
-                                .requestMatchers("/error").permitAll()
-                                .anyRequest().authenticated() // Bắt buộc có Token cho các API còn lại
-                );
+    public SecurityFilterChain filterChain(
+            HttpSecurity http
+    ) throws Exception {
 
-        http.authenticationProvider(authenticationProvider());
-        http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
+        http
+                .cors(cors ->
+                        cors.configurationSource(
+                                corsConfigurationSource()
+                        )
+                )
+
+                .csrf(csrf ->
+                        csrf.disable()
+                )
+
+                .exceptionHandling(exception ->
+                        exception
+
+                                // Chưa login / token sai
+                                // → 401
+                                .authenticationEntryPoint(
+                                        unauthorizedHandler
+                                )
+
+                                // Đã login nhưng không đủ quyền
+                                // → 403
+                                .accessDeniedHandler(
+                                        accessDeniedHandler
+                                )
+                )
+
+                .sessionManagement(session ->
+                        session.sessionCreationPolicy(
+                                SessionCreationPolicy.STATELESS
+                        )
+                )
+
+                .authorizeHttpRequests(auth ->
+                        auth
+                                .requestMatchers(
+                                        "/api/auth/login"
+                                )
+                                .permitAll()
+
+                                .requestMatchers(
+                                        "/error"
+                                )
+                                .permitAll()
+
+                                .requestMatchers(
+                                        "/api/admin/**"
+                                )
+                                .hasRole("ADMIN")
+
+                                .anyRequest()
+                                .authenticated()
+                );
+        http.authenticationProvider(
+                authenticationProvider()
+        );
+
+
+        http.addFilterBefore(
+                authenticationJwtTokenFilter(),
+                UsernamePasswordAuthenticationFilter.class
+        );
+
 
         return http.build();
     }

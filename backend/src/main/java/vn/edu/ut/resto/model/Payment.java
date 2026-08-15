@@ -1,7 +1,10 @@
 package vn.edu.ut.resto.model;
 
 import jakarta.persistence.*;
+import vn.edu.ut.resto.model.enums.EPaymentMethod;
 import vn.edu.ut.resto.model.enums.EPaymentStatus;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "payments")
@@ -16,7 +19,9 @@ public class Payment {
     @Column(nullable = false)
     private Double amount;
 
-    private String paymentMethod;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private EPaymentMethod paymentMethod;
 
     @Enumerated(EnumType.STRING)
     @Column(length = 20)
@@ -30,9 +35,11 @@ public class Payment {
     @JoinColumn(name = "order_id")
     private Order order;
 
+    private LocalDateTime paidAt;
+
     public Payment() {}
 
-    public Payment(String transactionId, Double amount, String paymentMethod, EPaymentStatus paymentStatus, String vnpResponseCode, String bankCode, Order order) {
+    public Payment(String transactionId, Double amount, EPaymentMethod paymentMethod, EPaymentStatus paymentStatus, String vnpResponseCode, String bankCode, Order order, LocalDateTime paidAt) {
         this.transactionId = transactionId;
         this.amount = amount;
         this.paymentMethod = paymentMethod;
@@ -40,6 +47,7 @@ public class Payment {
         this.vnpResponseCode = vnpResponseCode;
         this.bankCode = bankCode;
         this.order = order;
+        this.paidAt = paidAt;
     }
 
     public Long getId() {
@@ -66,11 +74,11 @@ public class Payment {
         this.amount = amount;
     }
 
-    public String getPaymentMethod() {
+    public EPaymentMethod getPaymentMethod() {
         return paymentMethod;
     }
 
-    public void setPaymentMethod(String paymentMethod) {
+    public void setPaymentMethod(EPaymentMethod paymentMethod) {
         this.paymentMethod = paymentMethod;
     }
 
@@ -104,5 +112,13 @@ public class Payment {
 
     public void setOrder(Order order) {
         this.order = order;
+    }
+
+    public LocalDateTime getPaidAt() {
+        return paidAt;
+    }
+
+    public void setPaidAt(LocalDateTime paidAt) {
+        this.paidAt = paidAt;
     }
 }
