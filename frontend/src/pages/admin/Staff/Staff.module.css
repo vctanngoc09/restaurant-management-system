@@ -60,7 +60,7 @@
 
 .searchInput {
   flex: 1;
-  width: auto;
+  width: 300px;
   min-width: 0;
 }
 
@@ -111,6 +111,42 @@
   grid-template-columns: repeat(4, minmax(0, 1fr));
 
   gap: 16px;
+}
+
+.filterGroup {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.filterSelect {
+  height: 36px;
+  padding: 0 12px;
+  color: var(--color-text-secondary);
+  background: var(--color-background-soft);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: 10px;
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+}
+
+.filterSelect:focus {
+  border-color: var(--color-primary);
+}
+
+/* Responsive cho thiết bị nhỏ */
+@media (max-width: 700px) {
+  .filterGroup {
+    width: 100%;
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .filterSelect {
+    width: 100%;
+  }
 }
 
 /* =========================

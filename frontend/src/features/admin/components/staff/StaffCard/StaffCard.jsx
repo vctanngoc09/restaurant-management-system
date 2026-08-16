@@ -1,7 +1,10 @@
 import {
   CheckCircle2,
   Phone,
+  UserRound,
   Clock3,
+  CircleOff,
+  RotateCcw,
 } from "lucide-react";
 
 import {
@@ -13,37 +16,54 @@ import { STAFF_ROLE_LABELS } from "../../../../../constants/staffRoles";
 
 import styles from "./StaffCard.module.css";
 
-function StaffCard({ staff, onEdit, onDelete }) {
+function StaffCard({ staff, onEdit, onDelete, onRestore }) {
+  const roles = (staff.roles || []).map((role) =>
+    role.replace("ROLE_", "").toLowerCase(),
+  );
+
+  // Lấy tối đa 2 role đầu tiên
+  const visibleRoles = roles.slice(0, 2);
+  const hiddenRolesCount = roles.length - 2;
+
+  const isActive = staff.status === "ACTIVE";
+
   return (
     <article className={styles.card}>
       <div>
-        {/* ROLE + PIN */}
         <div className={styles.top}>
-          <span className={styles.role}>
-            {STAFF_ROLE_LABELS[staff.role] || staff.role}
-          </span>
+          <div className={styles.roleList}>
+            {/* Map qua danh sách role đã bị cắt */}
+            {visibleRoles.map((role) => (
+              <span key={role} className={styles.role}>
+                {STAFF_ROLE_LABELS[role] || role}
+              </span>
+            ))}
 
-          <span className={styles.pin}>PIN: {staff.pin}</span>
+            {/* Nếu còn role thừa, hiển thị thêm tag +X */}
+            {hiddenRolesCount > 0 && (
+              <span className={styles.role}>+{hiddenRolesCount}</span>
+            )}
+          </div>
+          <div className={styles.staffId}>
+            <span>ID: {staff.id}</span>
+          </div>
         </div>
 
-        {/* INFORMATION */}
         <div className={styles.information}>
           <div className={styles.avatar}>
-            {staff.name.trim().charAt(0).toUpperCase()}
+            {staff.fullName?.trim().charAt(0).toUpperCase()}
           </div>
 
           <div className={styles.nameGroup}>
-            <h3>{staff.name}</h3>
-
-            <span className={styles.staffId}>{staff.id}</span>
+            <h3>{staff.fullName}</h3>
           </div>
         </div>
 
         <div className={styles.details}>
           <div>
-            <Clock3 size={14} />
+            <UserRound size={14} />
 
-            <span>{staff.shift || "Chưa phân ca"}</span>
+            <span>{staff.username}</span>
           </div>
 
           <div>
@@ -54,25 +74,36 @@ function StaffCard({ staff, onEdit, onDelete }) {
         </div>
       </div>
 
-      {/* FOOTER */}
       <footer className={styles.footer}>
-        <span className={styles.status}>
-          <CheckCircle2 size={14} />
-          Hoạt động
+        <span className={isActive ? styles.status : styles.inactiveStatus}>
+          {isActive ? <CheckCircle2 size={14} /> : <CircleOff size={14} />}
+
+          {isActive ? "Hoạt động" : "Ngừng hoạt động"}
         </span>
 
         <ActionGroup>
           <ActionButton
-              action="edit"
-              title={`Sửa nhân viên ${staff.name}`}
-              onClick={() => onEdit(staff)}
+            action="edit"
+            title={`Sửa nhân viên ${staff.fullName}`}
+            onClick={() => onEdit(staff)}
           />
 
-          <ActionButton
+          {isActive ? (
+            <ActionButton
               action="delete"
-              title={`Xóa nhân viên ${staff.name}`}
+              title={`Vô hiệu hóa ${staff.fullName}`}
               onClick={() => onDelete(staff)}
-          />
+            />
+          ) : (
+            <button
+              type="button"
+              className={styles.restoreButton}
+              onClick={() => onRestore(staff)}
+              title={`Khôi phục ${staff.fullName}`}
+            >
+              <RotateCcw size={15} />
+            </button>
+          )}
         </ActionGroup>
       </footer>
     </article>

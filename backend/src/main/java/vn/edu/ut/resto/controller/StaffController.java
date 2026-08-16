@@ -27,7 +27,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/admin/staff")
-@CrossOrigin(origins = "*", maxAge = 3600)
 
 @PreAuthorize("hasRole('ADMIN')")
 public class StaffController {

@@ -23,6 +23,18 @@ function StaffFormModal({
     });
   };
 
+  const handleRoleChange = (roleValue) => {
+    const currentRoles = form.roles || [];
+
+    const isSelected = currentRoles.includes(roleValue);
+
+    const updatedRoles = isSelected
+      ? currentRoles.filter((role) => role !== roleValue)
+      : [...currentRoles, roleValue];
+
+    updateField("roles", updatedRoles);
+  };
+
   const handlePinChange = (event) => {
     /*
       Chỉ cho phép nhập số.
@@ -40,8 +52,6 @@ function StaffFormModal({
       >
         <header className={styles.header}>
           <div>
-            <span className={styles.badge}>Quản Lý Nhân Viên</span>
-
             <h2>{editingStaff ? "Sửa Nhân Viên" : "Thêm Nhân Viên Mới"}</h2>
           </div>
 
@@ -61,70 +71,44 @@ function StaffFormModal({
 
             <input
               type="text"
-              value={form.name}
-              onChange={(event) => updateField("name", event.target.value)}
+              value={form.fullName}
+              onChange={(event) => updateField("fullName", event.target.value)}
               placeholder="VD: Trần Văn Minh"
               required
             />
           </div>
 
-          {/* ROLE */}
+          {/* USERNAME */}
           <div className={styles.field}>
-            <label>Vai Trò / Vai Trò Hệ Thống</label>
-
-            <select
-              value={form.role}
-              onChange={(event) => updateField("role", event.target.value)}
-            >
-              {STAFF_ROLES.map((role) => (
-                <option key={role.value} value={role.value}>
-                  {role.label}
-                  {" ("}
-                  {role.englishLabel}
-                  {")"}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* PIN */}
-          <div className={styles.field}>
-            <label>Mã PIN Đăng Nhập (4 số)</label>
+            <label>Tên Đăng Nhập</label>
 
             <input
-              type="password"
-              inputMode="numeric"
-              maxLength={4}
-              value={form.pin}
-              onChange={handlePinChange}
-              placeholder="1234"
-              className={styles.pinInput}
+              type="text"
+              value={form.username}
+              onChange={(event) => updateField("username", event.target.value)}
+              placeholder="VD: waiter01"
+              minLength={6}
+              maxLength={20}
               required
             />
           </div>
 
-          {/* SHIFT */}
+          {/* PASSWORD */}
           <div className={styles.field}>
-            <label>Ca Trực</label>
+            <label>{editingStaff ? "Mật Khẩu Mới" : "Mật Khẩu"}</label>
 
-            <select
-              value={form.shift}
-              onChange={(event) => updateField("shift", event.target.value)}
-            >
-              <option value="Ca Sáng (06:00 - 14:00)">
-                Ca Sáng (06:00 - 14:00)
-              </option>
-
-              <option value="Ca Chiều (14:00 - 22:00)">
-                Ca Chiều (14:00 - 22:00)
-              </option>
-
-              <option value="Ca Hành Chính (08:00 - 17:00)">
-                Ca Hành Chính (08:00 - 17:00)
-              </option>
-
-              <option value="Ca Cả Ngày">Ca Cả Ngày</option>
-            </select>
+            <input
+              type="password"
+              value={form.password}
+              onChange={(event) => updateField("password", event.target.value)}
+              placeholder={
+                editingStaff
+                  ? "Để trống nếu không đổi mật khẩu"
+                  : "Nhập mật khẩu"
+              }
+              minLength={form.password ? 6 : undefined}
+              required={!editingStaff}
+            />
           </div>
 
           {/* PHONE */}
@@ -136,7 +120,46 @@ function StaffFormModal({
               value={form.phone}
               onChange={(event) => updateField("phone", event.target.value)}
               placeholder="0901234567"
+              required
             />
+          </div>
+
+          {/* ROLES */}
+          <div className={styles.field}>
+            <label>Vai Trò Hệ Thống</label>
+
+            <p className={styles.roleHint}>
+              Một nhân viên có thể được cấp nhiều vai trò
+            </p>
+
+            <div className={styles.roleGrid}>
+              {STAFF_ROLES.map((role) => {
+                const checked = form.roles.includes(role.value);
+
+                return (
+                  <label
+                    key={role.value}
+                    className={`${styles.roleOption} ${
+                      checked ? styles.roleOptionSelected : ""
+                    }`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={checked}
+                      onChange={() => handleRoleChange(role.value)}
+                    />
+
+                    <div className={styles.roleContent}>
+                      <span className={styles.roleName}>{role.label}</span>
+
+                      <span className={styles.roleEnglish}>
+                        {role.englishLabel}
+                      </span>
+                    </div>
+                  </label>
+                );
+              })}
+            </div>
           </div>
 
           <footer className={styles.footer}>
