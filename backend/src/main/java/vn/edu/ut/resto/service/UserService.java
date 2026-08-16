@@ -16,5 +16,7 @@ public interface UserService {
 
     User updateStaff(Long id, UpdateStaffRequest request);
 
-    void deleteStaff(Long id);
+    void deactivateStaff(Long id);
+
+    User restoreStaff(Long id);
 }

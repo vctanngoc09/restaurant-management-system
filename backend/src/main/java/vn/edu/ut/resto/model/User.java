@@ -1,6 +1,8 @@
 package vn.edu.ut.resto.model;
 
 import jakarta.persistence.*;
+import vn.edu.ut.resto.model.enums.EUserStatus;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -23,6 +25,10 @@ public class User {
 
     @Column(unique = true, length = 15)
     private String phone;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private EUserStatus status = EUserStatus.ACTIVE;
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "user_roles",
@@ -78,6 +84,14 @@ public class User {
 
     public void setPhone(String phone) {
         this.phone = phone;
+    }
+
+    public EUserStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(EUserStatus status) {
+        this.status = status;
     }
 
     public Set<Role> getRoles() {

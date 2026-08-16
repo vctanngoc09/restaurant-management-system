@@ -73,6 +73,7 @@ public class UserMapper {
                 user.getFullName(),
                 user.getUsername(),
                 user.getPhone(),
+                user.getStatus().name(),
                 roles
         );
     }
@@ -99,6 +100,7 @@ public class UserMapper {
                 userDetails.getFullName(),
                 userDetails.getUsername(),
                 userDetails.getPhone(),
+                userDetails.getStatus().name(),
                 roles
         );
     }

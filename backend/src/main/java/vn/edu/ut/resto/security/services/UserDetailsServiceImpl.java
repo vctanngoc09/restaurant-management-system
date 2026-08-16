@@ -1,6 +1,7 @@
 package vn.edu.ut.resto.security.services;
 
 import vn.edu.ut.resto.model.User;
+import vn.edu.ut.resto.model.enums.EUserStatus;
 import vn.edu.ut.resto.repository.UserRepository;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -20,10 +21,16 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Override
     @Transactional
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = userRepository.findByUsername(username)
+    public UserDetails loadUserByUsername(String username)
+            throws UsernameNotFoundException {
+
+        User user = userRepository
+                .findByUsername(username)
                 .orElseThrow(() ->
-                        new UsernameNotFoundException("Lỗi: Không tìm thấy nhân viên với tài khoản: " + username));
+                        new UsernameNotFoundException(
+                                "Không tìm thấy tài khoản"
+                        )
+                );
 
         return UserDetailsImpl.build(user);
     }

@@ -5,6 +5,7 @@ import vn.edu.ut.resto.model.User;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import vn.edu.ut.resto.model.enums.EUserStatus;
 
 import java.util.Collection;
 import java.util.List;
@@ -16,17 +17,19 @@ public class UserDetailsImpl implements UserDetails {
     private String username;
     private String phone;
     private String fullName;
+    private EUserStatus status;
 
     @JsonIgnore
     private String password;
 
     private Collection<? extends GrantedAuthority> authorities;
 
-    public UserDetailsImpl(Long id, String username, String phone, String fullName, String password, Collection<? extends GrantedAuthority> authorities) {
+    public UserDetailsImpl(Long id, String username, String phone, String fullName, EUserStatus status, String password, Collection<? extends GrantedAuthority> authorities) {
         this.id = id;
         this.username = username;
         this.phone = phone;
         this.fullName = fullName;
+        this.status = status;
         this.password = password;
         this.authorities = authorities;
     }
@@ -42,6 +45,7 @@ public class UserDetailsImpl implements UserDetails {
                 user.getUsername(),
                 user.getPhone(),
                 user.getFullName(),
+                user.getStatus(),
                 user.getPassword(),
                 authorities
         );
@@ -62,6 +66,10 @@ public class UserDetailsImpl implements UserDetails {
 
     public String getFullName() {
         return fullName;
+    }
+
+    public EUserStatus getStatus() {
+        return status;
     }
 
     @Override
@@ -91,6 +99,6 @@ public class UserDetailsImpl implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return status == EUserStatus.ACTIVE;
     }
 }

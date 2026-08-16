@@ -39,24 +39,6 @@ public class AuthController {
     @Autowired
     UserMapper userMapper;
 
-    @PostMapping("/signup")
-    public ResponseEntity<ApiResponse<UserResponse>> registerUser(@Valid @RequestBody CreateStaffRequest signUpRequest) {
-
-        // 1. Chỉ cần gọi Service, mọi lỗi trùng lặp Service sẽ tự ném ra
-        User newUser = userService.registerUser(signUpRequest);
-
-        // 2. Map Role và trả kết quả
-        List<String> roleNames = newUser.getRoles().stream()
-                .map(role -> role.getName().name())
-                .collect(java.util.stream.Collectors.toList());
-
-        UserResponse responseData = new UserResponse(newUser.getId(),newUser.getFullName(), newUser.getUsername(), newUser.getPhone(), roleNames);
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(
-                new ApiResponse<>(201, "Đăng ký nhân viên thành công!", responseData)
-        );
-    }
-
     @PostMapping("/login")
     public ResponseEntity<ApiResponse<JwtResponse>> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
 

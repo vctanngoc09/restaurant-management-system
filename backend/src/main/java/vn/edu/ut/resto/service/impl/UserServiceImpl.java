@@ -11,6 +11,7 @@ import vn.edu.ut.resto.mapper.UserMapper;
 import vn.edu.ut.resto.model.Role;
 import vn.edu.ut.resto.model.User;
 import vn.edu.ut.resto.model.enums.ERole;
+import vn.edu.ut.resto.model.enums.EUserStatus;
 import vn.edu.ut.resto.repository.RoleRepository;
 import vn.edu.ut.resto.repository.UserRepository;
 import vn.edu.ut.resto.service.UserService;
@@ -73,7 +74,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void deleteStaff(Long id) {
+    public void deactivateStaff(Long id) {
 
         User user = userRepository.findById(id)
                 .orElseThrow(() ->
@@ -82,7 +83,9 @@ public class UserServiceImpl implements UserService {
                         )
                 );
 
-        userRepository.delete(user);
+        user.setStatus(EUserStatus.INACTIVE);
+
+        userRepository.save(user);
     }
 
     @Override
@@ -177,6 +180,21 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<User> getAllStaff() {
         return userRepository.findAll();
+    }
+
+    @Override
+    public User restoreStaff(Long id) {
+
+        User user = userRepository.findById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Không tìm thấy nhân viên có ID: " + id
+                        )
+                );
+
+        user.setStatus(EUserStatus.ACTIVE);
+
+        return userRepository.save(user);
     }
 
     private Set<Role> resolveRoles(Set<String> strRoles) {

@@ -146,14 +146,30 @@ public class StaffController {
             @PathVariable Long id
     ) {
 
-        userService.deleteStaff(id);
+        userService.deactivateStaff(id);
 
 
         return ResponseEntity.ok(
                 new ApiResponse<>(
                         200,
-                        "Xóa nhân viên thành công!",
+                        "Vô hiệu hóa nhân viên thành công!",
                         null
+                )
+        );
+    }
+
+    @PatchMapping("/{id}/restore")
+    public ResponseEntity<ApiResponse<UserResponse>> restoreStaff(
+            @PathVariable Long id
+    ) {
+
+        User user = userService.restoreStaff(id);
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        200,
+                        "Khôi phục nhân viên thành công!",
+                        userMapper.toResponse(user)
                 )
         );
     }

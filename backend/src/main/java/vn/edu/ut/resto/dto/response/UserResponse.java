@@ -8,16 +8,18 @@ public class UserResponse {
     private String fullName;
     private String username;
     private String phone;
+    private String status;
     private List<String> roles;
 
     public UserResponse() {
     }
 
-    public UserResponse(Long id, String fullName, String username, String phone, List<String> roles) {
+    public UserResponse(Long id, String fullName, String username, String phone, String status, List<String> roles) {
         this.id = id;
         this.fullName = fullName;
         this.username = username;
         this.phone = phone;
+        this.status = status;
         this.roles = roles;
     }
 
@@ -51,6 +53,14 @@ public class UserResponse {
 
     public void setPhone(String phone) {
         this.phone = phone;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 
     public List<String> getRoles() {
