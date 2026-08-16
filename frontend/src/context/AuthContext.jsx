@@ -62,6 +62,12 @@ export function AuthProvider({ children }) {
     };
   };
 
+  const updateCurrentUser = (updatedUser) => {
+    AuthStorage.updateUser(updatedUser);
+
+    setUser(updatedUser);
+  };
+
   // ==============================
   // LOGOUT
   // ==============================
@@ -82,6 +88,7 @@ export function AuthProvider({ children }) {
         isAuthenticated,
         login,
         logout,
+        updateCurrentUser,
       }}
     >
       {children}

@@ -1,6 +1,5 @@
 class AuthStorage {
   static setAuth(token, user, rememberMe = true) {
-    // Xóa phiên đăng nhập cũ trước
     this.removeAuth();
 
     const storage = rememberMe ? localStorage : sessionStorage;
@@ -25,6 +24,18 @@ class AuthStorage {
     storage.setItem("user", JSON.stringify(user));
   }
 
+  static updateUser(user) {
+    if (localStorage.getItem("token")) {
+      localStorage.setItem("user", JSON.stringify(user));
+
+      return;
+    }
+
+    if (sessionStorage.getItem("token")) {
+      sessionStorage.setItem("user", JSON.stringify(user));
+    }
+  }
+
   static getUser() {
     const userString =
       localStorage.getItem("user") || sessionStorage.getItem("user");
@@ -37,6 +48,7 @@ class AuthStorage {
       return JSON.parse(userString);
     } catch {
       this.removeAuth();
+
       return null;
     }
   }

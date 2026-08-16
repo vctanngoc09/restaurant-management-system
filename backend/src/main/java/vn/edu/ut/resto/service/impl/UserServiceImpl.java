@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import vn.edu.ut.resto.dto.request.CreateStaffRequest;
 import vn.edu.ut.resto.dto.request.UpdateStaffRequest;
 import vn.edu.ut.resto.exception.DuplicateException;
+import vn.edu.ut.resto.exception.InvalidOperationException;
 import vn.edu.ut.resto.exception.ResourceNotFoundException;
 import vn.edu.ut.resto.mapper.UserMapper;
 import vn.edu.ut.resto.model.Role;
@@ -34,6 +35,8 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private UserMapper userMapper;
+
+    private static final Long DEFAULT_ADMIN_ID = 1L;
 
     @Override
     public User registerUser(CreateStaffRequest request) {
@@ -76,12 +79,23 @@ public class UserServiceImpl implements UserService {
     @Override
     public void deactivateStaff(Long id) {
 
+        if (DEFAULT_ADMIN_ID.equals(id)) {
+            throw new InvalidOperationException(
+                    "Không thể vô hiệu hóa tài khoản quản trị mặc định."
+            );
+        }
+
         User user = userRepository.findById(id)
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
                                 "Không tìm thấy nhân viên có ID: " + id
                         )
                 );
+        if (user.getStatus() == EUserStatus.INACTIVE) {
+            throw new InvalidOperationException(
+                    "Tài khoản này đã bị vô hiệu hóa."
+            );
+        }
 
         user.setStatus(EUserStatus.INACTIVE);
 
@@ -102,9 +116,21 @@ public class UserServiceImpl implements UserService {
                 );
 
 
-        // =========================
-        // CHECK USERNAME
-        // =========================
+        if (DEFAULT_ADMIN_ID.equals(id)) {
+
+            boolean hasAdminRole = request
+                    .getRoles()
+                    .stream()
+                    .anyMatch(role ->
+                            role.equalsIgnoreCase("admin")
+                    );
+
+            if (!hasAdminRole) {
+                throw new InvalidOperationException(
+                        "Tài khoản quản trị mặc định phải giữ quyền ADMIN."
+                );
+            }
+        }
 
         if (userRepository.existsByUsernameAndIdNot(
                 request.getUsername(),

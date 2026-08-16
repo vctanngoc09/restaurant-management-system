@@ -1,12 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   Bell,
-  ChefHat,
-  CreditCard,
-  LayoutDashboard,
   LogOut,
-  Smartphone,
-  Soup,
   Volume2,
   VolumeX,
   ChevronDown,
@@ -16,8 +11,8 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
 import useAuth from "../../../hooks/useAuth";
-import { ROLES } from "../../../constants/roles";
 import { ROLE_NAVIGATION } from "../../../constants/roleNavigation";
+import { STAFF_ROLE_LABELS } from "../../../constants/staffRoles";
 import logo3 from "../../../assets/images/logo3.png";
 import styles from "./Header.module.css";
 
@@ -30,6 +25,12 @@ function Header() {
   const [timeStr, setTimeStr] = useState("");
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
+
+  const getRoleLabel = (role) => {
+    const normalizedRole = role.replace("ROLE_", "").toLowerCase();
+
+    return STAFF_ROLE_LABELS[normalizedRole] || normalizedRole;
+  };
 
   // =============================
   // CLOCK
@@ -177,7 +178,7 @@ function Header() {
               <div className={styles.profileInfo}>
                 <strong>{displayName}</strong>
 
-                <span>@{user?.username || "staff"}</span>
+                <span>{user?.username || "staff"}</span>
               </div>
 
               <div className={styles.roleInfo}>
@@ -186,7 +187,7 @@ function Header() {
                 <div className={styles.roleBadges}>
                   {roles.map((role) => (
                     <span key={role} className={styles.roleBadge}>
-                      {role.replace("ROLE_", "")}
+                      {getRoleLabel(role)}
                     </span>
                   ))}
                 </div>

@@ -1,5 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 
+import { useNavigate } from "react-router-dom";
+
+import useAuth from "../../../hooks/useAuth";
+
 import AddButton from "../../../components/common/AddButton";
 
 import { toast } from "react-toastify";
@@ -17,6 +21,10 @@ import SearchInput from "../../../components/common/SearchInput/SearchInput";
 import staffService from "../../../features/admin/services/staffService";
 
 function Staff() {
+  const navigate = useNavigate();
+
+  const { user: currentUser, updateCurrentUser, logout } = useAuth();
+
   const EMPTY_STAFF_FORM = {
     fullName: "",
     username: "",
@@ -48,7 +56,7 @@ function Staff() {
       console.error(error);
 
       toast.error(
-          error.response?.data?.message || "Không thể tải danh sách nhân viên.",
+        error.response?.data?.message || "Không thể tải danh sách nhân viên.",
       );
     } finally {
       setLoading(false);
@@ -141,15 +149,44 @@ function Staff() {
 
     try {
       if (editingStaff) {
+        const oldUsername = currentUser?.username;
+
         const response = await staffService.update(editingStaff.id, payload);
 
         const updatedStaff = response.data;
 
         setStaffList((currentStaff) =>
-            currentStaff.map((staff) =>
-                staff.id === editingStaff.id ? updatedStaff : staff,
-            ),
+          currentStaff.map((staff) =>
+            staff.id === editingStaff.id ? updatedStaff : staff,
+          ),
         );
+
+        const isCurrentUser =
+          Number(currentUser?.id) === Number(updatedStaff.id);
+
+        if (isCurrentUser) {
+          const usernameChanged = oldUsername !== updatedStaff.username;
+
+          const passwordChanged = Boolean(password);
+
+          const stillAdmin = updatedStaff.roles?.includes("ROLE_ADMIN");
+
+          if (usernameChanged || passwordChanged || !stillAdmin) {
+            logout();
+
+            toast.success(
+              "Thông tin tài khoản đã thay đổi. Vui lòng đăng nhập lại.",
+            );
+
+            navigate("/login", {
+              replace: true,
+            });
+
+            return;
+          }
+
+          updateCurrentUser(updatedStaff);
+        }
 
         toast.success("Cập nhật nhân viên thành công!");
       } else {
@@ -169,7 +206,7 @@ function Staff() {
       console.error(error);
 
       toast.error(
-          error.response?.data?.message || "Có lỗi xảy ra khi lưu nhân viên.",
+        error.response?.data?.message || "Có lỗi xảy ra khi lưu nhân viên.",
       );
     }
   };
@@ -179,9 +216,19 @@ function Staff() {
   // =========================
 
   const handleDelete = async (staff) => {
-    const confirmed = window.confirm(
-        `Xác nhận vô hiệu hóa nhân viên "${staff.fullName}"?`,
-    );
+    if (Number(staff.id) === 1) {
+      toast.error("Tài khoản quản trị mặc định không thể bị vô hiệu hóa.");
+
+      return;
+    }
+
+    const isCurrentUser = Number(currentUser?.id) === Number(staff.id);
+
+    const message = isCurrentUser
+      ? `Bạn đang vô hiệu hóa chính tài khoản "${staff.fullName}" đang đăng nhập. Sau thao tác này bạn sẽ bị đăng xuất. Tiếp tục?`
+      : `Xác nhận vô hiệu hóa nhân viên "${staff.fullName}"?`;
+
+    const confirmed = window.confirm(message);
 
     if (!confirmed) {
       return;
@@ -190,15 +237,31 @@ function Staff() {
     try {
       await staffService.deactivate(staff.id);
 
+      if (isCurrentUser) {
+        logout();
+
+        toast.success("Tài khoản của bạn đã được vô hiệu hóa.");
+
+        navigate("/login", {
+          replace: true,
+        });
+
+        return;
+      }
+
+      // =========================
+      // UPDATE LOCAL UI
+      // =========================
+
       setStaffList((currentStaff) =>
-          currentStaff.map((item) =>
-              item.id === staff.id
-                  ? {
-                    ...item,
-                    status: "INACTIVE",
-                  }
-                  : item,
-          ),
+        currentStaff.map((item) =>
+          item.id === staff.id
+            ? {
+                ...item,
+                status: "INACTIVE",
+              }
+            : item,
+        ),
       );
 
       toast.success(`Đã vô hiệu hóa nhân viên ${staff.fullName}.`);
@@ -206,14 +269,14 @@ function Staff() {
       console.error(error);
 
       toast.error(
-          error.response?.data?.message || "Không thể vô hiệu hóa nhân viên.",
+        error.response?.data?.message || "Không thể vô hiệu hóa nhân viên.",
       );
     }
   };
 
   const handleRestore = async (staff) => {
     const confirmed = window.confirm(
-        `Khôi phục nhân viên "${staff.fullName}"?`,
+      `Khôi phục nhân viên "${staff.fullName}"?`,
     );
 
     if (!confirmed) {
@@ -226,9 +289,9 @@ function Staff() {
       const restoredStaff = response.data;
 
       setStaffList((currentStaff) =>
-          currentStaff.map((item) =>
-              item.id === staff.id ? restoredStaff : item,
-          ),
+        currentStaff.map((item) =>
+          item.id === staff.id ? restoredStaff : item,
+        ),
       );
 
       toast.success(`Đã khôi phục nhân viên ${staff.fullName}.`);
@@ -236,7 +299,7 @@ function Staff() {
       console.error(error);
 
       toast.error(
-          error.response?.data?.message || "Không thể khôi phục nhân viên.",
+        error.response?.data?.message || "Không thể khôi phục nhân viên.",
       );
     }
   };
@@ -256,12 +319,12 @@ function Staff() {
     if (keyword) {
       result = result.filter((staff) => {
         return (
-            String(staff.id).toLowerCase().includes(keyword) ||
-            staff.fullName?.toLowerCase().includes(keyword) ||
-            staff.username?.toLowerCase().includes(keyword) ||
-            staff.phone?.toLowerCase().includes(keyword) ||
-            staff.roles?.join(" ").toLowerCase().includes(keyword) ||
-            staff.status?.toLowerCase().includes(keyword)
+          String(staff.id).toLowerCase().includes(keyword) ||
+          staff.fullName?.toLowerCase().includes(keyword) ||
+          staff.username?.toLowerCase().includes(keyword) ||
+          staff.phone?.toLowerCase().includes(keyword) ||
+          staff.roles?.join(" ").toLowerCase().includes(keyword) ||
+          staff.status?.toLowerCase().includes(keyword)
         );
       });
     }
@@ -270,98 +333,98 @@ function Staff() {
   }, [staffList, searchQuery, statusFilter]);
 
   return (
-      <div className={styles.page}>
-        {/* =======================
+    <div className={styles.page}>
+      {/* =======================
           GLOBAL ADMIN HEADER
       ======================= */}
 
-        <AdminPageHeader title="Quản Lý Nhân Viên" />
+      <AdminPageHeader title="Quản Lý Nhân Viên" />
 
-        {/* =======================
+      {/* =======================
           STAFF MANAGEMENT
       ======================= */}
 
-        <section className={styles.panel}>
-          <div className={styles.panelHeader}>
-            <div>
-              <h2>Quản Lý Nhân Viên & Phân Quyền</h2>
+      <section className={styles.panel}>
+        <div className={styles.panelHeader}>
+          <div>
+            <h2>Quản Lý Nhân Viên & Phân Quyền</h2>
 
-              <p>Quản lý tài khoản, thông tin và quyền truy cập của nhân viên</p>
-            </div>
-
-            <AddButton onClick={handleOpenAdd}>Thêm Nhân Viên</AddButton>
+            <p>Quản lý tài khoản, thông tin và quyền truy cập của nhân viên</p>
           </div>
 
-          {/* Cập nhật thanh công cụ để chứa Select giống OrderFilters */}
-          <div className={styles.toolbar}>
-            <div className={styles.filterGroup}>
-              <SearchInput
-                  value={searchQuery}
-                  onChange={setSearchQuery}
-                  placeholder="Tìm tên, mã NV, vai trò, SĐT..."
-                  className={styles.searchInput}
+          <AddButton onClick={handleOpenAdd}>Thêm Nhân Viên</AddButton>
+        </div>
+
+        {/* Cập nhật thanh công cụ để chứa Select giống OrderFilters */}
+        <div className={styles.toolbar}>
+          <div className={styles.filterGroup}>
+            <SearchInput
+              value={searchQuery}
+              onChange={setSearchQuery}
+              placeholder="Tìm tên, mã NV, vai trò, SĐT..."
+              className={styles.searchInput}
+            />
+
+            <select
+              className={styles.filterSelect}
+              value={statusFilter}
+              onChange={(event) => setStatusFilter(event.target.value)}
+            >
+              <option value="ALL">Tất cả trạng thái</option>
+              <option value="ACTIVE">Hoạt động</option>
+              <option value="INACTIVE">Ngừng hoạt động</option>
+            </select>
+          </div>
+
+          <div className={styles.result}>
+            Hiển thị <strong>{filteredStaff.length}</strong>
+            {" / "}
+            <strong>{staffList.length}</strong>
+            {" nhân viên"}
+          </div>
+        </div>
+
+        {/* STAFF CARDS */}
+
+        {loading ? (
+          <div className={styles.emptyState}>
+            Đang tải danh sách nhân viên...
+          </div>
+        ) : filteredStaff.length === 0 ? (
+          <div className={styles.emptyState}>
+            Không tìm thấy nhân viên phù hợp.
+          </div>
+        ) : (
+          <div className={styles.grid}>
+            {filteredStaff.map((staff) => (
+              <StaffCard
+                key={staff.id}
+                staff={staff}
+                onEdit={handleOpenEdit}
+                onDelete={handleDelete}
+                onRestore={handleRestore}
               />
-
-              <select
-                  className={styles.filterSelect}
-                  value={statusFilter}
-                  onChange={(event) => setStatusFilter(event.target.value)}
-              >
-                <option value="ALL">Tất cả trạng thái</option>
-                <option value="ACTIVE">Hoạt động</option>
-                <option value="INACTIVE">Ngừng hoạt động</option>
-              </select>
-            </div>
-
-            <div className={styles.result}>
-              Hiển thị <strong>{filteredStaff.length}</strong>
-              {" / "}
-              <strong>{staffList.length}</strong>
-              {" nhân viên"}
-            </div>
+            ))}
           </div>
+        )}
+      </section>
 
-          {/* STAFF CARDS */}
-
-          {loading ? (
-              <div className={styles.emptyState}>
-                Đang tải danh sách nhân viên...
-              </div>
-          ) : filteredStaff.length === 0 ? (
-              <div className={styles.emptyState}>
-                Không tìm thấy nhân viên phù hợp.
-              </div>
-          ) : (
-              <div className={styles.grid}>
-                {filteredStaff.map((staff) => (
-                    <StaffCard
-                        key={staff.id}
-                        staff={staff}
-                        onEdit={handleOpenEdit}
-                        onDelete={handleDelete}
-                        onRestore={handleRestore}
-                    />
-                ))}
-              </div>
-          )}
-        </section>
-
-        {/* =======================
+      {/* =======================
           ADD / EDIT MODAL
       ======================= */}
 
-        <StaffFormModal
-            open={isModalOpen}
-            editingStaff={editingStaff}
-            form={staffForm}
-            onChange={setStaffForm}
-            onClose={() => {
-              setIsModalOpen(false);
-              setEditingStaff(null);
-            }}
-            onSubmit={handleSave}
-        />
-      </div>
+      <StaffFormModal
+        open={isModalOpen}
+        editingStaff={editingStaff}
+        form={staffForm}
+        onChange={setStaffForm}
+        onClose={() => {
+          setIsModalOpen(false);
+          setEditingStaff(null);
+        }}
+        onSubmit={handleSave}
+      />
+    </div>
   );
 }
 

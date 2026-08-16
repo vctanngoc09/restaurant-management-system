@@ -2,7 +2,6 @@ import {
   CheckCircle2,
   Phone,
   UserRound,
-  Clock3,
   CircleOff,
   RotateCcw,
 } from "lucide-react";
@@ -88,7 +87,7 @@ function StaffCard({ staff, onEdit, onDelete, onRestore }) {
             onClick={() => onEdit(staff)}
           />
 
-          {isActive ? (
+          {Number(staff.id) === 1 ? null : isActive ? (
             <ActionButton
               action="delete"
               title={`Vô hiệu hóa ${staff.fullName}`}
