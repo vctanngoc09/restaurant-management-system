@@ -10,9 +10,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 
 import org.springframework.web.bind.annotation.*;
 
-import vn.edu.ut.resto.dto.request.CreateTableRequest;
-import vn.edu.ut.resto.dto.request.UpdateTableRequest;
-
+import vn.edu.ut.resto.dto.request.RestaurantTableRequest;
 import vn.edu.ut.resto.dto.response.ApiResponse;
 import vn.edu.ut.resto.dto.response.TableResponse;
 
@@ -92,7 +90,7 @@ public class RestaurantTableController {
     public ResponseEntity<ApiResponse<TableResponse>>
     createTable(
             @Valid
-            @RequestBody CreateTableRequest request
+            @RequestBody RestaurantTableRequest request
     ) {
 
         RestaurantTable table =
@@ -120,7 +118,7 @@ public class RestaurantTableController {
             @PathVariable Long id,
 
             @Valid
-            @RequestBody UpdateTableRequest request
+            @RequestBody RestaurantTableRequest request
     ) {
 
         RestaurantTable table =

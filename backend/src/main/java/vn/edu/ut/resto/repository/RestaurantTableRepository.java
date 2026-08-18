@@ -14,4 +14,6 @@ public interface RestaurantTableRepository
             String tableNumber,
             Long id
     );
+
+    boolean existsByAreaId(Long areaId);
 }

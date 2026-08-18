@@ -47,7 +47,7 @@ public class DataInitializer {
                         "admin",
                         passwordEncoder.encode("123456"),
                         "Quản lý nhà hàng",
-                        "0999999999" // Số điện thoại giả định
+                        "0999999993" // Số điện thoại giả định
                 );
                 admin.setRoles(roles);
 

@@ -1,18 +1,17 @@
 package vn.edu.ut.resto.service;
 
-import vn.edu.ut.resto.dto.request.CreateTableRequest;
-import vn.edu.ut.resto.dto.request.UpdateTableRequest;
+import vn.edu.ut.resto.dto.request.RestaurantTableRequest;
 import vn.edu.ut.resto.model.RestaurantTable;
 
 import java.util.List;
 
 public interface RestaurantTableService {
 
-    RestaurantTable createTable(CreateTableRequest request);
+    RestaurantTable createTable(RestaurantTableRequest request);
 
     RestaurantTable updateTable(
             Long id,
-            UpdateTableRequest request
+            RestaurantTableRequest request
     );
 
     RestaurantTable getTableById(Long id);

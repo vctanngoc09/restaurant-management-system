@@ -14,7 +14,13 @@ public class Area {
     @Column(nullable = false, unique = true)
     private String name;
 
-    @OneToMany(mappedBy = "area", cascade = CascadeType.ALL)
+    @OneToMany(
+            mappedBy = "area",
+            cascade = {
+                    CascadeType.PERSIST,
+                    CascadeType.MERGE
+            }
+    )
     private List<RestaurantTable> restaurantTables;
 
     public Area() {

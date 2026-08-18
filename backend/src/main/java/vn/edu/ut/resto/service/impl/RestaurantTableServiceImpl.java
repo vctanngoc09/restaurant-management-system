@@ -3,9 +3,7 @@ package vn.edu.ut.resto.service.impl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import vn.edu.ut.resto.dto.request.CreateTableRequest;
-import vn.edu.ut.resto.dto.request.UpdateTableRequest;
-
+import vn.edu.ut.resto.dto.request.RestaurantTableRequest;
 import vn.edu.ut.resto.exception.DuplicateException;
 import vn.edu.ut.resto.exception.InvalidOperationException;
 import vn.edu.ut.resto.exception.ResourceNotFoundException;
@@ -43,7 +41,7 @@ public class RestaurantTableServiceImpl
 
     @Override
     public RestaurantTable createTable(
-            CreateTableRequest request
+            RestaurantTableRequest request
     ) {
 
         // Check duplicate table number
@@ -117,7 +115,7 @@ public class RestaurantTableServiceImpl
     @Override
     public RestaurantTable updateTable(
             Long id,
-            UpdateTableRequest request
+            RestaurantTableRequest request
     ) {
 
         // Find table
@@ -232,6 +230,11 @@ public class RestaurantTableServiceImpl
                                 "Không tìm thấy bàn có ID: " + id
                         )
                 );
+        if (table.getStatus() == ETableStatus.MAINTENANCE) {
+            throw new InvalidOperationException(
+                    "Bàn này đã tạm dừng hoạt động."
+            );
+        }
 
         table.setStatus(ETableStatus.MAINTENANCE);
 

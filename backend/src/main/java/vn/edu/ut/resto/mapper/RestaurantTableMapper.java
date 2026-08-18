@@ -2,8 +2,7 @@ package vn.edu.ut.resto.mapper;
 
 import org.springframework.stereotype.Component;
 
-import vn.edu.ut.resto.dto.request.CreateTableRequest;
-import vn.edu.ut.resto.dto.request.UpdateTableRequest;
+import vn.edu.ut.resto.dto.request.RestaurantTableRequest;
 import vn.edu.ut.resto.dto.response.TableResponse;
 import vn.edu.ut.resto.model.RestaurantTable;
 import vn.edu.ut.resto.model.enums.ETableStatus;
@@ -11,31 +10,35 @@ import vn.edu.ut.resto.model.enums.ETableStatus;
 @Component
 public class RestaurantTableMapper {
 
-    // CREATE REQUEST -> ENTITY
-    public RestaurantTable toEntity(CreateTableRequest request) {
+    public RestaurantTable toEntity(
+            RestaurantTableRequest request
+    ) {
 
         if (request == null) {
             return null;
         }
 
-        RestaurantTable table = new RestaurantTable();
+        RestaurantTable table =
+                new RestaurantTable();
 
-        table.setTableNumber(request.getTableNumber());
-        table.setQrUrl(request.getQrUrl());
+        table.setTableNumber(
+                request.getTableNumber()
+        );
 
-        if (request.getStatus() == null) {
-            table.setStatus(ETableStatus.AVAILABLE);
-        } else {
-            table.setStatus(request.getStatus());
-        }
+        table.setQrUrl(
+                request.getQrUrl()
+        );
+
+        table.setStatus(
+                ETableStatus.AVAILABLE
+        );
 
         return table;
     }
 
 
-    // UPDATE REQUEST -> EXISTING ENTITY
     public void updateEntity(
-            UpdateTableRequest request,
+            RestaurantTableRequest request,
             RestaurantTable table
     ) {
 
@@ -43,14 +46,19 @@ public class RestaurantTableMapper {
             return;
         }
 
-        table.setTableNumber(request.getTableNumber());
-        table.setStatus(request.getStatus());
-        table.setQrUrl(request.getQrUrl());
+        table.setTableNumber(
+                request.getTableNumber()
+        );
+
+        table.setQrUrl(
+                request.getQrUrl()
+        );
     }
 
 
-    // ENTITY -> RESPONSE
-    public TableResponse toResponse(RestaurantTable table) {
+    public TableResponse toResponse(
+            RestaurantTable table
+    ) {
 
         if (table == null) {
             return null;

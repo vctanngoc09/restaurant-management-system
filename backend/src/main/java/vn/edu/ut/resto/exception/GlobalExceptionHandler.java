@@ -1,12 +1,16 @@
 package vn.edu.ut.resto.exception;
 
 import vn.edu.ut.resto.dto.response.ErrorResponse;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+
 import org.springframework.security.authentication.BadCredentialsException;
+
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -14,59 +18,162 @@ import java.util.stream.Collectors;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    // [Giữ nguyên] Bắt lỗi khi đăng ký trùng dữ liệu[cite: 37]
+
+    // =========================
+    // DUPLICATE
+    // =========================
+
     @ExceptionHandler(DuplicateException.class)
-    public ResponseEntity<ErrorResponse> handleDuplicate(DuplicateException ex) {
+    public ResponseEntity<ErrorResponse> handleDuplicate(
+            DuplicateException ex
+    ) {
+
         return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(new ErrorResponse(400, ex.getMessage(), LocalDateTime.now()));
+                .status(HttpStatus.CONFLICT)
+                .body(
+                        new ErrorResponse(
+                                409,
+                                ex.getMessage(),
+                                LocalDateTime.now()
+                        )
+                );
     }
 
-    // [Giữ nguyên] Bắt lỗi sai mật khẩu hoặc sai tài khoản từ Spring Security[cite: 37]
-    @ExceptionHandler(BadCredentialsException.class)
-    public ResponseEntity<ErrorResponse> handleBadCredentials(BadCredentialsException ex) {
-        return ResponseEntity
-                .status(HttpStatus.UNAUTHORIZED)
-                .body(new ErrorResponse(401, "Tài khoản hoặc mật khẩu không chính xác!", LocalDateTime.now()));
-    }
 
-    // [MỚI] Bắt lỗi Not Found (Không tìm thấy dữ liệu)
+    // =========================
+    // NOT FOUND
+    // =========================
+
     @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleResourceNotFound(ResourceNotFoundException ex) {
+    public ResponseEntity<ErrorResponse> handleResourceNotFound(
+            ResourceNotFoundException ex
+    ) {
+
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
-                .body(new ErrorResponse(404, ex.getMessage(), LocalDateTime.now()));
+                .body(
+                        new ErrorResponse(
+                                404,
+                                ex.getMessage(),
+                                LocalDateTime.now()
+                        )
+                );
     }
 
-    // [MỚI] Bắt lỗi Validation (Null, rỗng, sai định dạng, vượt biên)
+
+    // =========================
+    // INVALID BUSINESS OPERATION
+    // =========================
+
+    @ExceptionHandler(InvalidOperationException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidOperation(
+            InvalidOperationException ex
+    ) {
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(
+                        new ErrorResponse(
+                                400,
+                                ex.getMessage(),
+                                LocalDateTime.now()
+                        )
+                );
+    }
+
+
+    // =========================
+    // LOGIN FAILED
+    // =========================
+
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<ErrorResponse> handleBadCredentials(
+            BadCredentialsException ex
+    ) {
+
+        return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
+                .body(
+                        new ErrorResponse(
+                                401,
+                                "Tài khoản hoặc mật khẩu không chính xác!",
+                                LocalDateTime.now()
+                        )
+                );
+    }
+
+
+    // =========================
+    // VALIDATION
+    // =========================
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponse> handleValidationExceptions(MethodArgumentNotValidException ex) {
-        // Lấy tất cả các tin nhắn lỗi (message) từ file DTO gộp lại thành 1 chuỗi
-        List<String> errors = ex.getBindingResult().getFieldErrors().stream()
+    public ResponseEntity<ErrorResponse> handleValidationExceptions(
+            MethodArgumentNotValidException ex
+    ) {
+
+        List<String> errors = ex
+                .getBindingResult()
+                .getFieldErrors()
+                .stream()
                 .map(error -> error.getDefaultMessage())
                 .collect(Collectors.toList());
 
-        String errorMessage = String.join(", ", errors);
+        String errorMessage =
+                String.join(", ", errors);
 
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
-                .body(new ErrorResponse(400, errorMessage, LocalDateTime.now()));
+                .body(
+                        new ErrorResponse(
+                                400,
+                                errorMessage,
+                                LocalDateTime.now()
+                        )
+                );
     }
 
-    // [Giữ nguyên] Bắt các lỗi vặt khác chưa lường trước[cite: 37]
+
+    // =========================
+    // BUSINESS AUTHORIZATION
+    // =========================
+
+    @ExceptionHandler(UnauthorizedException.class)
+    public ResponseEntity<ErrorResponse> handleUnauthorizedException(
+            UnauthorizedException ex
+    ) {
+
+        return ResponseEntity
+                .status(HttpStatus.FORBIDDEN)
+                .body(
+                        new ErrorResponse(
+                                403,
+                                ex.getMessage(),
+                                LocalDateTime.now()
+                        )
+                );
+    }
+
+
+    // =========================
+    // UNKNOWN ERROR
+    // =========================
+
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleException(Exception ex) {
-        ex.printStackTrace(); // In ra console để dev dễ debug
+    public ResponseEntity<ErrorResponse> handleException(
+            Exception ex
+    ) {
+
+        ex.printStackTrace();
+
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new ErrorResponse(500, "Lỗi hệ thống nội bộ", LocalDateTime.now()));
-    }
-
-    // Bắt lỗi không đủ thẩm quyền theo logic nghiệp vụ
-    @ExceptionHandler(UnauthorizedException.class)
-    public ResponseEntity<ErrorResponse> handleUnauthorizedException(UnauthorizedException ex) {
-        return ResponseEntity
-                .status(HttpStatus.FORBIDDEN) // Hoặc UNAUTHORIZED tùy logic của bạn
-                .body(new ErrorResponse(403, ex.getMessage(), LocalDateTime.now()));
+                .body(
+                        new ErrorResponse(
+                                500,
+                                "Lỗi hệ thống nội bộ",
+                                LocalDateTime.now()
+                        )
+                );
     }
 }

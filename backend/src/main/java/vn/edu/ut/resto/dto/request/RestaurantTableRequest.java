@@ -3,23 +3,29 @@ package vn.edu.ut.resto.dto.request;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import vn.edu.ut.resto.model.enums.ETableStatus;
 
-public class UpdateTableRequest {
+public class RestaurantTableRequest {
 
     @NotBlank(message = "Số bàn không được để trống")
     @Size(max = 20, message = "Số bàn không được vượt quá 20 ký tự")
     private String tableNumber;
-
-    @NotNull(message = "Trạng thái bàn không được để trống")
-    private ETableStatus status;
 
     private String qrUrl;
 
     @NotNull(message = "Khu vực không được để trống")
     private Long areaId;
 
-    public UpdateTableRequest() {
+    public RestaurantTableRequest() {
+    }
+
+    public RestaurantTableRequest(
+            String tableNumber,
+            String qrUrl,
+            Long areaId
+    ) {
+        this.tableNumber = tableNumber;
+        this.qrUrl = qrUrl;
+        this.areaId = areaId;
     }
 
     public String getTableNumber() {
@@ -28,14 +34,6 @@ public class UpdateTableRequest {
 
     public void setTableNumber(String tableNumber) {
         this.tableNumber = tableNumber;
-    }
-
-    public ETableStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(ETableStatus status) {
-        this.status = status;
     }
 
     public String getQrUrl() {
