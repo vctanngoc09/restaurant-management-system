@@ -12,7 +12,17 @@ import vn.edu.ut.resto.mapper.ProductMapper;
 
 import vn.edu.ut.resto.model.Category;
 import vn.edu.ut.resto.model.Product;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
 
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import vn.edu.ut.resto.repository.CategoryRepository;
 import vn.edu.ut.resto.repository.ProductRepository;
 
@@ -73,10 +83,134 @@ public class ProductServiceImpl
     // GET ALL PRODUCTS
     // =========================
 
-    @Override
-    public List<Product> getAllProducts() {
+    // =========================
+// GET ALL PRODUCTS
+// PAGINATION + FILTER
+// =========================
 
-        return productRepository.findAll();
+    @Override
+    @Transactional(readOnly = true)
+    public Page<Product> getAllProducts(
+            int page,
+            int size,
+            String keyword,
+            Long categoryId,
+            Boolean isAvailable
+    ) {
+
+        // =========================
+        // VALIDATE
+        // =========================
+
+        if (page < 0) {
+
+            throw new InvalidOperationException(
+                    "Số trang không được nhỏ hơn 0."
+            );
+        }
+
+
+        if (size <= 0 || size > 50) {
+
+            throw new InvalidOperationException(
+                    "Số lượng sản phẩm mỗi trang phải từ 1 đến 50."
+            );
+        }
+
+
+        // =========================
+        // NORMALIZE KEYWORD
+        // =========================
+
+        if (keyword == null) {
+            keyword = "";
+        } else {
+            keyword = keyword.trim();
+        }
+
+
+        // =========================
+        // CREATE PAGEABLE
+        // =========================
+
+        Pageable pageable =
+                PageRequest.of(
+                        page,
+                        size
+                );
+
+
+        // =========================
+        // STEP 1
+        // ONLY GET IDS
+        // =========================
+
+        Page<Long> idPage =
+                productRepository.findProductIds(
+                        keyword,
+                        categoryId,
+                        isAvailable,
+                        pageable
+                );
+
+
+        // Không có dữ liệu
+        if (idPage.isEmpty()) {
+
+            return new PageImpl<>(
+                    List.of(),
+                    pageable,
+                    idPage.getTotalElements()
+            );
+        }
+
+
+        List<Long> ids =
+                idPage.getContent();
+
+
+        // =========================
+        // STEP 2
+        // FETCH PRODUCT + CATEGORY
+        // =========================
+
+        List<Product> products =
+                productRepository
+                        .findProductsByIdsWithCategory(
+                                ids
+                        );
+
+
+        // =========================
+        // PRESERVE ORDER
+        // =========================
+
+        Map<Long, Product> productMap =
+                products.stream()
+                        .collect(
+                                Collectors.toMap(
+                                        Product::getId,
+                                        Function.identity()
+                                )
+                        );
+
+
+        List<Product> orderedProducts =
+                ids.stream()
+                        .map(productMap::get)
+                        .filter(product -> product != null)
+                        .toList();
+
+
+        // =========================
+        // BUILD PAGE
+        // =========================
+
+        return new PageImpl<>(
+                orderedProducts,
+                pageable,
+                idPage.getTotalElements()
+        );
     }
 
 

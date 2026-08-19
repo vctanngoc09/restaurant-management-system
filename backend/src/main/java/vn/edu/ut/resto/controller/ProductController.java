@@ -3,6 +3,7 @@ package vn.edu.ut.resto.controller;
 import jakarta.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import vn.edu.ut.resto.dto.request.ProductRequest;
 
 import vn.edu.ut.resto.dto.response.ApiResponse;
+import vn.edu.ut.resto.dto.response.PageResponse;
 import vn.edu.ut.resto.dto.response.ProductResponse;
 
 import vn.edu.ut.resto.mapper.ProductMapper;
@@ -39,23 +41,59 @@ public class ProductController {
     // GET ALL PRODUCTS
     // =========================
 
+    // =========================
+// GET ALL PRODUCTS
+// PAGINATION + FILTER
+// =========================
+
     @GetMapping
     public ResponseEntity<
-            ApiResponse<List<ProductResponse>>
-            > getAllProducts() {
+            ApiResponse<PageResponse<ProductResponse>>
+            > getAllProducts(
 
-        List<ProductResponse> products =
+            @RequestParam(
+                    defaultValue = "0"
+            ) int page,
+
+            @RequestParam(
+                    defaultValue = "8"
+            ) int size,
+
+            @RequestParam(
+                    required = false
+            ) String keyword,
+
+            @RequestParam(
+                    required = false
+            ) Long categoryId,
+
+            @RequestParam(
+                    required = false
+            ) Boolean isAvailable
+
+    ) {
+
+        Page<ProductResponse> productPage =
                 productService
-                        .getAllProducts()
-                        .stream()
-                        .map(productMapper::toResponse)
-                        .toList();
+                        .getAllProducts(
+                                page,
+                                size,
+                                keyword,
+                                categoryId,
+                                isAvailable
+                        )
+                        .map(productMapper::toResponse);
+
+
+        PageResponse<ProductResponse> response =
+                PageResponse.from(productPage);
+
 
         return ResponseEntity.ok(
                 new ApiResponse<>(
                         200,
                         "Lấy danh sách sản phẩm thành công!",
-                        products
+                        response
                 )
         );
     }

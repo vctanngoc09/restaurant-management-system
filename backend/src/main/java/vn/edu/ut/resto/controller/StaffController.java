@@ -3,6 +3,7 @@ package vn.edu.ut.resto.controller;
 import jakarta.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -14,6 +15,7 @@ import vn.edu.ut.resto.dto.request.CreateStaffRequest;
 import vn.edu.ut.resto.dto.request.UpdateStaffRequest;
 
 import vn.edu.ut.resto.dto.response.ApiResponse;
+import vn.edu.ut.resto.dto.response.PageResponse;
 import vn.edu.ut.resto.dto.response.UserResponse;
 
 import vn.edu.ut.resto.mapper.UserMapper;
@@ -45,20 +47,34 @@ public class StaffController {
     // =========================
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<UserResponse>>> getAllStaff() {
+    public ResponseEntity<
+            ApiResponse<PageResponse<UserResponse>>
+            > getAllStaff(
 
-        List<UserResponse> staff = userService
-                .getAllStaff()
-                .stream()
-                .map(userMapper::toResponse)
-                .toList();
+            @RequestParam(
+                    defaultValue = "0"
+            ) int page,
+
+            @RequestParam(
+                    defaultValue = "8"
+            ) int size
+    ) {
+
+        Page<UserResponse> staffPage =
+                userService
+                        .getAllStaff(page, size)
+                        .map(userMapper::toResponse);
+
+
+        PageResponse<UserResponse> response =
+                PageResponse.from(staffPage);
 
 
         return ResponseEntity.ok(
                 new ApiResponse<>(
                         200,
                         "Lấy danh sách nhân viên thành công!",
-                        staff
+                        response
                 )
         );
     }

@@ -1,6 +1,11 @@
 package vn.edu.ut.resto.service.impl;
 
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import vn.edu.ut.resto.dto.request.CreateStaffRequest;
@@ -20,6 +25,9 @@ import vn.edu.ut.resto.service.UserService;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -204,8 +212,102 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<User> getAllStaff() {
-        return userRepository.findAll();
+    @Transactional(readOnly = true)
+    public Page<User> getAllStaff(
+            int page,
+            int size
+    ) {
+
+        // =========================
+        // VALIDATE PAGINATION
+        // =========================
+
+        if (page < 0) {
+            throw new InvalidOperationException(
+                    "Số trang không được nhỏ hơn 0."
+            );
+        }
+
+        if (size <= 0 || size > 50) {
+            throw new InvalidOperationException(
+                    "Số lượng nhân viên mỗi trang phải từ 1 đến 50."
+            );
+        }
+
+
+        // =========================
+        // CREATE PAGEABLE
+        // =========================
+
+        Pageable pageable =
+                PageRequest.of(page, size);
+
+
+        // =========================
+        // STEP 1
+        // GET IDS ONLY
+        // =========================
+
+        Page<Long> idPage =
+                userRepository.findUserIds(
+                        pageable
+                );
+
+
+        if (idPage.isEmpty()) {
+
+            return new PageImpl<>(
+                    List.of(),
+                    pageable,
+                    idPage.getTotalElements()
+            );
+        }
+
+
+        List<Long> ids =
+                idPage.getContent();
+
+
+        // =========================
+        // STEP 2
+        // FETCH FULL USER + ROLE
+        // =========================
+
+        List<User> users =
+                userRepository
+                        .findUsersByIdsWithRoles(ids);
+
+
+        // =========================
+        // PRESERVE ORDER
+        // =========================
+
+        Map<Long, User> userMap =
+                users.stream()
+                        .collect(
+                                Collectors.toMap(
+                                        User::getId,
+                                        Function.identity()
+                                )
+                        );
+
+
+        List<User> orderedUsers =
+                ids.stream()
+                        .map(userMap::get)
+                        .filter(user -> user != null)
+                        .toList();
+
+
+        // =========================
+        // BUILD PAGE
+        // =========================
+
+        return new PageImpl<>(
+                orderedUsers,
+                pageable,
+                idPage.getTotalElements()
+        );
     }
 
     @Override

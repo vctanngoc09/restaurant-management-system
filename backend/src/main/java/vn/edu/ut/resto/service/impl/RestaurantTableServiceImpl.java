@@ -18,7 +18,16 @@ import vn.edu.ut.resto.repository.AreaRepository;
 import vn.edu.ut.resto.repository.RestaurantTableRepository;
 
 import vn.edu.ut.resto.service.RestaurantTableService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.List;
 
 @Service
@@ -79,15 +88,129 @@ public class RestaurantTableServiceImpl
         return tableRepository.save(table);
     }
 
-
-    // =========================
     // GET ALL TABLE
+    // PAGINATION + FILTER
     // =========================
 
     @Override
-    public List<RestaurantTable> getAllTables() {
+    @Transactional(readOnly = true)
+    public Page<RestaurantTable> getAllTables(
+            int page,
+            int size,
+            String keyword,
+            Long areaId,
+            ETableStatus status
+    ) {
 
-        return tableRepository.findAll();
+        // =========================
+        // VALIDATE
+        // =========================
+
+        if (page < 0) {
+            throw new InvalidOperationException(
+                    "Số trang không được nhỏ hơn 0."
+            );
+        }
+
+        if (size <= 0 || size > 50) {
+            throw new InvalidOperationException(
+                    "Số lượng bàn mỗi trang phải từ 1 đến 50."
+            );
+        }
+
+
+        // =========================
+        // NORMALIZE KEYWORD
+        // PostgreSQL: không truyền null
+        // =========================
+
+        if (keyword == null) {
+            keyword = "";
+        } else {
+            keyword = keyword.trim();
+        }
+
+
+        // =========================
+        // PAGEABLE
+        // =========================
+
+        Pageable pageable =
+                PageRequest.of(
+                        page,
+                        size
+                );
+
+
+        // =========================
+        // STEP 1
+        // GET TABLE IDS
+        // =========================
+
+        Page<Long> idPage =
+                tableRepository.findTableIds(
+                        keyword,
+                        areaId,
+                        status,
+                        pageable
+                );
+
+
+        // Không có dữ liệu
+        if (idPage.isEmpty()) {
+
+            return new PageImpl<>(
+                    List.of(),
+                    pageable,
+                    idPage.getTotalElements()
+            );
+        }
+
+
+        List<Long> ids =
+                idPage.getContent();
+
+
+        // =========================
+        // STEP 2
+        // GET TABLE + AREA
+        // =========================
+
+        List<RestaurantTable> tables =
+                tableRepository
+                        .findTablesByIdsWithArea(ids);
+
+
+        // =========================
+        // PRESERVE ORDER
+        // =========================
+
+        Map<Long, RestaurantTable> tableMap =
+                tables.stream()
+                        .collect(
+                                Collectors.toMap(
+                                        RestaurantTable::getId,
+                                        Function.identity()
+                                )
+                        );
+
+
+        List<RestaurantTable> orderedTables =
+                ids.stream()
+                        .map(tableMap::get)
+                        .filter(table -> table != null)
+                        .toList();
+
+
+        // =========================
+        // BUILD PAGE
+        // =========================
+
+        return new PageImpl<>(
+                orderedTables,
+                pageable,
+                idPage.getTotalElements()
+        );
     }
 
 

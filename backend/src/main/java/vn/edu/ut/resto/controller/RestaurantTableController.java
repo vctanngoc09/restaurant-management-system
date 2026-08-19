@@ -3,6 +3,7 @@ package vn.edu.ut.resto.controller;
 import jakarta.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -12,12 +13,14 @@ import org.springframework.web.bind.annotation.*;
 
 import vn.edu.ut.resto.dto.request.RestaurantTableRequest;
 import vn.edu.ut.resto.dto.response.ApiResponse;
+import vn.edu.ut.resto.dto.response.PageResponse;
 import vn.edu.ut.resto.dto.response.TableResponse;
 
 import vn.edu.ut.resto.mapper.RestaurantTableMapper;
 
 import vn.edu.ut.resto.model.RestaurantTable;
 
+import vn.edu.ut.resto.model.enums.ETableStatus;
 import vn.edu.ut.resto.service.RestaurantTableService;
 
 import java.util.List;
@@ -33,27 +36,59 @@ public class RestaurantTableController {
     @Autowired
     private RestaurantTableMapper tableMapper;
 
-
-    // =========================
+    
     // GET ALL TABLE
+    // PAGINATION + FILTER
     // =========================
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<TableResponse>>>
-    getAllTables() {
+    public ResponseEntity<
+            ApiResponse<PageResponse<TableResponse>>
+            > getAllTables(
 
-        List<TableResponse> tables =
+            @RequestParam(
+                    defaultValue = "0"
+            ) int page,
+
+            @RequestParam(
+                    defaultValue = "8"
+            ) int size,
+
+            @RequestParam(
+                    required = false
+            ) String keyword,
+
+            @RequestParam(
+                    required = false
+            ) Long areaId,
+
+            @RequestParam(
+                    required = false
+            ) ETableStatus status
+
+    ) {
+
+        Page<TableResponse> tablePage =
                 tableService
-                        .getAllTables()
-                        .stream()
-                        .map(tableMapper::toResponse)
-                        .toList();
+                        .getAllTables(
+                                page,
+                                size,
+                                keyword,
+                                areaId,
+                                status
+                        )
+                        .map(tableMapper::toResponse);
+
+
+        PageResponse<TableResponse> response =
+                PageResponse.from(tablePage);
+
 
         return ResponseEntity.ok(
                 new ApiResponse<>(
                         200,
                         "Lấy danh sách bàn thành công!",
-                        tables
+                        response
                 )
         );
     }
