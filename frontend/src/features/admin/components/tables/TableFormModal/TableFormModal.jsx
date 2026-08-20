@@ -1,13 +1,12 @@
 import { X } from "lucide-react";
 
-import { TABLE_AREA } from "../../../../../constants/tableConfig";
-
 import styles from "./TableFormModal.module.css";
 
 function TableFormModal({
   open,
   editingTable,
   form,
+  areas,
   onChange,
   onClose,
   onSubmit,
@@ -23,6 +22,14 @@ function TableFormModal({
     });
   };
 
+  const selectedArea = areas.find(
+    (area) => String(area.id) === String(form.areaId),
+  );
+
+  const isOutdoor = selectedArea?.name?.toLowerCase().includes("ngoài");
+
+  const tablePrefix = isOutdoor ? "N" : "T";
+
   return (
     <div className={styles.backdrop} onMouseDown={onClose}>
       <div
@@ -33,8 +40,6 @@ function TableFormModal({
 
         <header className={styles.header}>
           <div>
-            <span className={styles.badge}>Quản Lý Bàn Ăn</span>
-
             <h2>{editingTable ? "Sửa Bàn Ăn" : "Thêm Bàn Ăn Mới"}</h2>
           </div>
 
@@ -53,13 +58,17 @@ function TableFormModal({
           {/* NUMBER */}
 
           <div className={styles.field}>
-            <label>Số Bàn (Tên Bàn)</label>
+            <label>Số Bàn</label>
 
             <input
               type="text"
               value={form.number}
-              onChange={(event) => updateField("number", event.target.value)}
-              placeholder="VD: 09"
+              onChange={(event) => {
+                const value = event.target.value.replace(/\D/g, "");
+
+                updateField("number", value.slice(0, 3));
+              }}
+              placeholder="VD: 01"
               maxLength={3}
               className={styles.numberInput}
               required
@@ -74,12 +83,17 @@ function TableFormModal({
             <label>Khu Vực Bàn</label>
 
             <select
-              value={form.area}
-              onChange={(event) => updateField("area", event.target.value)}
+              value={form.areaId}
+              onChange={(event) => updateField("areaId", event.target.value)}
+              required
             >
-              <option value={TABLE_AREA.INDOOR}>Trong Nhà (Indoor)</option>
+              <option value="">-- Chọn khu vực --</option>
 
-              <option value={TABLE_AREA.OUTDOOR}>Ngoài Trời (Outdoor)</option>
+              {areas.map((area) => (
+                <option key={area.id} value={area.id}>
+                  {area.name}
+                </option>
+              ))}
             </select>
           </div>
 
@@ -87,10 +101,21 @@ function TableFormModal({
             <span>Xem trước tên bàn</span>
 
             <strong>
-              {form.area === TABLE_AREA.OUTDOOR
-                ? `N-${form.number || "--"}`
-                : `T-${form.number || "--"}`}
+              {tablePrefix}-{form.number || "--"}
             </strong>
+          </div>
+
+          <div className={styles.field}>
+            <label>URL QR Code</label>
+
+            <input
+              type="url"
+              value={form.qrUrl}
+              onChange={(event) => updateField("qrUrl", event.target.value)}
+              placeholder="https://example.com/qr/table-01"
+            />
+
+            <small>Có thể để trống và cập nhật sau.</small>
           </div>
 
           {/* FOOTER */}

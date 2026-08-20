@@ -3,8 +3,13 @@ import api from "../../../services/api";
 const STAFF_URL = "/api/admin/staff";
 
 const staffService = {
-  async getAll() {
-    const response = await api.get(STAFF_URL);
+  async getAll({ page = 0, size = 8 } = {}) {
+    const response = await api.get(STAFF_URL, {
+      params: {
+        page,
+        size,
+      },
+    });
 
     return response.data;
   },

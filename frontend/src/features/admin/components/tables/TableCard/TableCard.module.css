@@ -13,9 +13,10 @@
   border-radius: var(--radius-lg);
 
   transition:
-    transform var(--transition-fast),
-    box-shadow var(--transition-fast),
-    border-color var(--transition-fast);
+          transform var(--transition-fast),
+          box-shadow var(--transition-fast),
+          border-color var(--transition-fast),
+          opacity var(--transition-fast);
 }
 
 .card:hover {
@@ -30,8 +31,12 @@
 ========================= */
 
 .empty {
-  background: var(--color-background-soft);
+  background:
+          var(--color-background-soft);
 }
+
+
+/* OCCUPIED */
 
 .occupied {
   background: #eef2ff;
@@ -39,10 +44,24 @@
   border-color: #c7d2fe;
 }
 
-.reserved {
+
+/* MAINTENANCE */
+
+.maintenance {
   background: #fffbeb;
 
   border-color: #fde68a;
+}
+
+
+/* INACTIVE */
+
+.inactive {
+  background: #f8fafc;
+
+  border-color: #e2e8f0;
+
+  opacity: 0.72;
 }
 
 
@@ -64,16 +83,20 @@
 
   gap: 7px;
 
-  color: var(--color-text-primary);
+  color:
+          var(--color-text-primary);
 }
 
 .tableName svg {
-  color: var(--color-text-muted);
+  color:
+          var(--color-text-muted);
 }
 
 .tableName strong {
   font-size: 15px;
-  font-weight: var(--font-weight-extrabold);
+
+  font-weight:
+          var(--font-weight-extrabold);
 }
 
 
@@ -84,29 +107,49 @@
 .indoorBadge,
 .outdoorBadge {
   display: inline-flex;
+  align-items: center;
+
+  max-width: 130px;
 
   padding: 4px 8px;
 
-  border-radius: var(--radius-full);
+  overflow: hidden;
+
+  border-radius:
+          var(--radius-full);
 
   font-size: 9px;
-  font-weight: var(--font-weight-bold);
+
+  font-weight:
+          var(--font-weight-bold);
+
+  text-overflow: ellipsis;
+
+  white-space: nowrap;
 }
+
+
+/* INDOOR */
 
 .indoorBadge {
   color: #475569;
 
   background: #ffffff;
 
-  border: 1px solid #e2e8f0;
+  border:
+          1px solid #e2e8f0;
 }
+
+
+/* OUTDOOR */
 
 .outdoorBadge {
   color: #047857;
 
   background: #ecfdf5;
 
-  border: 1px solid #a7f3d0;
+  border:
+          1px solid #a7f3d0;
 }
 
 
@@ -122,6 +165,11 @@
 
   justify-content: center;
 }
+
+
+/* =========================
+   STATUS ROW
+========================= */
 
 .statusRow {
   display: flex;
@@ -139,23 +187,48 @@
   border-radius: 50%;
 }
 
+
+/* AVAILABLE */
+
 .emptyDot {
-  background: #cbd5e1;
+  background: #10b981;
 }
+
+
+/* OCCUPIED */
 
 .occupiedDot {
-  background: var(--color-primary);
+  background:
+          var(--color-primary);
 }
 
-.reservedDot {
+
+/* MAINTENANCE */
+
+.maintenanceDot {
   background: #f59e0b;
 }
 
+
+/* INACTIVE */
+
+.inactiveDot {
+  background: #94a3b8;
+}
+
+
+/* =========================
+   STATUS LABEL
+========================= */
+
 .statusLabel {
-  color: var(--color-text-secondary);
+  color:
+          var(--color-text-secondary);
 
   font-size: 10px;
-  font-weight: var(--font-weight-semibold);
+
+  font-weight:
+          var(--font-weight-semibold);
 }
 
 
@@ -180,28 +253,39 @@
 
   gap: 5px;
 
-  color: var(--color-text-secondary);
+  color:
+          var(--color-text-secondary);
 
   font-size: 10px;
 }
 
 .occupiedInfo svg {
-  color: var(--color-primary);
+  color:
+          var(--color-primary);
 }
 
 .occupiedInfo strong {
   width: 100%;
 
-  color: var(--color-text-primary);
+  color:
+          var(--color-text-primary);
 
   font-size: 14px;
-  font-weight: var(--font-weight-extrabold);
+
+  font-weight:
+          var(--font-weight-extrabold);
 }
+
+
+/* =========================
+   READY TEXT
+========================= */
 
 .readyText {
   margin-top: 11px;
 
-  color: var(--color-text-muted);
+  color:
+          var(--color-text-muted);
 
   font-size: 10px;
 }
@@ -221,16 +305,70 @@
   padding-top: 12px;
 
   border-top:
-    1px solid rgba(203, 213, 225, 0.7);
+          1px solid
+          rgba(203, 213, 225, 0.7);
 }
 
+
+/* =========================
+   TABLE ID
+========================= */
+
 .tableId {
-  color: var(--color-text-muted);
+  color:
+          var(--color-text-muted);
 
   font-family:
-    "SFMono-Regular",
-    Consolas,
-    monospace;
+          "SFMono-Regular",
+          Consolas,
+          monospace;
 
   font-size: 9px;
+}
+
+
+/* =========================
+   RESTORE BUTTON
+========================= */
+
+.restoreButton {
+  width: 32px;
+  height: 32px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0;
+
+  color: #059669;
+
+  background: #ecfdf5;
+
+  border:
+          1px solid #a7f3d0;
+
+  border-radius:
+          var(--radius-md);
+
+  cursor: pointer;
+
+  transition:
+          background var(--transition-fast),
+          border-color var(--transition-fast),
+          transform var(--transition-fast);
+}
+
+.restoreButton:hover {
+  background: #d1fae5;
+
+  border-color: #6ee7b7;
+
+  transform:
+          translateY(-1px);
+}
+
+.restoreButton:active {
+  transform:
+          translateY(0);
 }

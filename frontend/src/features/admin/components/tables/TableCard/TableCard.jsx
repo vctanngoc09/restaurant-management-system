@@ -1,6 +1,6 @@
 import {
   Armchair,
-  Users,
+  RotateCcw,
   Utensils,
 } from "lucide-react";
 
@@ -10,124 +10,364 @@ import {
 } from "../../../../../components/common/ActionButton";
 
 import {
-  TABLE_AREA,
-  TABLE_AREA_LABELS,
-  TABLE_STATUS,
-  TABLE_STATUS_LABELS,
-} from "../../../../../constants/tableConfig";
-
-import { formatCurrency } from "../../../../../utils/formatCurrency";
+  formatCurrency,
+} from "../../../../../utils/formatCurrency";
 
 import styles from "./TableCard.module.css";
 
-function TableCard({ table, onEdit, onDelete }) {
-  const isOccupied = table.status === TABLE_STATUS.OCCUPIED;
 
-  const isReserved = table.status === TABLE_STATUS.RESERVED;
+// =========================
+// STATUS LABEL
+// =========================
 
-  const displayCode =
-    table.area === TABLE_AREA.OUTDOOR
-      ? `N-${table.number}`
-      : `T-${table.number}`;
+const STATUS_LABELS = {
+  AVAILABLE: "Bàn trống",
+
+  OCCUPIED: "Đang có khách",
+
+  MAINTENANCE: "Đang bảo trì",
+
+  INACTIVE: "Ngừng hoạt động",
+};
+
+
+function TableCard({
+                     table,
+                     onEdit,
+                     onDelete,
+                     onRestore,
+                   }) {
+
+  // =========================
+  // STATUS
+  // =========================
+
+  const isOccupied =
+      table.status === "OCCUPIED";
+
+  const isMaintenance =
+      table.status === "MAINTENANCE";
+
+  const isInactive =
+      table.status === "INACTIVE";
+
+  const isAvailable =
+      table.status === "AVAILABLE";
+
+
+  // =========================
+  // AREA
+  // =========================
+
+  const areaName =
+      table.areaName ||
+      "Chưa có khu vực";
+
+
+  const isOutdoor =
+      areaName
+          .toLowerCase()
+          .includes("ngoài");
+
+
+  // =========================
+  // TEMP ORDER DATA
+  // Sau này lấy từ Order
+  // =========================
+
+  const tempItemCount = 3;
+
+  const tempCurrentTotal = 120000;
+
+
+  // =========================
+  // CARD STYLE
+  // =========================
+
+  const cardClass =
+      isOccupied
+          ? styles.occupied
+
+          : isMaintenance
+              ? styles.maintenance
+
+              : isInactive
+                  ? styles.inactive
+
+                  : styles.empty;
+
+
+  const dotClass =
+      isOccupied
+          ? styles.occupiedDot
+
+          : isMaintenance
+              ? styles.maintenanceDot
+
+              : isInactive
+                  ? styles.inactiveDot
+
+                  : styles.emptyDot;
+
 
   return (
-    <article
-      className={`${styles.card} ${
-        isOccupied
-          ? styles.occupied
-          : isReserved
-            ? styles.reserved
-            : styles.empty
-      }`}
-    >
-      {/* =========================
+      <article
+          className={
+            `${styles.card} ${cardClass}`
+          }
+      >
+
+        {/* =========================
           TOP
       ========================= */}
 
-      <div className={styles.top}>
-        <div className={styles.tableName}>
-          <Armchair size={17} />
+        <div className={styles.top}>
 
-          <strong>{displayCode}</strong>
+          <div
+              className={
+                styles.tableName
+              }
+          >
+
+            <Armchair size={17} />
+
+            <strong>
+              {table.tableNumber}
+            </strong>
+
+          </div>
+
+
+          <span
+              className={
+                isOutdoor
+                    ? styles.outdoorBadge
+                    : styles.indoorBadge
+              }
+          >
+          {areaName}
+        </span>
+
         </div>
+
+
+        {/* =========================
+          CONTENT
+      ========================= */}
+
+        <div
+            className={
+              styles.content
+            }
+        >
+
+          {/* STATUS */}
+
+          <div
+              className={
+                styles.statusRow
+              }
+          >
+
+          <span
+              className={
+                `${styles.statusDot} ${dotClass}`
+              }
+          />
+
+
+            <span
+                className={
+                  styles.statusLabel
+                }
+            >
+            {
+                STATUS_LABELS[
+                    table.status
+                    ] ||
+                table.status
+            }
+          </span>
+
+          </div>
+
+
+          {/* =========================
+            OCCUPIED
+        ========================= */}
+
+          {isOccupied && (
+
+              <div
+                  className={
+                    styles.occupiedInfo
+                  }
+              >
+
+                <div>
+
+                  <Utensils
+                      size={14}
+                  />
+
+                  <span>
+                {tempItemCount} món
+              </span>
+
+                </div>
+
+
+                <strong>
+                  {formatCurrency(
+                      tempCurrentTotal,
+                  )}
+                </strong>
+
+              </div>
+
+          )}
+
+
+          {/* =========================
+            AVAILABLE
+        ========================= */}
+
+          {isAvailable && (
+
+              <p
+                  className={
+                    styles.readyText
+                  }
+              >
+                Sẵn sàng đón khách
+              </p>
+
+          )}
+
+
+          {/* =========================
+            MAINTENANCE
+        ========================= */}
+
+          {isMaintenance && (
+
+              <p
+                  className={
+                    styles.readyText
+                  }
+              >
+                Bàn đang tạm dừng để bảo trì
+              </p>
+
+          )}
+
+
+          {/* =========================
+            INACTIVE
+        ========================= */}
+
+          {isInactive && (
+
+              <p
+                  className={
+                    styles.readyText
+                  }
+              >
+                Bàn đã ngừng hoạt động
+              </p>
+
+          )}
+
+        </div>
+
+
+        {/* =========================
+          FOOTER
+      ========================= */}
+
+        <footer
+            className={
+              styles.footer
+            }
+        >
 
         <span
-          className={
-            table.area === TABLE_AREA.OUTDOOR
-              ? styles.outdoorBadge
-              : styles.indoorBadge
-          }
+            className={
+              styles.tableId
+            }
         >
-          {TABLE_AREA_LABELS[table.area]}
+          ID: {table.id}
         </span>
-      </div>
 
-      {/* =========================
-          STATUS
-      ========================= */}
 
-      <div className={styles.content}>
-        <div className={styles.statusRow}>
-          <span
-            className={`${styles.statusDot} ${
-              isOccupied
-                ? styles.occupiedDot
-                : isReserved
-                  ? styles.reservedDot
-                  : styles.emptyDot
-            }`}
-          />
+          <ActionGroup>
 
-          <span className={styles.statusLabel}>
-            {TABLE_STATUS_LABELS[table.status]}
-          </span>
-        </div>
+            {/* EDIT */}
 
-        {isOccupied ? (
-          <div className={styles.occupiedInfo}>
-            <div>
-              <Users size={14} />
+            <ActionButton
+                action="edit"
 
-              <span>{table.guestCount} khách</span>
-            </div>
+                title={
+                  `Sửa bàn ${table.tableNumber}`
+                }
 
-            <div>
-              <Utensils size={14} />
+                onClick={() =>
+                    onEdit?.(table)
+                }
+            />
 
-              <span>{table.itemCount} món</span>
-            </div>
 
-            <strong>{formatCurrency(table.currentTotal)}</strong>
-          </div>
-        ) : isReserved ? (
-          <p className={styles.readyText}>Bàn đang được giữ chỗ</p>
-        ) : (
-          <p className={styles.readyText}>Sẵn sàng đón khách</p>
-        )}
-      </div>
+            {/* =========================
+              INACTIVE -> RESTORE
+          ========================= */}
 
-      {/* =========================
-          ACTIONS
-      ========================= */}
+            {isInactive ? (
 
-      <footer className={styles.footer}>
-        <span className={styles.tableId}>ID: {table.id}</span>
+                <button
+                    type="button"
 
-        <ActionGroup>
-          <ActionButton
-              action="edit"
-              title={`Sửa bàn ${displayCode}`}
-              onClick={() => onEdit(table)}
-          />
+                    className={
+                      styles.restoreButton
+                    }
 
-          <ActionButton
-              action="delete"
-              title={`Xóa bàn ${displayCode}`}
-              onClick={() => onDelete(table)}
-          />
-        </ActionGroup>
-      </footer>
-    </article>
+                    title={
+                      `Khôi phục bàn ${table.tableNumber}`
+                    }
+
+                    onClick={() =>
+                        onRestore?.(table)
+                    }
+                >
+                  <RotateCcw
+                      size={15}
+                  />
+                </button>
+
+            ) : (
+
+                /* =========================
+                    ACTIVE -> DELETE
+                ========================= */
+
+                <ActionButton
+                    action="delete"
+
+                    title={
+                      `Ngừng hoạt động bàn ${table.tableNumber}`
+                    }
+
+                    onClick={() =>
+                        onDelete?.(table)
+                    }
+                />
+
+            )}
+
+          </ActionGroup>
+
+        </footer>
+
+      </article>
   );
 }
 

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { useNavigate } from "react-router-dom";
 
@@ -20,6 +20,10 @@ import SearchInput from "../../../components/common/SearchInput/SearchInput";
 
 import staffService from "../../../features/admin/services/staffService";
 
+import Pagination from "../../../components/common/Pagination/Pagination";
+
+import usePagination from "../../../hooks/usePagination";
+
 function Staff() {
   const navigate = useNavigate();
 
@@ -36,6 +40,23 @@ function Staff() {
   const [staffList, setStaffList] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const {
+    page,
+    size,
+
+    totalElements,
+    totalPages,
+
+    hasNext,
+    hasPrevious,
+
+    setPage,
+    updatePagination,
+  } = usePagination({
+    initialPage: 0,
+    initialSize: 8,
+  });
+
   const [searchQuery, setSearchQuery] = useState("");
   // Thêm state cho bộ lọc trạng thái
   const [statusFilter, setStatusFilter] = useState("ALL");
@@ -45,27 +66,43 @@ function Staff() {
 
   const [staffForm, setStaffForm] = useState(EMPTY_STAFF_FORM);
 
-  const fetchStaff = async () => {
-    try {
-      setLoading(true);
+  const fetchStaff = useCallback(
+    async ({ showLoading = false } = {}) => {
+      try {
+        if (showLoading) {
+          setLoading(true);
+        }
 
-      const response = await staffService.getAll();
+        const response = await staffService.getAll({
+          page,
+          size,
+        });
 
-      setStaffList(response.data || []);
-    } catch (error) {
-      console.error(error);
+        const pageData = response.data;
 
-      toast.error(
-        error.response?.data?.message || "Không thể tải danh sách nhân viên.",
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
+        setStaffList(pageData?.content || []);
+
+        updatePagination(pageData);
+      } catch (error) {
+        console.error(error);
+
+        toast.error(
+          error.response?.data?.message || "Không thể tải danh sách nhân viên.",
+        );
+      } finally {
+        if (showLoading) {
+          setLoading(false);
+        }
+      }
+    },
+    [page, size, updatePagination],
+  );
 
   useEffect(() => {
-    fetchStaff();
-  }, []);
+    fetchStaff({
+      showLoading: true,
+    });
+  }, [fetchStaff]);
 
   // =========================
   // ADD STAFF
@@ -188,15 +225,23 @@ function Staff() {
           updateCurrentUser(updatedStaff);
         }
 
+        await fetchStaff({
+          showLoading: false,
+        });
+
         toast.success("Cập nhật nhân viên thành công!");
       } else {
-        const response = await staffService.create(payload);
-
-        const newStaff = response.data;
-
-        setStaffList((currentStaff) => [...currentStaff, newStaff]);
+        await staffService.create(payload);
 
         toast.success("Thêm nhân viên thành công!");
+
+        if (page === 0) {
+          await fetchStaff({
+            showLoading: false,
+          });
+        } else {
+          setPage(0);
+        }
       }
 
       setIsModalOpen(false);
@@ -264,6 +309,10 @@ function Staff() {
         ),
       );
 
+      await fetchStaff({
+        showLoading: false,
+      });
+
       toast.success(`Đã vô hiệu hóa nhân viên ${staff.fullName}.`);
     } catch (error) {
       console.error(error);
@@ -293,6 +342,9 @@ function Staff() {
           item.id === staff.id ? restoredStaff : item,
         ),
       );
+      await fetchStaff({
+        showLoading: false,
+      });
 
       toast.success(`Đã khôi phục nhân viên ${staff.fullName}.`);
     } catch (error) {
@@ -378,8 +430,8 @@ function Staff() {
 
           <div className={styles.result}>
             Hiển thị <strong>{filteredStaff.length}</strong>
-            {" / "}
-            <strong>{staffList.length}</strong>
+            {" trên trang này • Tổng "}
+            <strong>{totalElements}</strong>
             {" nhân viên"}
           </div>
         </div>
@@ -395,17 +447,27 @@ function Staff() {
             Không tìm thấy nhân viên phù hợp.
           </div>
         ) : (
-          <div className={styles.grid}>
-            {filteredStaff.map((staff) => (
-              <StaffCard
-                key={staff.id}
-                staff={staff}
-                onEdit={handleOpenEdit}
-                onDelete={handleDelete}
-                onRestore={handleRestore}
-              />
-            ))}
-          </div>
+          <>
+            <div className={styles.grid}>
+              {filteredStaff.map((staff) => (
+                <StaffCard
+                  key={staff.id}
+                  staff={staff}
+                  onEdit={handleOpenEdit}
+                  onDelete={handleDelete}
+                  onRestore={handleRestore}
+                />
+              ))}
+            </div>
+
+            <Pagination
+              page={page}
+              totalPages={totalPages}
+              hasNext={hasNext}
+              hasPrevious={hasPrevious}
+              onPageChange={setPage}
+            />
+          </>
         )}
       </section>
 

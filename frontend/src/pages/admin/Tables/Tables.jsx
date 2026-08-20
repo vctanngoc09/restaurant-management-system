@@ -1,36 +1,57 @@
-import { useMemo, useState } from "react";
-
-import { Plus } from "lucide-react";
-import AddButton from "../../../components/common/AddButton";
+import { useCallback, useEffect, useState } from "react";
 
 import { toast } from "react-toastify";
+
+import AddButton from "../../../components/common/AddButton";
+
+import SearchInput from "../../../components/common/SearchInput/SearchInput";
+
+import Pagination from "../../../components/common/Pagination/Pagination";
 
 import AdminPageHeader from "../../../features/admin/components/common/AdminPageHeader/AdminPageHeader";
 
 import TableCard from "../../../features/admin/components/tables/TableCard/TableCard";
 
 import TableFormModal from "../../../features/admin/components/tables/TableFormModal/TableFormModal";
-import SearchInput from "../../../components/common/SearchInput/SearchInput";
-import {
-  EMPTY_TABLE_FORM,
-  INITIAL_TABLES,
-} from "../../../data/adminTablesMock";
 
-import { TABLE_AREA, TABLE_STATUS } from "../../../constants/tableConfig";
+import ManageAreasButton from "../../../features/admin/components/areas/ManageAreasButton/ManageAreasButton";
+
+import AreaManagementModal from "../../../features/admin/components/areas/AreaManagementModal/AreaManagementModal";
+
+import tableService from "../../../features/admin/services/tableService";
+
+import areaService from "../../../features/admin/services/areaService";
+
+import usePagination from "../../../hooks/usePagination";
 
 import styles from "./Tables.module.css";
 
+// =========================
+// EMPTY FORM
+// =========================
+
+const EMPTY_TABLE_FORM = {
+  number: "",
+  areaId: "",
+  qrUrl: "",
+};
+
 function Tables() {
-  const [searchQuery, setSearchQuery] = useState("");
   // =========================
   // DATA
   // =========================
 
-  const [tables, setTables] = useState(INITIAL_TABLES);
+  const [tables, setTables] = useState([]);
+
+  const [areas, setAreas] = useState([]);
+
+  const [loading, setLoading] = useState(true);
 
   // =========================
-  // FILTER
+  // SEARCH + FILTER
   // =========================
+
+  const [searchQuery, setSearchQuery] = useState("");
 
   const [areaFilter, setAreaFilter] = useState("all");
 
@@ -46,94 +67,162 @@ function Tables() {
 
   const [tableForm, setTableForm] = useState(EMPTY_TABLE_FORM);
 
+  const [isAreaModalOpen, setIsAreaModalOpen] = useState(false);
+
   // =========================
-  // STATISTICS
+  // PAGINATION
+  // =========================
+
+  const {
+    page,
+    size,
+
+    totalElements,
+    totalPages,
+
+    hasNext,
+    hasPrevious,
+
+    setPage,
+    updatePagination,
+  } = usePagination({
+    initialPage: 0,
+    initialSize: 8,
+  });
+
+  // =========================
+  // FETCH TABLES
+  // =========================
+
+  const fetchTables = useCallback(async () => {
+    try {
+      const response = await tableService.getAll({
+        page,
+        size,
+
+        keyword: searchQuery.trim() || undefined,
+
+        areaId: areaFilter === "all" ? undefined : Number(areaFilter),
+
+        status: statusFilter === "all" ? undefined : statusFilter,
+      });
+
+      const pageData = response.data;
+
+      setTables(pageData?.content || []);
+
+      updatePagination(pageData);
+    } catch (error) {
+      console.error(error);
+
+      toast.error(
+        error.response?.data?.message || "Không thể tải danh sách bàn.",
+      );
+    } finally {
+      setLoading(false);
+    }
+  }, [page, size, searchQuery, areaFilter, statusFilter, updatePagination]);
+
+  useEffect(() => {
+    fetchTables();
+  }, [fetchTables]);
+
+  // =========================
+  // FETCH AREAS
+  // =========================
+
+  const fetchAreas = useCallback(async () => {
+    try {
+      const response = await areaService.getAll();
+
+      setAreas(response.data || []);
+    } catch (error) {
+      console.error(error);
+
+      toast.error(
+        error.response?.data?.message || "Không thể tải danh sách khu vực.",
+      );
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchAreas();
+  }, [fetchAreas]);
+
+  // =========================
+  // STATISTICS CURRENT PAGE
   // =========================
 
   const occupiedCount = tables.filter(
-    (table) => table.status === TABLE_STATUS.OCCUPIED,
+    (table) => table.status === "OCCUPIED",
   ).length;
 
-  const emptyCount = tables.filter(
-    (table) => table.status === TABLE_STATUS.EMPTY,
+  const availableCount = tables.filter(
+    (table) => table.status === "AVAILABLE",
   ).length;
 
   // =========================
-  // FILTER DATA
-  // =========================
-
-  const filteredTables = useMemo(() => {
-    const keyword = searchQuery.trim().toLowerCase();
-
-    return tables.filter((table) => {
-      const matchesArea = areaFilter === "all" || table.area === areaFilter;
-
-      const matchesStatus =
-        statusFilter === "all" || table.status === statusFilter;
-
-      const displayCode =
-        table.area === TABLE_AREA.OUTDOOR
-          ? `N-${table.number}`
-          : `T-${table.number}`;
-
-      const areaLabel =
-        table.area === TABLE_AREA.OUTDOOR ? "ngoài trời" : "trong nhà";
-
-      const matchesSearch =
-        !keyword ||
-        displayCode.toLowerCase().includes(keyword) ||
-        table.id.toLowerCase().includes(keyword) ||
-        table.number.toLowerCase().includes(keyword) ||
-        areaLabel.includes(keyword);
-
-      return matchesArea && matchesStatus && matchesSearch;
-    });
-  }, [tables, areaFilter, statusFilter, searchQuery]);
-
-  // =========================
-  // ADD
+  // OPEN CREATE
   // =========================
 
   const handleOpenAdd = () => {
     setEditingTable(null);
 
-    /*
-      Tìm số bàn tiếp theo.
-    */
-
-    const nextNumber = String(tables.length + 1).padStart(2, "0");
-
     setTableForm({
-      number: nextNumber,
-      area: TABLE_AREA.INDOOR,
+      number: "",
+
+      areaId: areas[0]?.id ? String(areas[0].id) : "",
+
+      qrUrl: "",
     });
 
     setIsModalOpen(true);
   };
 
   // =========================
-  // EDIT
+  // OPEN EDIT
   // =========================
 
   const handleOpenEdit = (table) => {
     setEditingTable(table);
 
+    /*
+      Backend:
+      T-01
+      N-05
+
+      Form chỉ cần:
+      01
+      05
+    */
+
+    const number = table.tableNumber?.replace(/\D/g, "") || "";
+
     setTableForm({
-      number: table.number,
-      area: table.area,
+      number,
+
+      areaId: String(table.areaId || ""),
+
+      qrUrl: table.qrUrl || "",
     });
 
     setIsModalOpen(true);
   };
 
   // =========================
-  // SAVE
+  // SAVE CREATE / UPDATE
   // =========================
 
-  const handleSave = (event) => {
+  const handleSave = async (event) => {
     event.preventDefault();
 
     const number = tableForm.number.trim();
+
+    const qrUrl = tableForm.qrUrl.trim();
+
+    // =========================
+    // VALIDATE
+    // =========================
 
     if (!number) {
       toast.error("Vui lòng nhập số bàn.");
@@ -141,131 +230,252 @@ function Tables() {
       return;
     }
 
-    /*
-      Kiểm tra trùng bàn.
-
-      Ví dụ:
-      indoor + 01
-      không được có 2 lần.
-    */
-
-    const duplicated = tables.some(
-      (table) =>
-        table.number === number &&
-        table.area === tableForm.area &&
-        table.id !== editingTable?.id,
-    );
-
-    if (duplicated) {
-      toast.error("Số bàn này đã tồn tại trong khu vực.");
+    if (!tableForm.areaId) {
+      toast.error("Vui lòng chọn khu vực.");
 
       return;
     }
 
     // =========================
-    // UPDATE
+    // FIND AREA
     // =========================
 
-    if (editingTable) {
-      setTables((currentTables) =>
-        currentTables.map((table) =>
-          table.id === editingTable.id
-            ? {
-                ...table,
+    const selectedArea = areas.find(
+      (area) => String(area.id) === String(tableForm.areaId),
+    );
 
-                number,
-                area: tableForm.area,
-              }
-            : table,
-        ),
-      );
+    if (!selectedArea) {
+      toast.error("Khu vực không hợp lệ.");
 
-      toast.success("Cập nhật bàn ăn thành công!");
+      return;
     }
 
     // =========================
-    // ADD
+    // BUILD TABLE NUMBER
     // =========================
-    else {
-      const prefix = tableForm.area === TABLE_AREA.OUTDOOR ? "N" : "T";
 
-      /*
-        Tạo ID tạm thời.
-      */
+    const isOutdoor = selectedArea.name?.toLowerCase().includes("ngoài");
 
-      let newId = `${prefix}${number}`;
+    const prefix = isOutdoor ? "N" : "T";
 
-      /*
-        Trường hợp ID đã tồn tại
-        thì thêm timestamp tạm.
-      */
+    const normalizedNumber = number.padStart(2, "0");
 
-      if (tables.some((table) => table.id === newId)) {
-        newId = `${prefix}${Date.now()}`;
+    const tableNumber = `${prefix}-${normalizedNumber}`;
+
+    // =========================
+    // PAYLOAD
+    // =========================
+
+    const payload = {
+      tableNumber,
+
+      qrUrl: qrUrl || null,
+
+      areaId: Number(tableForm.areaId),
+    };
+
+    try {
+      // =========================
+      // UPDATE
+      // =========================
+
+      if (editingTable) {
+        const response = await tableService.update(editingTable.id, payload);
+
+        const updatedTable = response.data;
+
+        /*
+          Update local trước để UI
+          đổi ngay lập tức.
+        */
+
+        setTables((currentTables) =>
+          currentTables.map((table) =>
+            table.id === editingTable.id ? updatedTable : table,
+          ),
+        );
+
+        toast.success(`Cập nhật bàn ${tableNumber} thành công!`);
+
+        /*
+          Đồng bộ lại pagination
+          + dữ liệu backend.
+        */
+
+        await fetchTables();
       }
 
-      const newTable = {
-        id: newId,
+      // =========================
+      // CREATE
+      // =========================
+      else {
+        await tableService.create(payload);
 
-        number,
+        toast.success(`Thêm bàn ${tableNumber} thành công!`);
 
-        area: tableForm.area,
+        /*
+          Backend sort ID DESC nên
+          bàn mới nằm ở page đầu.
+        */
 
-        status: TABLE_STATUS.EMPTY,
+        if (page === 0) {
+          await fetchTables();
+        } else {
+          setPage(0);
+        }
+      }
 
-        guestCount: 0,
+      // =========================
+      // CLOSE MODAL
+      // =========================
 
-        itemCount: 0,
+      setIsModalOpen(false);
 
-        currentOrderId: null,
+      setEditingTable(null);
 
-        currentTotal: 0,
-      };
+      setTableForm(EMPTY_TABLE_FORM);
+    } catch (error) {
+      console.error(error);
 
-      setTables((currentTables) => [...currentTables, newTable]);
-
-      toast.success("Thêm bàn ăn thành công!");
+      toast.error(
+        error.response?.data?.message ||
+          (editingTable ? "Không thể cập nhật bàn." : "Không thể thêm bàn."),
+      );
     }
-
-    setIsModalOpen(false);
-
-    setEditingTable(null);
   };
 
   // =========================
-  // DELETE
+  // SOFT DELETE
   // =========================
 
-  const handleDelete = (table) => {
-    /*
-      Không nên cho xóa bàn
-      đang có khách.
-    */
-
-    if (table.status === TABLE_STATUS.OCCUPIED) {
-      toast.error("Không thể xóa bàn đang có khách.");
+  const handleDelete = async (table) => {
+    // Không cho xóa bàn có khách
+    if (table.status === "OCCUPIED") {
+      toast.error("Không thể ngừng hoạt động bàn đang có khách.");
 
       return;
     }
 
-    const displayName =
-      table.area === TABLE_AREA.OUTDOOR
-        ? `N-${table.number}`
-        : `T-${table.number}`;
+    // Đã inactive rồi
+    if (table.status === "INACTIVE") {
+      toast.error("Bàn này đã ngừng hoạt động.");
+
+      return;
+    }
 
     const confirmed = window.confirm(
-      `Bạn có chắc muốn xóa bàn ${displayName}?`,
+      `Bạn có chắc muốn ngừng hoạt động bàn ${table.tableNumber}?`,
     );
 
     if (!confirmed) {
       return;
     }
 
-    setTables((currentTables) =>
-      currentTables.filter((item) => item.id !== table.id),
+    try {
+      await tableService.deactivate(table.id);
+
+      /*
+        Backend là soft delete.
+
+        Không remove card khỏi array.
+        Chỉ đổi status -> INACTIVE.
+      */
+
+      setTables((currentTables) =>
+        currentTables.map((item) =>
+          item.id === table.id
+            ? {
+                ...item,
+                status: "INACTIVE",
+              }
+            : item,
+        ),
+      );
+
+      toast.success(`Đã ngừng hoạt động bàn ${table.tableNumber}.`);
+
+      // Sync lại backend
+      await fetchTables();
+    } catch (error) {
+      console.error(error);
+
+      toast.error(
+        error.response?.data?.message || "Không thể ngừng hoạt động bàn.",
+      );
+    }
+  };
+
+  // =========================
+  // RESTORE
+  // =========================
+
+  const handleRestore = async (table) => {
+    const confirmed = window.confirm(
+      `Bạn có chắc muốn khôi phục bàn ${table.tableNumber}?`,
     );
 
-    toast.success(`Đã xóa bàn ${displayName}.`);
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      const response = await tableService.restore(table.id);
+
+      const restoredTable = response.data;
+
+      /*
+            Backend trả TableResponse mới
+            với AVAILABLE.
+          */
+
+      setTables((currentTables) =>
+        currentTables.map((item) =>
+          item.id === table.id ? restoredTable : item,
+        ),
+      );
+
+      toast.success(`Khôi phục bàn ${table.tableNumber} thành công!`);
+
+      await fetchTables();
+    } catch (error) {
+      console.error(error);
+
+      toast.error(error.response?.data?.message || "Không thể khôi phục bàn.");
+    }
+  };
+
+  // =========================
+  // SEARCH CHANGE
+  // =========================
+
+  const handleSearchChange = (value) => {
+    setSearchQuery(value);
+
+    /*
+      Khi search phải về page đầu.
+    */
+
+    setPage(0);
+  };
+
+  // =========================
+  // AREA FILTER CHANGE
+  // =========================
+
+  const handleAreaFilterChange = (event) => {
+    setAreaFilter(event.target.value);
+
+    setPage(0);
+  };
+
+  // =========================
+  // STATUS FILTER CHANGE
+  // =========================
+
+  const handleStatusFilterChange = (event) => {
+    setStatusFilter(event.target.value);
+
+    setPage(0);
   };
 
   return (
@@ -281,14 +491,20 @@ function Tables() {
       ========================= */}
 
       <section className={styles.panel}>
+        {/* HEADER */}
+
         <div className={styles.panelHeader}>
           <div>
             <h2>Quản Lý Sơ Đồ Bàn Ăn & Khu Vực</h2>
 
-            <p>Thêm bàn mới, thay đổi vị trí Trong nhà / Ngoài trời</p>
+            <p>Thêm bàn mới, thay đổi vị trí và trạng thái hoạt động</p>
           </div>
 
-          <AddButton onClick={handleOpenAdd}>Thêm Bàn Ăn Mới</AddButton>
+          <div className={styles.areaButton}>
+            <ManageAreasButton onClick={() => setIsAreaModalOpen(true)} />
+
+            <AddButton onClick={handleOpenAdd}>Thêm Bàn Ăn Mới</AddButton>
+          </div>
         </div>
 
         {/* =========================
@@ -296,11 +512,13 @@ function Tables() {
         ========================= */}
 
         <div className={styles.controlBar}>
+          {/* SUMMARY */}
+
           <div className={styles.summary}>
             <div>
               <span>Tổng số bàn</span>
 
-              <strong>{tables.length}</strong>
+              <strong>{totalElements}</strong>
             </div>
 
             <div className={styles.occupiedSummary}>
@@ -312,40 +530,44 @@ function Tables() {
             <div className={styles.emptySummary}>
               <span>Bàn trống</span>
 
-              <strong>{emptyCount}</strong>
+              <strong>{availableCount}</strong>
             </div>
           </div>
+
+          {/* FILTER */}
 
           <div className={styles.filters}>
             <SearchInput
               value={searchQuery}
-              onChange={setSearchQuery}
+              onChange={handleSearchChange}
               placeholder="Tìm theo mã bàn..."
               className={styles.searchInput}
             />
 
-            <select
-              value={areaFilter}
-              onChange={(event) => setAreaFilter(event.target.value)}
-            >
+            {/* AREA */}
+
+            <select value={areaFilter} onChange={handleAreaFilterChange}>
               <option value="all">Tất cả khu vực</option>
 
-              <option value={TABLE_AREA.INDOOR}>Trong nhà</option>
-
-              <option value={TABLE_AREA.OUTDOOR}>Ngoài trời</option>
+              {areas.map((area) => (
+                <option key={area.id} value={area.id}>
+                  {area.name}
+                </option>
+              ))}
             </select>
 
-            <select
-              value={statusFilter}
-              onChange={(event) => setStatusFilter(event.target.value)}
-            >
+            {/* STATUS */}
+
+            <select value={statusFilter} onChange={handleStatusFilterChange}>
               <option value="all">Tất cả trạng thái</option>
 
-              <option value={TABLE_STATUS.OCCUPIED}>Đang có khách</option>
+              <option value="AVAILABLE">Bàn trống</option>
 
-              <option value={TABLE_STATUS.EMPTY}>Bàn trống</option>
+              <option value="OCCUPIED">Đang có khách</option>
 
-              <option value={TABLE_STATUS.RESERVED}>Đã đặt trước</option>
+              <option value="MAINTENANCE">Đang bảo trì</option>
+
+              <option value="INACTIVE">Ngừng hoạt động</option>
             </select>
           </div>
         </div>
@@ -354,21 +576,32 @@ function Tables() {
             TABLE GRID
         ========================= */}
 
-        {filteredTables.length === 0 ? (
-          <div className={styles.emptyState}>
-            Không có bàn nào phù hợp với bộ lọc.
-          </div>
+        {loading ? (
+          <div className={styles.emptyState}>Đang tải danh sách bàn...</div>
+        ) : tables.length === 0 ? (
+          <div className={styles.emptyState}>Không có bàn nào phù hợp.</div>
         ) : (
-          <div className={styles.grid}>
-            {filteredTables.map((table) => (
-              <TableCard
-                key={table.id}
-                table={table}
-                onEdit={handleOpenEdit}
-                onDelete={handleDelete}
-              />
-            ))}
-          </div>
+          <>
+            <div className={styles.grid}>
+              {tables.map((table) => (
+                <TableCard
+                  key={table.id}
+                  table={table}
+                  onEdit={handleOpenEdit}
+                  onDelete={handleDelete}
+                  onRestore={handleRestore}
+                />
+              ))}
+            </div>
+
+            <Pagination
+              page={page}
+              totalPages={totalPages}
+              hasNext={hasNext}
+              hasPrevious={hasPrevious}
+              onPageChange={setPage}
+            />
+          </>
         )}
       </section>
 
@@ -380,13 +613,23 @@ function Tables() {
         open={isModalOpen}
         editingTable={editingTable}
         form={tableForm}
+        areas={areas}
         onChange={setTableForm}
         onClose={() => {
           setIsModalOpen(false);
 
           setEditingTable(null);
+
+          setTableForm(EMPTY_TABLE_FORM);
         }}
         onSubmit={handleSave}
+      />
+
+      <AreaManagementModal
+        open={isAreaModalOpen}
+        areas={areas}
+        onClose={() => setIsAreaModalOpen(false)}
+        onChanged={fetchAreas}
       />
     </div>
   );
