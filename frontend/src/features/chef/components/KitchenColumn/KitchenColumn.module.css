@@ -1,0 +1,102 @@
+.column {
+  min-width: 0;
+}
+
+.columnHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 10px;
+
+  padding: 0 4px;
+
+  margin-bottom: 14px;
+}
+
+.columnHeader h2 {
+  display: flex;
+  align-items: center;
+
+  gap: 8px;
+
+  color: var(--kds-text);
+
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+
+  letter-spacing: 0.06em;
+}
+
+.columnHeader > span {
+  color: var(--kds-muted);
+
+  font-family: monospace;
+  font-size: var(--font-size-xs);
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+
+  flex-shrink: 0;
+
+  border-radius: var(--radius-full);
+}
+
+.pendingDot {
+  background: var(--kds-text);
+}
+
+.readyDot {
+  background: #059669;
+}
+
+.tickets {
+  display: flex;
+  flex-direction: column;
+
+  gap: 14px;
+}
+
+.emptyState {
+  padding: 48px 20px;
+
+  text-align: center;
+
+  background: var(--kds-surface);
+
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+}
+
+.emptyState svg {
+  margin: 0 auto 8px;
+}
+
+.emptySuccess {
+  color: #059669;
+}
+
+.emptyIcon {
+  color: var(--color-border-dark);
+}
+
+.emptyState h3 {
+  color: var(--kds-text);
+
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+}
+
+.emptyState p {
+  max-width: 360px;
+
+  margin: 5px auto 0;
+
+  color: var(--kds-muted);
+
+  font-size: var(--font-size-xs);
+
+  line-height: 1.6;
+}

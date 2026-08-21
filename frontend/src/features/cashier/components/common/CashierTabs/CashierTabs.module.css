@@ -1,0 +1,146 @@
+.cashierTabs {
+  position: sticky;
+  top: var(--header-height);
+  z-index: var(--z-sticky);
+
+  width: 100%;
+  min-height: 54px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 0 24px;
+
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+
+  box-shadow: var(--shadow-xs);
+}
+
+.cashierTabsLeft {
+  height: 54px;
+
+  display: flex;
+  align-items: stretch;
+
+  gap: 20px;
+}
+
+.cashierTab {
+  position: relative;
+
+  display: flex;
+  align-items: center;
+
+  gap: 8px;
+
+  padding: 0 4px;
+
+  color: var(--color-text-secondary);
+
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+
+  transition: color var(--transition-fast);
+}
+
+.cashierTab:hover {
+  color: var(--color-primary);
+}
+
+.cashierTabActive {
+  color: var(--color-primary);
+}
+
+.cashierTabActive::after {
+  content: "";
+
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+
+  height: 2px;
+
+  background: var(--color-primary);
+
+  border-radius: var(--radius-full);
+}
+
+.tabCount {
+  min-width: 22px;
+  height: 20px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0 6px;
+
+  color: var(--color-primary);
+  background: var(--color-primary-light);
+
+  border: 1px solid #dfe3ff;
+  border-radius: var(--radius-full);
+
+  font-size: 10px;
+  font-weight: var(--font-weight-bold);
+}
+
+.primaryButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 7px;
+
+  padding: 9px 16px;
+
+  color: var(--color-text-inverse);
+  background: var(--color-primary);
+
+  border-radius: var(--radius-md);
+
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+
+  transition:
+    background var(--transition-fast),
+    transform var(--transition-fast);
+}
+
+.primaryButton:hover {
+  background: var(--color-primary-hover);
+}
+
+.primaryButton:active {
+  transform: translateY(1px);
+}
+
+@media (max-width: 650px) {
+  .cashierTabs {
+    padding: 0 12px;
+  }
+
+  .primaryButton span {
+    display: none;
+  }
+
+  .primaryButton {
+    width: 38px;
+    height: 38px;
+
+    padding: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .cashierTabsLeft {
+    gap: 10px;
+  }
+
+  .cashierTab {
+    font-size: var(--font-size-xs);
+  }
+}

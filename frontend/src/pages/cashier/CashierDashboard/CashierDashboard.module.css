@@ -1,0 +1,6 @@
+.cashierPage {
+  width: 100%;
+  min-height: calc(100dvh - var(--header-height));
+
+  background: var(--color-background);
+}

@@ -1,0 +1,354 @@
+.orderCard {
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+
+  padding: 16px;
+
+  background: var(--color-surface);
+
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+
+  box-shadow: var(--shadow-xs);
+
+  transition:
+    border var(--transition-fast),
+    box-shadow var(--transition-fast);
+}
+
+.orderCard:hover {
+  border-color: #c7d2fe;
+
+  box-shadow: var(--shadow-sm);
+}
+
+.orderCardHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+
+  gap: 10px;
+
+  margin-bottom: 12px;
+}
+
+.orderCardHeader > div {
+  display: flex;
+  flex-direction: column;
+}
+
+.orderCardHeader strong {
+  color: var(--color-text-primary);
+
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+}
+
+.orderCardHeader div span {
+  margin-top: 1px;
+
+  color: var(--color-text-muted);
+
+  font-size: 9px;
+}
+
+.orderTypeBadge {
+  padding: 3px 7px;
+
+  border-radius: var(--radius-sm);
+
+  font-size: 9px;
+  font-weight: var(--font-weight-bold);
+
+  white-space: nowrap;
+}
+
+.orderTypeDineIn {
+  color: #4338ca;
+  background: #eef2ff;
+}
+
+.orderTypeTakeaway {
+  color: #b45309;
+  background: #fffbeb;
+}
+
+.orderTypeDelivery {
+  color: #0369a1;
+  background: #f0f9ff;
+}
+
+.orderCustomer {
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+
+  padding: 9px;
+
+  margin-bottom: 12px;
+
+  background: var(--color-background-soft);
+
+  border-radius: var(--radius-md);
+}
+
+.orderAvatar {
+  width: 34px;
+  height: 34px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  flex-shrink: 0;
+
+  color: var(--color-primary);
+  background: var(--color-primary-light);
+
+  border-radius: var(--radius-sm);
+
+  font-size: 10px;
+  font-weight: var(--font-weight-bold);
+}
+
+.orderCustomer > div:last-child {
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+}
+
+.orderCustomer strong {
+  overflow: hidden;
+
+  color: var(--color-text-primary);
+
+  font-size: var(--font-size-xs);
+
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.orderCustomer span {
+  overflow: hidden;
+
+  color: var(--color-text-secondary);
+
+  font-size: 9px;
+
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.orderProgress {
+  margin-bottom: 12px;
+}
+
+.orderProgress > div:first-child {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 6px;
+
+  margin-bottom: 5px;
+
+  font-size: 9px;
+}
+
+.orderProgress strong {
+  color: var(--color-primary);
+
+  font-weight: var(--font-weight-bold);
+}
+
+.orderProgress .readyText {
+  color: var(--color-success);
+}
+
+.orderProgress span {
+  color: var(--color-text-muted);
+}
+
+.progressTrack {
+  width: 100%;
+  height: 5px;
+
+  overflow: hidden;
+
+  background: var(--color-border-light);
+
+  border-radius: var(--radius-full);
+}
+
+.progressTrack > span {
+  display: block;
+
+  height: 100%;
+
+  border-radius: inherit;
+}
+
+.progressNormal {
+  background: var(--color-primary);
+}
+
+.progressReady {
+  background: var(--color-success);
+}
+
+.progressPayment {
+  background: var(--color-text-primary);
+}
+
+.orderItems {
+  min-height: 107px;
+
+  padding-top: 10px;
+
+  border-top: 1px solid var(--color-border-light);
+}
+
+.orderItemHeader,
+.orderItem {
+  display: grid;
+
+  grid-template-columns:
+    minmax(0, 1fr)
+    35px
+    58px;
+
+  align-items: center;
+
+  gap: 5px;
+}
+
+.orderItemHeader {
+  margin-bottom: 5px;
+
+  color: var(--color-text-muted);
+
+  font-size: 9px;
+  font-weight: var(--font-weight-bold);
+}
+
+.orderItemHeader span:nth-child(2),
+.orderItem strong {
+  text-align: center;
+}
+
+.orderItemHeader span:last-child,
+.orderItem > span:last-child {
+  text-align: right;
+}
+
+.orderItem {
+  padding: 3px 0;
+
+  color: var(--color-text-secondary);
+
+  font-size: 10px;
+}
+
+.orderItem > span:first-child {
+  min-width: 0;
+
+  display: flex;
+  align-items: center;
+
+  gap: 5px;
+
+  overflow: hidden;
+
+  color: var(--color-text-primary);
+
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.orderItem i {
+  width: 5px;
+  height: 5px;
+
+  flex-shrink: 0;
+
+  background: var(--color-primary);
+
+  border-radius: var(--radius-full);
+}
+
+.orderFooter {
+  padding-top: 11px;
+  margin-top: 12px;
+
+  border-top: 1px solid var(--color-border-light);
+}
+
+.orderTotal {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 8px;
+
+  margin-bottom: 11px;
+}
+
+.orderTotal span {
+  color: var(--color-text-muted);
+
+  font-size: 9px;
+  font-weight: var(--font-weight-bold);
+}
+
+.orderTotal strong {
+  color: var(--color-text-primary);
+
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-extrabold);
+}
+
+.orderActions {
+  display: grid;
+
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+
+  gap: 8px;
+}
+
+.orderActions button {
+  min-height: 34px;
+
+  color: var(--color-text-secondary);
+  background: var(--color-background);
+
+  border-radius: var(--radius-md);
+
+  font-size: 10px;
+  font-weight: var(--font-weight-bold);
+
+  transition: all var(--transition-fast);
+}
+
+.orderActions button:hover {
+  background: var(--color-border);
+}
+
+.orderActions .payButton {
+  color: #ffffff;
+  background: var(--color-primary);
+}
+
+.orderActions .payButton:hover {
+  background: var(--color-primary-hover);
+}
+
+.orderActions button:disabled {
+  color: var(--color-text-muted);
+  background: var(--color-border-light);
+}

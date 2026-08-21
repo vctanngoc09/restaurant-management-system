@@ -1,0 +1,155 @@
+.tableFilterCard {
+  padding: 17px 16px;
+
+  background: var(--color-surface);
+
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+
+  box-shadow: var(--shadow-xs);
+}
+
+.tableFilterHeader {
+  display: flex;
+  align-items: center;
+
+  gap: 14px;
+
+  padding-bottom: 14px;
+  margin-bottom: 12px;
+
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.tableFilterHeader h2 {
+  color: var(--color-text-primary);
+
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+}
+
+.tableLegend {
+  display: flex;
+  align-items: center;
+
+  gap: 12px;
+}
+
+.tableLegend span {
+  display: inline-flex;
+  align-items: center;
+
+  gap: 5px;
+
+  font-size: 10px;
+  font-weight: var(--font-weight-semibold);
+}
+
+.tableLegend i {
+  width: 8px;
+  height: 8px;
+
+  border-radius: var(--radius-full);
+}
+
+.occupiedLegend {
+  color: var(--color-primary);
+}
+
+.occupiedLegend i {
+  background: var(--color-primary);
+}
+
+.emptyLegend {
+  color: var(--color-text-muted);
+}
+
+.emptyLegend i {
+  background: var(--color-border-dark);
+}
+
+.filterRows {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 14px;
+
+  flex-wrap: wrap;
+}
+
+.filterGroup {
+  display: inline-flex;
+  align-items: center;
+
+  gap: 3px;
+
+  padding: 4px;
+
+  background: var(--color-background);
+
+  border-radius: var(--radius-md);
+}
+
+.filterGroup button {
+  min-height: 32px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 5px;
+
+  padding: 5px 11px;
+
+  color: var(--color-text-secondary);
+
+  border-radius: 8px;
+
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+
+  white-space: nowrap;
+
+  transition: all var(--transition-fast);
+}
+
+.filterGroup button:hover {
+  color: var(--color-text-primary);
+}
+
+.filterGroup .filterActive {
+  color: var(--color-text-primary);
+  background: var(--color-surface);
+
+  box-shadow: var(--shadow-xs);
+
+  font-weight: var(--font-weight-semibold);
+}
+
+.filterGroup .filterPrimaryActive {
+  color: var(--color-text-inverse);
+  background: var(--color-primary);
+
+  box-shadow: var(--shadow-xs);
+
+  font-weight: var(--font-weight-semibold);
+}
+
+@media (max-width: 650px) {
+  .filterRows {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .filterGroup {
+    max-width: 100%;
+
+    overflow-x: auto;
+  }
+
+  .tableFilterHeader {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

@@ -1,0 +1,37 @@
+.container {
+  width: min(1400px, 100%);
+
+  margin: 0 auto;
+
+  padding-bottom: 20px;
+}
+
+.workspace {
+  display: grid;
+
+  grid-template-columns:
+    minmax(0, 8fr)
+    minmax(340px, 4fr);
+
+  align-items: start;
+
+  gap: 20px;
+}
+
+@media (max-width: 1050px) {
+  .workspace {
+    display: flex;
+
+    flex-direction: column;
+  }
+
+  .workspace > :last-child {
+    order: -1;
+  }
+}
+
+@media (max-width: 1050px) {
+  .container {
+    padding-bottom: 100px;
+  }
+}

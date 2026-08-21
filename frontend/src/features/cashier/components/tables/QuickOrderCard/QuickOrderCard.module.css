@@ -1,0 +1,129 @@
+.quickCard {
+  width: 100%;
+  height: 145px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+
+  padding: 15px;
+
+  text-align: left;
+
+  border-radius: var(--radius-lg);
+
+  transition:
+    transform var(--transition-fast),
+    box-shadow var(--transition-fast);
+}
+
+.quickCard:hover {
+  transform: translateY(-1px);
+
+  box-shadow: var(--shadow-sm);
+}
+
+.takeawayCard {
+  color: #92400e;
+  background: #fffbeb;
+
+  border: 1px solid #fcd34d;
+}
+
+.deliveryCard {
+  color: #065f46;
+  background: #ccfbf1;
+
+  border: 1px solid #5eead4;
+}
+
+.quickCardHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+
+  gap: 8px;
+}
+
+.quickCardHeader h3 {
+  display: flex;
+  align-items: center;
+
+  gap: 6px;
+
+  color: inherit;
+
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-extrabold);
+}
+
+.quickCardHeader p {
+  margin-top: 2px;
+
+  color: inherit;
+
+  font-size: 10px;
+  font-weight: var(--font-weight-semibold);
+}
+
+.quickBadge {
+  display: inline-flex;
+  align-items: center;
+
+  gap: 3px;
+
+  padding: 3px 7px;
+
+  border: 1px solid currentColor;
+  border-radius: var(--radius-full);
+
+  font-size: 9px;
+  font-weight: var(--font-weight-extrabold);
+
+  white-space: nowrap;
+}
+
+.quickIconArea {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.quickIconArea span {
+  width: 42px;
+  height: 42px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: #ffffff;
+
+  border-radius: var(--radius-md);
+}
+
+.takeawayCard .quickIconArea span {
+  background: #f59e0b;
+}
+
+.deliveryCard .quickIconArea span {
+  background: #0d9488;
+}
+
+.quickFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 6px;
+
+  padding-top: 8px;
+
+  border-top: 1px solid currentColor;
+
+  font-size: 9px;
+}
+
+.quickFooter strong {
+  font-weight: var(--font-weight-extrabold);
+}

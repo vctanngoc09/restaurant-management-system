@@ -1,0 +1,31 @@
+.waiterPage {
+  --waiter-bg: #f1f3f5;
+
+  --waiter-surface: #ffffff;
+
+  --waiter-text: #0f1419;
+
+  --waiter-muted: #4a5568;
+
+  --waiter-primary: #2c5ef5;
+
+  --waiter-primary-hover: #1f4fe0;
+
+  width: 100%;
+
+  min-height: calc(
+    100dvh - var(--header-height)
+  );
+
+  padding: 24px;
+
+  color: var(--waiter-text);
+
+  background: var(--waiter-bg);
+}
+
+@media (max-width: 650px) {
+  .waiterPage {
+    padding: 14px;
+  }
+}

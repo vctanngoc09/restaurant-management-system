@@ -1,0 +1,54 @@
+.orderView {
+  padding: 24px;
+}
+
+.orderGrid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(4, minmax(0, 1fr));
+
+  gap: 16px;
+
+  margin-top: 16px;
+}
+
+.noData {
+  margin-top: 16px;
+  padding: 50px 20px;
+
+  color: var(--color-text-muted);
+
+  text-align: center;
+
+  background: var(--color-surface);
+
+  border: 1px dashed var(--color-border-dark);
+  border-radius: var(--radius-lg);
+}
+
+@media (max-width: 1280px) {
+  .orderGrid {
+    grid-template-columns:
+      repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 850px) {
+  .orderGrid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 650px) {
+  .orderView {
+    padding: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .orderGrid {
+    grid-template-columns: 1fr;
+  }
+}

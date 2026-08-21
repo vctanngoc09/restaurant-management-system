@@ -1,0 +1,246 @@
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-modal-backdrop);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 20px;
+
+  background: rgba(15, 23, 42, 0.55);
+
+  backdrop-filter: blur(2px);
+}
+
+.modalBox {
+  width: 100%;
+
+  display: flex;
+  flex-direction: column;
+
+  overflow: hidden;
+
+  background: var(--color-surface);
+
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+
+  box-shadow: var(--shadow-xl);
+}
+
+.newOrderModal {
+  max-width: 460px;
+}
+
+.modalHeader {
+  min-height: 62px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 15px;
+
+  padding: 14px 20px;
+
+  background: var(--color-background-soft);
+
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.modalHeader h2 {
+  color: var(--color-text-primary);
+
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-extrabold);
+}
+
+.modalCloseButton {
+  width: 34px;
+  height: 34px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: var(--color-text-muted);
+
+  border-radius: var(--radius-full);
+}
+
+.modalCloseButton:hover {
+  color: var(--color-text-primary);
+  background: var(--color-border-light);
+}
+
+.modalBody {
+  display: flex;
+  flex-direction: column;
+
+  gap: 20px;
+
+  padding: 22px;
+
+  overflow-y: auto;
+}
+
+.formLabel {
+  display: block;
+
+  margin-bottom: 7px;
+
+  color: var(--color-text-secondary);
+
+  font-size: 10px;
+  font-weight: var(--font-weight-bold);
+
+  letter-spacing: 0.03em;
+}
+
+.formControl {
+  width: 100%;
+  min-height: 41px;
+
+  padding: 0 12px;
+
+  color: var(--color-text-primary);
+  background: var(--color-background-soft);
+
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+}
+
+.formControl:focus {
+  border-color: var(--color-border-focus);
+
+  box-shadow: 0 0 0 3px var(--color-primary-light);
+}
+
+.orderTypeSelector {
+  display: grid;
+
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+
+  gap: 8px;
+}
+
+.orderTypeSelector button {
+  min-height: 76px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  gap: 5px;
+
+  color: var(--color-text-secondary);
+  background: var(--color-background-soft);
+
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+}
+
+.orderTypeSelector button:hover {
+  border-color: var(--color-border-dark);
+}
+
+.orderTypeSelector .orderTypeSelected {
+  color: var(--color-primary);
+  background: var(--color-primary-light);
+
+  border-color: var(--color-primary);
+
+  box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.08);
+}
+
+.guestCounter {
+  min-height: 52px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 15px;
+
+  padding: 7px;
+
+  background: var(--color-background-soft);
+
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.guestCounter button {
+  width: 36px;
+  height: 36px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: var(--color-text-secondary);
+  background: var(--color-surface);
+
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+
+  box-shadow: var(--shadow-xs);
+}
+
+.guestCounter strong {
+  min-width: 80px;
+
+  color: var(--color-text-primary);
+
+  font-size: var(--font-size-sm);
+}
+
+.modalPrimaryButton {
+  width: 100%;
+  min-height: 43px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 7px;
+
+  padding: 9px 16px;
+
+  color: var(--color-text-inverse);
+  background: var(--color-primary);
+
+  border-radius: var(--radius-md);
+
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+
+  transition: background var(--transition-fast);
+}
+
+.modalPrimaryButton:hover {
+  background: var(--color-primary-hover);
+}
+
+@media (max-width: 650px) {
+  .modalOverlay {
+    padding: 8px;
+  }
+
+  .modalBox {
+    border-radius: var(--radius-lg);
+  }
+
+  .orderTypeSelector {
+    grid-template-columns: 1fr;
+  }
+}

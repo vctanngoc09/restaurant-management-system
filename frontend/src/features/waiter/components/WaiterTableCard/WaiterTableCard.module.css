@@ -1,0 +1,164 @@
+.card {
+  width: 100%;
+  height: 115px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+
+  padding: 14px;
+
+  text-align: left;
+
+  border-radius: var(--radius-lg);
+
+  transition:
+    transform var(--transition-fast),
+    background var(--transition-fast),
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast);
+}
+
+.card:hover {
+  transform: translateY(-1px);
+
+  box-shadow: var(--shadow-sm);
+}
+
+.occupied {
+  background: #eef2ff;
+
+  border: 1px solid #c7d2fe;
+}
+
+.occupied:hover {
+  background: #e8edff;
+
+  border-color: #a5b4fc;
+}
+
+.empty {
+  background: #ffffff;
+
+  border: 1px solid var(--color-border);
+}
+
+.empty:hover {
+  background: #f8fafc;
+}
+
+.top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 8px;
+}
+
+.identity {
+  min-width: 0;
+
+  display: flex;
+  align-items: center;
+
+  gap: 5px;
+}
+
+.identity > svg {
+  color: var(--waiter-muted);
+
+  flex-shrink: 0;
+}
+
+.identity strong {
+  color: var(--waiter-text);
+
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.identity span {
+  padding: 2px 5px;
+
+  border-radius: 5px;
+
+  font-size: 8px;
+  font-weight: 700;
+
+  white-space: nowrap;
+}
+
+.indoorBadge {
+  color: var(--waiter-muted);
+  background: #f8fafc;
+
+  border: 1px solid var(--color-border);
+}
+
+.outdoorBadge {
+  color: #047857;
+  background: #ecfdf5;
+
+  border: 1px solid #a7f3d0;
+}
+
+.outdoorIcon {
+  color: #059669 !important;
+}
+
+.emptyDot,
+.occupiedDot {
+  width: 9px;
+  height: 9px;
+
+  flex-shrink: 0;
+
+  border-radius: var(--radius-full);
+}
+
+.emptyDot {
+  background: var(--color-border-dark);
+}
+
+.occupiedDot {
+  background: var(--color-primary);
+
+  box-shadow:
+    0 0 0 4px
+    var(--color-primary-light);
+}
+
+.bottom {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+
+  gap: 8px;
+
+  padding-top: 8px;
+
+  border-top:
+    1px solid
+    rgba(226, 232, 240, 0.8);
+}
+
+.bottom p {
+  color: var(--waiter-muted);
+
+  font-size: 10px;
+}
+
+.bottom strong {
+  display: block;
+
+  margin-top: 2px;
+
+  color: #1e1b4b;
+
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.bottom > svg {
+  color: var(--waiter-primary);
+}

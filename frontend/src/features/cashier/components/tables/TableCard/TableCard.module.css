@@ -1,0 +1,208 @@
+.tableCard {
+  width: 100%;
+  height: 145px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+
+  padding: 15px;
+
+  text-align: left;
+
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+
+  overflow: hidden;
+
+  transition:
+    border var(--transition-fast),
+    background var(--transition-fast),
+    box-shadow var(--transition-fast),
+    transform var(--transition-fast);
+}
+
+.tableCard:hover {
+  transform: translateY(-1px);
+
+  box-shadow: var(--shadow-sm);
+}
+
+.tableCardOccupied {
+  background: #eef2ff;
+
+  border-color: #c7d2fe;
+}
+
+.tableCardOccupied:hover {
+  background: #e8edff;
+
+  border-color: #a5b4fc;
+}
+
+.tableCardEmpty {
+  background: var(--color-surface);
+}
+
+.tableCardEmpty:hover {
+  background: var(--color-surface-hover);
+
+  border-color: var(--color-border-dark);
+}
+
+.tableCardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 8px;
+}
+
+.tableIdentity {
+  min-width: 0;
+
+  display: flex;
+  align-items: center;
+
+  gap: 6px;
+}
+
+.tableIdentity > svg {
+  color: var(--color-text-muted);
+
+  flex-shrink: 0;
+}
+
+.tableIdentity strong {
+  color: var(--color-text-primary);
+
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-extrabold);
+
+  white-space: nowrap;
+}
+
+.indoorBadge,
+.outdoorBadge {
+  padding: 2px 5px;
+
+  border-radius: var(--radius-xs);
+
+  font-size: 9px;
+  font-weight: var(--font-weight-semibold);
+
+  white-space: nowrap;
+}
+
+.indoorBadge {
+  color: var(--color-text-secondary);
+  background: var(--color-background-soft);
+
+  border: 1px solid var(--color-border);
+}
+
+.outdoorBadge {
+  color: #047857;
+  background: #ecfdf5;
+
+  border: 1px solid #a7f3d0;
+}
+
+.outdoorIcon {
+  color: #059669 !important;
+}
+
+.statusDot {
+  width: 9px;
+  height: 9px;
+
+  flex-shrink: 0;
+
+  background: var(--color-border-dark);
+
+  border-radius: var(--radius-full);
+}
+
+.statusDotOccupied {
+  background: var(--color-primary);
+
+  box-shadow: 0 0 0 4px var(--color-primary-light);
+}
+
+.tableCardCenter {
+  height: 37px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.utensilsIcon {
+  color: var(--color-primary);
+}
+
+.emptyStamp {
+  width: 38px;
+  height: 34px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: var(--color-text-disabled);
+
+  border: 2px dashed var(--color-border);
+  border-radius: var(--radius-md);
+
+  font-size: 9px;
+  font-weight: var(--font-weight-bold);
+}
+
+.tableCardFooter {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+
+  gap: 8px;
+
+  padding-top: 8px;
+
+  border-top: 1px solid rgba(226, 232, 240, 0.8);
+}
+
+.tableCardFooter p {
+  color: var(--color-text-secondary);
+
+  font-size: 10px;
+  font-weight: var(--font-weight-medium);
+}
+
+.tableCardFooter strong {
+  display: block;
+
+  margin-top: 1px;
+
+  color: #1e1b4b;
+
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-extrabold);
+}
+
+.tableCardFooter .mutedPrice {
+  color: var(--color-text-muted);
+}
+
+.cardArrow {
+  width: 22px;
+  height: 22px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: var(--color-text-muted);
+  background: rgba(255, 255, 255, 0.8);
+
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+}

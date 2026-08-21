@@ -1,0 +1,43 @@
+.chefPage {
+  --kds-background: #f1f3f5;
+  --kds-surface: #ffffff;
+
+  --kds-text: #0f1419;
+  --kds-muted: #4a5568;
+
+  --kds-blue: #2c5ef5;
+  --kds-blue-hover: #1f4fe0;
+
+  width: 100%;
+  min-height: calc(
+    100dvh - var(--header-height)
+  );
+
+  padding: 24px;
+
+  color: var(--kds-text);
+  background: var(--kds-background);
+}
+
+.kitchenBoard {
+  display: grid;
+
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+
+  align-items: start;
+
+  gap: 24px;
+}
+
+@media (max-width: 1050px) {
+  .kitchenBoard {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 650px) {
+  .chefPage {
+    padding: 14px;
+  }
+}
