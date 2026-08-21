@@ -3,7 +3,6 @@ import {
   Phone,
   UserRound,
   CircleOff,
-  RotateCcw,
 } from "lucide-react";
 
 import {
@@ -94,14 +93,11 @@ function StaffCard({ staff, onEdit, onDelete, onRestore }) {
               onClick={() => onDelete(staff)}
             />
           ) : (
-            <button
-              type="button"
-              className={styles.restoreButton}
-              onClick={() => onRestore(staff)}
+            <ActionButton
+              action="restore"
               title={`Khôi phục ${staff.fullName}`}
-            >
-              <RotateCcw size={15} />
-            </button>
+              onClick={() => onRestore(staff)}
+            />
           )}
         </ActionGroup>
       </footer>

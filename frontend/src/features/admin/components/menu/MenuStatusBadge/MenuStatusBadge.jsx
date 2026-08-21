@@ -1,13 +1,13 @@
-import styles from "./MenuStatusBadge.module.css";
+// import styles from "./MenuStatusBadge.module.css";
 
-function MenuStatusBadge({ status }) {
-  const inStock = status === "in_stock";
+// function MenuStatusBadge({ status }) {
+//   const inStock = status === "in_stock";
 
-  return (
-    <span className={inStock ? styles.available : styles.unavailable}>
-      {inStock ? "Còn món (Sẵn sàng)" : "Hết món (Out)"}
-    </span>
-  );
-}
+//   return (
+//     <span className={inStock ? styles.available : styles.unavailable}>
+//       {inStock ? "Còn món (Sẵn sàng)" : "Hết món (Out)"}
+//     </span>
+//   );
+// }
 
-export default MenuStatusBadge;
+// export default MenuStatusBadge;

@@ -100,6 +100,27 @@
   border-color: #fecaca;
 }
 
+/* =========================
+   RESTORE
+========================= */
+
+.restore {
+  color: #039855;
+
+  background: #ecfdf3;
+
+  border-color: #a7f3d0;
+}
+
+
+.restore:hover {
+  color: #027a48;
+
+  background: #d1fadf;
+
+  border-color: #6ce9a6;
+}
+
 
 /* =========================
    OPTIONAL LABEL

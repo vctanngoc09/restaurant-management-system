@@ -3,6 +3,7 @@ package vn.edu.ut.resto.service;
 import org.springframework.data.domain.Page;
 import vn.edu.ut.resto.dto.request.ProductRequest;
 import vn.edu.ut.resto.model.Product;
+import vn.edu.ut.resto.model.enums.EProductStatus;
 
 import java.util.List;
 
@@ -17,7 +18,7 @@ public interface ProductService {
             int size,
             String keyword,
             Long categoryId,
-            Boolean isAvailable
+            EProductStatus status
     );
 
     Product getProductById(Long id);
@@ -30,4 +31,6 @@ public interface ProductService {
     void deleteProduct(Long id);
 
     Product restoreProduct(Long id);
+
+    Product toggleAvailability(Long id);
 }

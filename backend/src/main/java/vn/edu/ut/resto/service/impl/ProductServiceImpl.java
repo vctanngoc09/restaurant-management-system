@@ -23,6 +23,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import vn.edu.ut.resto.model.enums.EProductStatus;
 import vn.edu.ut.resto.repository.CategoryRepository;
 import vn.edu.ut.resto.repository.ProductRepository;
 
@@ -31,8 +33,7 @@ import vn.edu.ut.resto.service.ProductService;
 import java.util.List;
 
 @Service
-public class ProductServiceImpl
-        implements ProductService {
+public class ProductServiceImpl implements ProductService {
 
     @Autowired
     private ProductRepository productRepository;
@@ -95,7 +96,7 @@ public class ProductServiceImpl
             int size,
             String keyword,
             Long categoryId,
-            Boolean isAvailable
+            EProductStatus status
     ) {
 
         // =========================
@@ -110,7 +111,10 @@ public class ProductServiceImpl
         }
 
 
-        if (size <= 0 || size > 50) {
+        if (
+                size <= 0 ||
+                        size > 50
+        ) {
 
             throw new InvalidOperationException(
                     "Số lượng sản phẩm mỗi trang phải từ 1 đến 50."
@@ -125,12 +129,14 @@ public class ProductServiceImpl
         if (keyword == null) {
             keyword = "";
         } else {
-            keyword = keyword.trim();
+
+            keyword =
+                    keyword.trim();
         }
 
 
         // =========================
-        // CREATE PAGEABLE
+        // PAGEABLE
         // =========================
 
         Pageable pageable =
@@ -142,25 +148,30 @@ public class ProductServiceImpl
 
         // =========================
         // STEP 1
-        // ONLY GET IDS
+        // GET IDS
         // =========================
 
         Page<Long> idPage =
-                productRepository.findProductIds(
-                        keyword,
-                        categoryId,
-                        isAvailable,
-                        pageable
-                );
+                productRepository
+                        .findProductIds(
+                                keyword,
+                                categoryId,
+                                status,
+                                pageable
+                        );
 
 
-        // Không có dữ liệu
+        // =========================
+        // EMPTY
+        // =========================
+
         if (idPage.isEmpty()) {
 
             return new PageImpl<>(
                     List.of(),
                     pageable,
-                    idPage.getTotalElements()
+                    idPage
+                            .getTotalElements()
             );
         }
 
@@ -171,7 +182,7 @@ public class ProductServiceImpl
 
         // =========================
         // STEP 2
-        // FETCH PRODUCT + CATEGORY
+        // PRODUCT + CATEGORY
         // =========================
 
         List<Product> products =
@@ -186,7 +197,8 @@ public class ProductServiceImpl
         // =========================
 
         Map<Long, Product> productMap =
-                products.stream()
+                products
+                        .stream()
                         .collect(
                                 Collectors.toMap(
                                         Product::getId,
@@ -196,9 +208,18 @@ public class ProductServiceImpl
 
 
         List<Product> orderedProducts =
-                ids.stream()
-                        .map(productMap::get)
-                        .filter(product -> product != null)
+                ids
+                        .stream()
+
+                        .map(
+                                productMap::get
+                        )
+
+                        .filter(
+                                product ->
+                                        product != null
+                        )
+
                         .toList();
 
 
@@ -284,7 +305,9 @@ public class ProductServiceImpl
     // =========================
 
     @Override
-    public void deleteProduct(Long id) {
+    public void deleteProduct(
+            Long id
+    ) {
 
         Product product =
                 productRepository
@@ -297,7 +320,10 @@ public class ProductServiceImpl
                         );
 
 
-        if (!product.getIsAvailable()) {
+        if (
+                product.getStatus()
+                        == EProductStatus.INACTIVE
+        ) {
 
             throw new InvalidOperationException(
                     "Sản phẩm này đã ngừng bán."
@@ -305,9 +331,14 @@ public class ProductServiceImpl
         }
 
 
-        product.setIsAvailable(false);
+        product.setStatus(
+                EProductStatus.INACTIVE
+        );
 
-        productRepository.save(product);
+
+        productRepository.save(
+                product
+        );
     }
 
 
@@ -316,7 +347,9 @@ public class ProductServiceImpl
     // =========================
 
     @Override
-    public Product restoreProduct(Long id) {
+    public Product restoreProduct(
+            Long id
+    ) {
 
         Product product =
                 productRepository
@@ -329,16 +362,90 @@ public class ProductServiceImpl
                         );
 
 
-        if (product.getIsAvailable()) {
+        if (
+                product.getStatus()
+                        != EProductStatus.INACTIVE
+        ) {
 
             throw new InvalidOperationException(
-                    "Sản phẩm này hiện đang được bán."
+                    "Sản phẩm này chưa ở trạng thái ngừng bán."
             );
         }
 
 
-        product.setIsAvailable(true);
+        product.setStatus(
+                EProductStatus.AVAILABLE
+        );
 
-        return productRepository.save(product);
+
+        return productRepository.save(
+                product
+        );
+    }
+    @Override
+    public Product toggleAvailability(
+            Long id
+    ) {
+
+        Product product =
+                productRepository
+                        .findById(id)
+                        .orElseThrow(() ->
+
+                                new ResourceNotFoundException(
+                                        "Không tìm thấy sản phẩm có ID: "
+                                                + id
+                                )
+                        );
+
+
+        // =========================
+        // INACTIVE
+        // =========================
+
+        if (
+                product.getStatus()
+                        == EProductStatus.INACTIVE
+        ) {
+
+            throw new InvalidOperationException(
+                    "Không thể thay đổi trạng thái món đã ngừng bán."
+            );
+        }
+
+
+        // =========================
+        // AVAILABLE -> OUT OF STOCK
+        // =========================
+
+        if (
+                product.getStatus()
+                        == EProductStatus.AVAILABLE
+        ) {
+
+            product.setStatus(
+                    EProductStatus.OUT_OF_STOCK
+            );
+        }
+
+
+        // =========================
+        // OUT OF STOCK -> AVAILABLE
+        // =========================
+
+        else if (
+                product.getStatus()
+                        == EProductStatus.OUT_OF_STOCK
+        ) {
+
+            product.setStatus(
+                    EProductStatus.AVAILABLE
+            );
+        }
+
+
+        return productRepository.save(
+                product
+        );
     }
 }

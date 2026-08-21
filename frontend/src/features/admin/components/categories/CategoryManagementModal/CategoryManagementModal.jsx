@@ -1,38 +1,40 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 
-import { MapPinned, Plus, Save, X, XCircle } from "lucide-react";
+import { Plus, Save, Tags, X, XCircle } from "lucide-react";
 
 import { toast } from "react-toastify";
 
-import areaService from "../../../services/areaService";
+import categoryService from "../../../services/categoryService";
 
 import {
   ActionButton,
   ActionGroup,
 } from "../../../../../components/common/ActionButton";
 
-import styles from "./AreaManagementModal.module.css";
+import styles from "./CategoryManagementModal.module.css";
 
-function AreaManagementModal({ open, areas, onClose, onChanged }) {
+function CategoryManagementModal({ open, categories, onClose, onChanged }) {
   // =========================
   // STATE
   // =========================
 
   const [name, setName] = useState("");
 
-  const [editingAreaId, setEditingAreaId] = useState(null);
+  const [description, setDescription] = useState("");
+
+  const [editingCategoryId, setEditingCategoryId] = useState(null);
 
   const [saving, setSaving] = useState(false);
 
   const [deletingId, setDeletingId] = useState(null);
 
   // =========================
-  // SORT AREA
+  // SORT
   // =========================
 
-  const sortedAreas = useMemo(() => {
-    return [...areas].sort((a, b) => a.name.localeCompare(b.name, "vi"));
-  }, [areas]);
+  const sortedCategories = useMemo(() => {
+    return [...categories].sort((a, b) => a.name.localeCompare(b.name, "vi"));
+  }, [categories]);
 
   // =========================
   // RESET FORM
@@ -40,7 +42,10 @@ function AreaManagementModal({ open, areas, onClose, onChanged }) {
 
   const resetForm = useCallback(() => {
     setName("");
-    setEditingAreaId(null);
+
+    setDescription("");
+
+    setEditingCategoryId(null);
   }, []);
 
   // =========================
@@ -54,7 +59,7 @@ function AreaManagementModal({ open, areas, onClose, onChanged }) {
   }, [open, resetForm]);
 
   // =========================
-  // ESC CLOSE MODAL
+  // ESC CLOSE
   // =========================
 
   useEffect(() => {
@@ -87,10 +92,12 @@ function AreaManagementModal({ open, areas, onClose, onChanged }) {
   // START EDIT
   // =========================
 
-  const handleStartEdit = (area) => {
-    setEditingAreaId(area.id);
+  const handleStartEdit = (category) => {
+    setEditingCategoryId(category.id);
 
-    setName(area.name);
+    setName(category.name || "");
+
+    setDescription(category.description || "");
   };
 
   // =========================
@@ -108,30 +115,36 @@ function AreaManagementModal({ open, areas, onClose, onChanged }) {
   const handleSubmit = async (event) => {
     event.preventDefault();
 
+    // =========================
+    // NORMALIZE
+    // =========================
+
     const normalizedName = name.trim();
 
+    const normalizedDescription = description.trim();
+
     // =========================
-    // VALIDATE EMPTY
+    // VALIDATE NAME
     // =========================
 
     if (!normalizedName) {
-      toast.error("Vui lòng nhập tên khu vực.");
+      toast.error("Vui lòng nhập tên danh mục.");
 
       return;
     }
 
     // =========================
-    // VALIDATE DUPLICATE
+    // DUPLICATE FRONTEND
     // =========================
 
-    const duplicatedArea = areas.find(
-      (area) =>
-        area.id !== editingAreaId &&
-        area.name.trim().toLowerCase() === normalizedName.toLowerCase(),
+    const duplicatedCategory = categories.find(
+      (category) =>
+        category.id !== editingCategoryId &&
+        category.name?.trim().toLowerCase() === normalizedName.toLowerCase(),
     );
 
-    if (duplicatedArea) {
-      toast.error("Tên khu vực đã tồn tại.");
+    if (duplicatedCategory) {
+      toast.error("Tên danh mục đã tồn tại.");
 
       return;
     }
@@ -142,6 +155,8 @@ function AreaManagementModal({ open, areas, onClose, onChanged }) {
 
     const payload = {
       name: normalizedName,
+
+      description: normalizedDescription || null,
     };
 
     try {
@@ -151,19 +166,23 @@ function AreaManagementModal({ open, areas, onClose, onChanged }) {
       // UPDATE
       // =========================
 
-      if (editingAreaId) {
-        await areaService.update(editingAreaId, payload);
+      if (editingCategoryId) {
+        await categoryService.update(
+          editingCategoryId,
 
-        toast.success(`Cập nhật khu vực "${normalizedName}" thành công!`);
+          payload,
+        );
+
+        toast.success(`Cập nhật danh mục "${normalizedName}" thành công!`);
       }
 
       // =========================
       // CREATE
       // =========================
       else {
-        await areaService.create(payload);
+        await categoryService.create(payload);
 
-        toast.success(`Thêm khu vực "${normalizedName}" thành công!`);
+        toast.success(`Thêm danh mục "${normalizedName}" thành công!`);
       }
 
       // =========================
@@ -182,9 +201,9 @@ function AreaManagementModal({ open, areas, onClose, onChanged }) {
 
       toast.error(
         error.response?.data?.message ||
-          (editingAreaId
-            ? "Không thể cập nhật khu vực."
-            : "Không thể thêm khu vực."),
+          (editingCategoryId
+            ? "Không thể cập nhật danh mục."
+            : "Không thể thêm danh mục."),
       );
     } finally {
       setSaving(false);
@@ -195,9 +214,9 @@ function AreaManagementModal({ open, areas, onClose, onChanged }) {
   // DELETE
   // =========================
 
-  const handleDelete = async (area) => {
+  const handleDelete = async (category) => {
     const confirmed = window.confirm(
-      `Bạn có chắc muốn xóa khu vực "${area.name}"?\n\nNếu khu vực đang có bàn thì hệ thống có thể không cho phép xóa.`,
+      `Bạn có chắc muốn xóa danh mục "${category.name}"?\n\nDanh mục đang có món ăn sẽ không thể xóa.`,
     );
 
     if (!confirmed) {
@@ -205,25 +224,32 @@ function AreaManagementModal({ open, areas, onClose, onChanged }) {
     }
 
     try {
-      setDeletingId(area.id);
+      setDeletingId(category.id);
 
-      await areaService.remove(area.id);
+      await categoryService.remove(category.id);
 
-      // Nếu đang edit khu vực
-      // vừa bị delete
-      if (editingAreaId === area.id) {
+      // Nếu đang sửa đúng category
+      // vừa bị xóa
+      if (editingCategoryId === category.id) {
         resetForm();
       }
 
-      toast.success(`Xóa khu vực "${area.name}" thành công!`);
+      toast.success(`Xóa danh mục "${category.name}" thành công!`);
 
       await onChanged?.();
     } catch (error) {
       console.error(error);
 
+      /*
+       * Backend của bạn đã xử lý:
+       *
+       * "Không thể xóa danh mục vì
+       * vẫn còn sản phẩm thuộc
+       * danh mục này."
+       */
       toast.error(
         error.response?.data?.message ||
-          `Không thể xóa khu vực "${area.name}". Có thể khu vực này đang được bàn sử dụng.`,
+          `Không thể xóa danh mục "${category.name}".`,
       );
     } finally {
       setDeletingId(null);
@@ -243,13 +269,13 @@ function AreaManagementModal({ open, areas, onClose, onChanged }) {
         <header className={styles.header}>
           <div className={styles.headerTitle}>
             <div className={styles.headerIcon}>
-              <MapPinned size={21} />
+              <Tags size={21} />
             </div>
 
             <div>
-              <h2>Quản Lý Khu Vực</h2>
+              <h2>Quản Lý Danh Mục</h2>
 
-              <p>Thêm, đổi tên hoặc xóa khu vực bàn ăn.</p>
+              <p>Thêm, sửa hoặc xóa danh mục món ăn.</p>
             </div>
           </div>
 
@@ -264,43 +290,62 @@ function AreaManagementModal({ open, areas, onClose, onChanged }) {
         </header>
 
         {/* =========================
-            CREATE / UPDATE FORM
+            FORM
         ========================= */}
 
         <form className={styles.formSection} onSubmit={handleSubmit}>
           <div className={styles.formHeading}>
-            <span>
-              {editingAreaId ? "Chỉnh sửa khu vực" : "Thêm khu vực mới"}
-            </span>
+            {editingCategoryId ? "Chỉnh sửa danh mục" : "Thêm danh mục mới"}
           </div>
 
-          <div className={styles.formRow}>
+          {/* NAME */}
+
+          <div className={styles.field}>
+            <label>Tên danh mục</label>
+
             <input
               type="text"
               value={name}
               onChange={(event) => setName(event.target.value)}
-              placeholder="VD: Tầng 1, Tầng 2, Ngoài trời..."
+              placeholder="VD: Món chính, Món kèm, Nước uống..."
               maxLength={100}
               autoFocus
             />
+          </div>
 
+          {/* DESCRIPTION */}
+
+          <div className={styles.field}>
+            <label>Mô tả danh mục</label>
+
+            <textarea
+              value={description}
+              onChange={(event) => setDescription(event.target.value)}
+              placeholder="VD: Các món chính phục vụ trong thực đơn..."
+              rows={2}
+            />
+          </div>
+
+          {/* ACTION */}
+
+          <div className={styles.formActions}>
             <button
               type="submit"
               className={styles.saveButton}
               disabled={saving}
             >
-              {editingAreaId ? <Save size={17} /> : <Plus size={17} />}
+              {editingCategoryId ? <Save size={17} /> : <Plus size={17} />}
 
               <span>
                 {saving
                   ? "Đang lưu..."
-                  : editingAreaId
+                  : editingCategoryId
                     ? "Cập Nhật"
-                    : "Thêm Khu Vực"}
+                    : "Thêm Danh Mục"}
               </span>
             </button>
 
-            {editingAreaId && (
+            {editingCategoryId && (
               <button
                 type="button"
                 className={styles.cancelEditButton}
@@ -308,8 +353,7 @@ function AreaManagementModal({ open, areas, onClose, onChanged }) {
                 disabled={saving}
               >
                 <XCircle size={17} />
-
-                <span>Hủy sửa</span>
+                Hủy sửa
               </button>
             )}
           </div>
@@ -318,82 +362,76 @@ function AreaManagementModal({ open, areas, onClose, onChanged }) {
         <div className={styles.divider} />
 
         {/* =========================
-            AREA LIST
+            LIST
         ========================= */}
 
         <div className={styles.listSection}>
           <div className={styles.listHeader}>
             <div>
-              <h3>Danh Sách Khu Vực</h3>
+              <h3>Danh Sách Danh Mục</h3>
 
-              <p>{areas.length} khu vực hiện có</p>
+              <p>{categories.length} danh mục hiện có</p>
             </div>
           </div>
 
-          {sortedAreas.length === 0 ? (
-            // =========================
-            // EMPTY
-            // =========================
-
+          {sortedCategories.length === 0 ? (
             <div className={styles.emptyState}>
-              <MapPinned size={30} />
+              <Tags size={30} />
 
-              <strong>Chưa có khu vực nào</strong>
+              <strong>Chưa có danh mục nào</strong>
 
-              <span>Hãy thêm khu vực đầu tiên cho nhà hàng.</span>
+              <span>Hãy thêm danh mục đầu tiên cho thực đơn.</span>
             </div>
           ) : (
-            // =========================
-            // LIST
-            // =========================
+            <div className={styles.categoryList}>
+              {sortedCategories.map((category) => {
+                const isEditing = editingCategoryId === category.id;
 
-            <div className={styles.areaList}>
-              {sortedAreas.map((area) => {
-                const isEditing = editingAreaId === area.id;
-
-                const isDeleting = deletingId === area.id;
+                const isDeleting = deletingId === category.id;
 
                 return (
                   <div
-                    key={area.id}
+                    key={category.id}
                     className={`
-                                ${styles.areaItem}
-                                ${isEditing ? styles.areaItemEditing : ""}
-                              `}
+                              ${styles.categoryItem}
+                              ${isEditing ? styles.categoryItemEditing : ""}
+                            `}
                   >
-                    {/* AREA INFO */}
+                    {/* INFO */}
 
-                    <div className={styles.areaInfo}>
-                      <div className={styles.areaIcon}>
-                        <MapPinned size={17} />
+                    <div className={styles.categoryInfo}>
+                      <div className={styles.categoryIcon}>
+                        <Tags size={17} />
                       </div>
 
-                      <div>
-                        <strong>{area.name}</strong>
+                      <div className={styles.categoryText}>
+                        <strong>{category.name}</strong>
 
-                        <span>ID: {area.id}</span>
+                        <span>{category.description || "Chưa có mô tả"}</span>
+
+                        <small>ID: {category.id}</small>
                       </div>
                     </div>
 
                     {/* ACTION */}
 
-                    
+                    <div className={styles.actions}>
                       <ActionGroup>
                         <ActionButton
                           action="edit"
-                          title={`Sửa khu vực ${area.name}`}
-                          onClick={() => handleStartEdit(area)}
+                          title={`Sửa danh mục ${category.name}`}
+                          onClick={() => handleStartEdit(category)}
                           disabled={saving || isDeleting}
                         />
 
                         <ActionButton
                           action="delete"
-                          title={`Xóa khu vực ${area.name}`}
-                          onClick={() => handleDelete(area)}
+                          title={`Xóa danh mục ${category.name}`}
+                          onClick={() => handleDelete(category)}
                           disabled={saving || isDeleting}
                         />
                       </ActionGroup>
-                    
+                    </div>
                   </div>
                 );
               })}
@@ -415,4 +453,4 @@ function AreaManagementModal({ open, areas, onClose, onChanged }) {
   );
 }
 
-export default AreaManagementModal;
+export default CategoryManagementModal;

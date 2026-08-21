@@ -21,6 +21,7 @@ import vn.edu.ut.resto.mapper.ProductMapper;
 
 import vn.edu.ut.resto.model.Product;
 
+import vn.edu.ut.resto.model.enums.EProductStatus;
 import vn.edu.ut.resto.service.ProductService;
 
 import java.util.List;
@@ -69,7 +70,8 @@ public class ProductController {
 
             @RequestParam(
                     required = false
-            ) Boolean isAvailable
+            )
+            EProductStatus status
 
     ) {
 
@@ -80,7 +82,7 @@ public class ProductController {
                                 size,
                                 keyword,
                                 categoryId,
-                                isAvailable
+                                status
                         )
                         .map(productMapper::toResponse);
 
@@ -217,6 +219,60 @@ public class ProductController {
                         200,
                         "Mở bán lại sản phẩm thành công!",
                         productMapper.toResponse(product)
+                )
+        );
+    }
+
+    // =========================
+    // TOGGLE AVAILABILITY
+    // AVAILABLE <-> OUT_OF_STOCK
+    // =========================
+
+    @PatchMapping("/{id}/availability")
+    public ResponseEntity<
+            ApiResponse<ProductResponse>
+            >
+    toggleAvailability(
+            @PathVariable Long id
+    ) {
+
+        Product product =
+                productService
+                        .toggleAvailability(
+                                id
+                        );
+
+
+        String message;
+
+
+        if (
+                product.getStatus()
+                        == EProductStatus.AVAILABLE
+        ) {
+
+            message =
+                    "Sản phẩm đã sẵn sàng để bán.";
+
+        } else {
+
+            message =
+                    "Sản phẩm đã chuyển sang trạng thái hết món.";
+        }
+
+
+        return ResponseEntity.ok(
+
+                new ApiResponse<>(
+
+                        200,
+
+                        message,
+
+                        productMapper
+                                .toResponse(
+                                        product
+                                )
                 )
         );
     }

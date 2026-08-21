@@ -18,8 +18,43 @@
 
   background: var(--color-background-soft);
 
-  border-bottom:
-    1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.stopSelling {
+  width: 90px;
+  height: 29px;
+
+  box-sizing: border-box;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 5px;
+
+  flex-shrink: 0;
+
+  padding: 0 8px;
+
+  border: 1px solid #d0d5dd;
+  border-radius: var(--radius-md);
+
+  font-size: 10px;
+  font-weight: var(--font-weight-semibold);
+
+  white-space: nowrap;
+
+  cursor: default;
+
+  background: #f2f4f7;
+  color: #667085;
+
+  transition:
+    background var(--transition-fast),
+    color var(--transition-fast),
+    border-color var(--transition-fast),
+    transform var(--transition-fast);
 }
 
 .table th {
@@ -36,8 +71,7 @@
 .table td {
   padding: 11px 13px;
 
-  border-bottom:
-    1px solid var(--color-border-light);
+  border-bottom: 1px solid var(--color-border-light);
 
   vertical-align: middle;
 }
@@ -47,14 +81,12 @@
 }
 
 .table tbody tr {
-  transition:
-    background var(--transition-fast);
+  transition: background var(--transition-fast);
 }
 
 .table tbody tr:hover {
   background: #f8fafc;
 }
-
 
 /* =========================
    FOOD
@@ -120,7 +152,6 @@
   white-space: nowrap;
 }
 
-
 /* =========================
    CATEGORY
 ========================= */
@@ -134,7 +165,6 @@
   text-transform: uppercase;
 }
 
-
 /* =========================
    PRICE
 ========================= */
@@ -145,7 +175,6 @@
   font-size: 12px;
   font-weight: var(--font-weight-extrabold);
 }
-
 
 /* =========================
    ACTIONS

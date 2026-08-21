@@ -1,20 +1,24 @@
-import { ImageIcon } from "lucide-react";
+import { ImageIcon, Ban } from "lucide-react";
+
 import StockToggleButton from "../../../../../components/common/StockToggleButton";
+
 import {
   ActionButton,
   ActionGroup,
 } from "../../../../../components/common/ActionButton";
 
-import { MENU_CATEGORY_LABELS } from "../../../../../constants/menuCategories";
-
 import { formatCurrency } from "../../../../../utils/formatCurrency";
 
 import styles from "./MenuTable.module.css";
 
-function MenuTable({ menuItems, onEdit, onDelete, onToggleStock, }) {
+function MenuTable({ menuItems, onEdit, onDelete, onRestore, onToggleStock }) {
   return (
     <div className={styles.wrapper}>
       <table className={styles.table}>
+        {/* =========================
+            HEADER
+        ========================= */}
+
         <thead>
           <tr>
             <th>Món Ăn</th>
@@ -29,6 +33,10 @@ function MenuTable({ menuItems, onEdit, onDelete, onToggleStock, }) {
           </tr>
         </thead>
 
+        {/* =========================
+            BODY
+        ========================= */}
+
         <tbody>
           {menuItems.length === 0 ? (
             <tr>
@@ -37,72 +45,99 @@ function MenuTable({ menuItems, onEdit, onDelete, onToggleStock, }) {
               </td>
             </tr>
           ) : (
-            menuItems.map((item) => (
-              <tr key={item.id}>
-                {/* FOOD */}
+            menuItems.map((item) => {
+              // =========================
+              // STATUS
+              // =========================
 
-                <td>
-                  <div className={styles.food}>
-                    <div className={styles.image}>
-                      {item.image ? (
-                        <img src={item.image} alt={item.name} />
-                      ) : (
-                        <ImageIcon size={20} />
-                      )}
+              const isInactive = item.productStatus === "INACTIVE";
+
+              return (
+                <tr key={item.id}>
+                  {/* =========================
+                          FOOD
+                      ========================= */}
+
+                  <td>
+                    <div className={styles.food}>
+                      <div className={styles.image}>
+                        {item.urlImg ? (
+                          <img src={item.urlImg} alt={item.name} />
+                        ) : (
+                          <ImageIcon size={20} />
+                        )}
+                      </div>
+
+                      <div className={styles.foodInfo}>
+                        <strong>{item.name}</strong>
+                      </div>
                     </div>
+                  </td>
 
-                    <div className={styles.foodInfo}>
-                      <strong>{item.name}</strong>
+                  {/* =========================
+                          CATEGORY
+                      ========================= */}
 
-                      <span title={item.description}>
-                        {item.description || "Chưa có mô tả"}
-                      </span>
-                    </div>
-                  </div>
-                </td>
+                  <td>
+                    <span className={styles.category}>
+                      {item.categoryName || "Chưa có danh mục"}
+                    </span>
+                  </td>
 
-                {/* CATEGORY */}
+                  {/* =========================
+                          PRICE
+                      ========================= */}
 
-                <td>
-                  <span className={styles.category}>
-                    {MENU_CATEGORY_LABELS[item.category] || item.category}
-                  </span>
-                </td>
+                  <td className={styles.price}>{formatCurrency(item.price)}</td>
 
-                {/* PRICE */}
+                  {/* =========================
+                          STATUS
+                      ========================= */}
 
-                <td className={styles.price}>{formatCurrency(item.price)}</td>
+                  <td>
+                    {isInactive ? (
+                      <div className={styles.stopSelling}>
+                        <Ban size={17} />
+                        <span>Ngừng bán</span>
+                      </div>
+                    ) : (
+                      <StockToggleButton
+                        status={item.status}
+                        onClick={() => onToggleStock(item)}
+                      />
+                    )}
+                  </td>
 
-                {/* STATUS */}
+                  {/* =========================
+                          ACTION
+                      ========================= */}
 
-                <td>
-                  <StockToggleButton
-                      status={item.status}
-                      onClick={() =>
-                          onToggleStock(item.id)
-                      }
-                  />
-                </td>
-
-                {/* ACTION */}
-
-                <td>
-                  <ActionGroup>
-                    <ActionButton
+                  <td>
+                    <ActionGroup>
+                      <ActionButton
                         action="edit"
                         title={`Sửa ${item.name}`}
                         onClick={() => onEdit(item)}
-                    />
+                      />
 
-                    <ActionButton
-                        action="delete"
-                        title={`Xóa ${item.name}`}
-                        onClick={() => onDelete(item)}
-                    />
-                  </ActionGroup>
-                </td>
-              </tr>
-            ))
+                      {isInactive ? (
+                        <ActionButton
+                          action="restore"
+                          title={`Khôi phục ${item.name}`}
+                          onClick={() => onRestore(item)}
+                        />
+                      ) : (
+                        <ActionButton
+                          action="delete"
+                          title={`Ngừng bán ${item.name}`}
+                          onClick={() => onDelete(item)}
+                        />
+                      )}
+                    </ActionGroup>
+                  </td>
+                </tr>
+              );
+            })
           )}
         </tbody>
       </table>

@@ -1,4 +1,4 @@
-import { Eye, SquarePen, Trash2 } from "lucide-react";
+import { Eye, SquarePen, Trash2, RotateCcw } from "lucide-react";
 
 import styles from "./ActionButton.module.css";
 
@@ -19,6 +19,12 @@ const ACTION_CONFIG = {
     icon: Trash2,
     label: "Xóa",
     className: "delete",
+  },
+
+  restore: {
+    icon: RotateCcw,
+    label: "Khôi phục",
+    className: "restore",
   },
 };
 

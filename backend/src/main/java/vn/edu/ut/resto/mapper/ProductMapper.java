@@ -1,11 +1,16 @@
 package vn.edu.ut.resto.mapper;
 
+
 import org.springframework.stereotype.Component;
 
 import vn.edu.ut.resto.dto.request.ProductRequest;
+
 import vn.edu.ut.resto.dto.response.ProductResponse;
 
 import vn.edu.ut.resto.model.Product;
+
+import vn.edu.ut.resto.model.enums.EProductStatus;
+
 
 @Component
 public class ProductMapper {
@@ -23,21 +28,34 @@ public class ProductMapper {
             return null;
         }
 
-        Product product = new Product();
+
+        Product product =
+                new Product();
+
 
         product.setName(
                 request.getName()
         );
 
+
         product.setPrice(
                 request.getPrice()
         );
+
 
         product.setUrlImg(
                 request.getUrlImg()
         );
 
-        product.setIsAvailable(true);
+
+        /*
+         * Món mới tạo mặc định
+         * là đang bán.
+         */
+        product.setStatus(
+                EProductStatus.AVAILABLE
+        );
+
 
         return product;
     }
@@ -52,21 +70,36 @@ public class ProductMapper {
             Product product
     ) {
 
-        if (request == null || product == null) {
+        if (
+                request == null ||
+                        product == null
+        ) {
+
             return;
         }
+
 
         product.setName(
                 request.getName()
         );
 
+
         product.setPrice(
                 request.getPrice()
         );
 
+
         product.setUrlImg(
                 request.getUrlImg()
         );
+
+
+        /*
+         * KHÔNG update status ở đây.
+         *
+         * Status được xử lý bởi
+         * API riêng.
+         */
     }
 
 
@@ -82,25 +115,51 @@ public class ProductMapper {
             return null;
         }
 
-        Long categoryId = null;
-        String categoryName = null;
 
-        if (product.getCategory() != null) {
+        Long categoryId =
+                null;
+
+
+        String categoryName =
+                null;
+
+
+        if (
+                product.getCategory()
+                        != null
+        ) {
 
             categoryId =
-                    product.getCategory().getId();
+                    product
+                            .getCategory()
+                            .getId();
+
 
             categoryName =
-                    product.getCategory().getName();
+                    product
+                            .getCategory()
+                            .getName();
         }
 
+
         return new ProductResponse(
+
                 product.getId(),
+
                 product.getName(),
+
                 product.getPrice(),
-                product.getIsAvailable(),
+
+                product.getStatus() != null
+                        ? product
+                        .getStatus()
+                        .name()
+                        : null,
+
                 product.getUrlImg(),
+
                 categoryId,
+
                 categoryName
         );
     }

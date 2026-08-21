@@ -1,13 +1,13 @@
 import { X } from "lucide-react";
 
-import { MENU_CATEGORIES } from "../../../../../constants/menuCategories";
-
 import styles from "./MenuFormModal.module.css";
 
 function MenuFormModal({
   open,
   editingItem,
   form,
+  categories,
+  categoriesLoading,
   onChange,
   onClose,
   onSubmit,
@@ -16,9 +16,14 @@ function MenuFormModal({
     return null;
   }
 
+  // =========================
+  // UPDATE FIELD
+  // =========================
+
   const updateField = (field, value) => {
     onChange({
       ...form,
+
       [field]: value,
     });
   };
@@ -29,6 +34,10 @@ function MenuFormModal({
         className={styles.modal}
         onMouseDown={(event) => event.stopPropagation()}
       >
+        {/* =========================
+            HEADER
+        ========================= */}
+
         <header className={styles.header}>
           <div>
             <span className={styles.badge}>Quản Lý Thực Đơn</span>
@@ -45,8 +54,14 @@ function MenuFormModal({
           </button>
         </header>
 
+        {/* =========================
+            FORM
+        ========================= */}
+
         <form onSubmit={onSubmit} className={styles.form}>
-          {/* NAME */}
+          {/* =========================
+              NAME
+          ========================= */}
 
           <div className={styles.field}>
             <label>Tên Món Ăn</label>
@@ -56,30 +71,47 @@ function MenuFormModal({
               value={form.name}
               onChange={(event) => updateField("name", event.target.value)}
               placeholder="VD: Hủ Tiếu Nam Vang"
+              maxLength={150}
               required
             />
           </div>
 
-          {/* CATEGORY */}
+          {/* =========================
+              CATEGORY
+          ========================= */}
 
           <div className={styles.field}>
             <label>Danh Mục</label>
 
             <select
-              value={form.category}
-              onChange={(event) => updateField("category", event.target.value)}
+              value={form.categoryId}
+              onChange={(event) =>
+                updateField("categoryId", event.target.value)
+              }
+              disabled={categoriesLoading}
+              required
             >
-              {MENU_CATEGORIES.filter((category) => category.id !== "all").map(
-                (category) => (
-                  <option key={category.id} value={category.id}>
-                    {category.label}
-                  </option>
-                ),
-              )}
+              <option value="">
+                {categoriesLoading
+                  ? "Đang tải danh mục..."
+                  : "-- Chọn danh mục --"}
+              </option>
+
+              {categories.map((category) => (
+                <option key={category.id} value={category.id}>
+                  {category.name}
+                </option>
+              ))}
             </select>
+
+            {!categoriesLoading && categories.length === 0 && (
+              <small>Chưa có danh mục món ăn.</small>
+            )}
           </div>
 
-          {/* PRICE */}
+          {/* =========================
+              PRICE
+          ========================= */}
 
           <div className={styles.field}>
             <label>Đơn Giá (VND)</label>
@@ -87,6 +119,7 @@ function MenuFormModal({
             <input
               type="number"
               min="1"
+              step="1000"
               value={form.price}
               onChange={(event) => updateField("price", event.target.value)}
               placeholder="VD: 55000"
@@ -94,49 +127,24 @@ function MenuFormModal({
             />
           </div>
 
-          {/* STATUS */}
-
-          <div className={styles.field}>
-            <label>Trạng Thái Kho</label>
-
-            <select
-              value={form.status}
-              onChange={(event) => updateField("status", event.target.value)}
-            >
-              <option value="in_stock">Còn món / Sẵn sàng</option>
-
-              <option value="out_of_stock">Hết món</option>
-            </select>
-          </div>
-
-          {/* IMAGE */}
+          {/* =========================
+              IMAGE URL
+          ========================= */}
 
           <div className={styles.field}>
             <label>URL Hình Ảnh</label>
 
             <input
               type="text"
-              value={form.image}
-              onChange={(event) => updateField("image", event.target.value)}
+              value={form.urlImg}
+              onChange={(event) => updateField("urlImg", event.target.value)}
               placeholder="https://..."
             />
           </div>
 
-          {/* DESCRIPTION */}
-
-          <div className={styles.field}>
-            <label>Mô Tả Ngắn</label>
-
-            <textarea
-              value={form.description}
-              onChange={(event) =>
-                updateField("description", event.target.value)
-              }
-              placeholder="Mô tả thành phần chính..."
-            />
-          </div>
-
-          {/* FOOTER */}
+          {/* =========================
+              FOOTER
+          ========================= */}
 
           <footer className={styles.footer}>
             <button
@@ -147,7 +155,11 @@ function MenuFormModal({
               Hủy
             </button>
 
-            <button type="submit" className={styles.saveButton}>
+            <button
+              type="submit"
+              className={styles.saveButton}
+              disabled={categoriesLoading || categories.length === 0}
+            >
               {editingItem ? "Cập Nhật Món" : "Lưu Món Mới"}
             </button>
           </footer>
