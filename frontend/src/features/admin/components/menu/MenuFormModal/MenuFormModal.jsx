@@ -39,9 +39,7 @@ function MenuFormModal({
         ========================= */}
 
         <header className={styles.header}>
-          <div>
-            <span className={styles.badge}>Quản Lý Thực Đơn</span>
-
+          <div>         
             <h2>{editingItem ? "Sửa Thông Tin Món Ăn" : "Thêm Món Ăn Mới"}</h2>
           </div>
 

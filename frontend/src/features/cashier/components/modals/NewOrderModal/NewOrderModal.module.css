@@ -1,3 +1,7 @@
+/* ======================================================
+   MODAL
+====================================================== */
+
 .modalOverlay {
   position: fixed;
   inset: 0;
@@ -31,11 +35,17 @@
 }
 
 .newOrderModal {
-  max-width: 460px;
+  max-width: 620px;
+
+  max-height: 92vh;
 }
 
+/* ======================================================
+   HEADER
+====================================================== */
+
 .modalHeader {
-  min-height: 62px;
+  min-height: 70px;
 
   display: flex;
   align-items: center;
@@ -43,18 +53,30 @@
 
   gap: 15px;
 
-  padding: 14px 20px;
+  padding: 15px 22px;
+
+  flex-shrink: 0;
 
   background: var(--color-background-soft);
 
-  border-bottom: 1px solid var(--color-border-light);
+  border-bottom:
+    1px solid
+    var(--color-border-light);
 }
 
 .modalHeader h2 {
   color: var(--color-text-primary);
 
-  font-size: var(--font-size-md);
+  font-size: var(--font-size-lg);
   font-weight: var(--font-weight-extrabold);
+}
+
+.modalHeader p {
+  margin-top: 3px;
+
+  color: var(--color-text-muted);
+
+  font-size: 10px;
 }
 
 .modalCloseButton {
@@ -65,17 +87,30 @@
   align-items: center;
   justify-content: center;
 
+  flex-shrink: 0;
+
   color: var(--color-text-muted);
 
   border-radius: var(--radius-full);
+
+  transition:
+    color var(--transition-fast),
+    background var(--transition-fast);
 }
 
 .modalCloseButton:hover {
   color: var(--color-text-primary);
+
   background: var(--color-border-light);
 }
 
+/* ======================================================
+   BODY
+====================================================== */
+
 .modalBody {
+  min-height: 0;
+
   display: flex;
   flex-direction: column;
 
@@ -85,6 +120,10 @@
 
   overflow-y: auto;
 }
+
+/* ======================================================
+   COMMON FORM
+====================================================== */
 
 .formLabel {
   display: block;
@@ -101,25 +140,41 @@
 
 .formControl {
   width: 100%;
-  min-height: 41px;
+  min-height: 42px;
 
   padding: 0 12px;
 
   color: var(--color-text-primary);
   background: var(--color-background-soft);
 
-  border: 1px solid var(--color-border);
+  border:
+    1px solid
+    var(--color-border);
+
   border-radius: var(--radius-md);
 
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-medium);
+
+  transition:
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast),
+    background var(--transition-fast);
 }
 
 .formControl:focus {
+  background: var(--color-surface);
+
   border-color: var(--color-border-focus);
 
-  box-shadow: 0 0 0 3px var(--color-primary-light);
+  box-shadow:
+    0 0 0 3px
+    var(--color-primary-light);
 }
+
+/* ======================================================
+   ORDER TYPE
+====================================================== */
 
 .orderTypeSelector {
   display: grid;
@@ -127,40 +182,72 @@
   grid-template-columns:
     repeat(3, minmax(0, 1fr));
 
-  gap: 8px;
+  gap: 10px;
 }
 
 .orderTypeSelector button {
-  min-height: 76px;
+  min-height: 88px;
 
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
 
-  gap: 5px;
+  gap: 7px;
 
   color: var(--color-text-secondary);
   background: var(--color-background-soft);
 
-  border: 1px solid var(--color-border);
+  border:
+    1px solid
+    var(--color-border);
+
   border-radius: var(--radius-lg);
 
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-semibold);
+
+  transition:
+    color var(--transition-fast),
+    border-color var(--transition-fast),
+    background var(--transition-fast),
+    box-shadow var(--transition-fast),
+    transform var(--transition-fast);
 }
 
 .orderTypeSelector button:hover {
-  border-color: var(--color-border-dark);
+  border-color:
+    var(--color-border-dark);
+
+  transform: translateY(-1px);
 }
 
-.orderTypeSelector .orderTypeSelected {
+.orderTypeSelector
+  .orderTypeSelected {
   color: var(--color-primary);
-  background: var(--color-primary-light);
 
-  border-color: var(--color-primary);
+  background:
+    var(--color-primary-light);
 
-  box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.08);
+  border-color:
+    var(--color-primary);
+
+  box-shadow:
+    0 0 0 2px
+    rgba(79, 70, 229, 0.08);
+}
+
+/* ======================================================
+   DINE IN
+====================================================== */
+
+.dineInSection {
+  display: flex;
+  flex-direction: column;
+
+  gap: 17px;
+
+  padding-top: 2px;
 }
 
 .guestCounter {
@@ -169,13 +256,17 @@
   display: flex;
   align-items: center;
 
-  gap: 15px;
+  gap: 14px;
 
   padding: 7px;
 
-  background: var(--color-background-soft);
+  background:
+    var(--color-background-soft);
 
-  border: 1px solid var(--color-border);
+  border:
+    1px solid
+    var(--color-border);
+
   border-radius: var(--radius-md);
 }
 
@@ -187,26 +278,471 @@
   align-items: center;
   justify-content: center;
 
-  color: var(--color-text-secondary);
-  background: var(--color-surface);
+  color:
+    var(--color-text-secondary);
 
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
+  background:
+    var(--color-surface);
 
-  box-shadow: var(--shadow-xs);
+  border:
+    1px solid
+    var(--color-border);
+
+  border-radius:
+    var(--radius-sm);
+
+  box-shadow:
+    var(--shadow-xs);
+
+  transition:
+    background
+      var(--transition-fast),
+    transform
+      var(--transition-fast);
+}
+
+.guestCounter button:hover {
+  background:
+    var(--color-border-light);
+}
+
+.guestCounter button:active {
+  transform: scale(0.96);
 }
 
 .guestCounter strong {
-  min-width: 80px;
+  min-width: 90px;
 
-  color: var(--color-text-primary);
+  color:
+    var(--color-text-primary);
 
-  font-size: var(--font-size-sm);
+  font-size:
+    var(--font-size-sm);
 }
+
+/* ======================================================
+   SHIPPING DETAIL
+====================================================== */
+
+.shippingSection {
+  display: flex;
+  flex-direction: column;
+
+  gap: 17px;
+
+  padding: 17px;
+
+  background: #f8fafc;
+
+  border: 1px solid #dbe3ef;
+
+  border-radius: var(--radius-lg);
+}
+
+.shippingHeader {
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+
+  padding-bottom: 13px;
+
+  border-bottom:
+    1px solid
+    var(--color-border);
+}
+
+.shippingIcon {
+  width: 38px;
+  height: 38px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  flex-shrink: 0;
+
+  color: #0f766e;
+
+  background: #ccfbf1;
+
+  border: 1px solid #99f6e4;
+
+  border-radius: 10px;
+}
+
+.shippingHeader h3 {
+  color:
+    var(--color-text-primary);
+
+  font-size:
+    var(--font-size-sm);
+
+  font-weight:
+    var(--font-weight-bold);
+}
+
+.shippingHeader p {
+  margin-top: 2px;
+
+  color:
+    var(--color-text-muted);
+
+  font-size: 10px;
+}
+
+/* ======================================================
+   SHIPPING FORM
+====================================================== */
+
+.shippingGrid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+
+  gap: 12px;
+}
+
+.inputGroup {
+  min-width: 0;
+}
+
+.inputGroup > label {
+  display: block;
+
+  margin-bottom: 6px;
+
+  color:
+    var(--color-text-secondary);
+
+  font-size: 9px;
+  font-weight:
+    var(--font-weight-bold);
+
+  letter-spacing: 0.03em;
+}
+
+.inputGroup > label span {
+  margin-left: 2px;
+
+  color:
+    var(--color-danger);
+}
+
+.inputWithIcon,
+.addressInput {
+  position: relative;
+}
+
+.inputWithIcon > svg,
+.addressInput > svg {
+  position: absolute;
+
+  top: 50%;
+  left: 11px;
+
+  color:
+    var(--color-text-muted);
+
+  transform:
+    translateY(-50%);
+
+  pointer-events: none;
+}
+
+.inputWithIcon input,
+.addressInput input {
+  width: 100%;
+  height: 42px;
+
+  padding:
+    0
+    12px
+    0
+    37px;
+
+  color:
+    var(--color-text-primary);
+
+  background:
+    var(--color-surface);
+
+  border:
+    1px solid
+    var(--color-border);
+
+  border-radius:
+    var(--radius-md);
+
+  font-size:
+    var(--font-size-xs);
+
+  transition:
+    border-color
+      var(--transition-fast),
+    box-shadow
+      var(--transition-fast);
+}
+
+.inputWithIcon input:focus,
+.addressInput input:focus {
+  border-color:
+    var(--color-primary);
+
+  box-shadow:
+    0 0 0 3px
+    var(--color-primary-light);
+}
+
+.inputWithIcon input::placeholder,
+.addressInput input::placeholder {
+  color:
+    var(--color-text-muted);
+}
+
+/* ======================================================
+   ADDRESS
+====================================================== */
+
+.addressRow {
+  display: grid;
+
+  grid-template-columns:
+    minmax(0, 1fr)
+    auto;
+
+  gap: 8px;
+}
+
+.addressInput {
+  min-width: 0;
+}
+
+.estimateButton {
+  min-height: 42px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 6px;
+
+  padding: 0 12px;
+
+  color: #4338ca;
+
+  background: #eef2ff;
+
+  border: 1px solid #c7d2fe;
+
+  border-radius:
+    var(--radius-md);
+
+  font-size: 10px;
+  font-weight:
+    var(--font-weight-bold);
+
+  white-space: nowrap;
+
+  transition:
+    background
+      var(--transition-fast),
+    border-color
+      var(--transition-fast);
+}
+
+.estimateButton:hover {
+  background: #e0e7ff;
+
+  border-color: #a5b4fc;
+}
+
+.estimateButton:disabled {
+  opacity: 0.65;
+
+  cursor: wait;
+}
+
+.addressHint {
+  margin-top: 6px;
+
+  color:
+    var(--color-text-muted);
+
+  font-size: 9px;
+
+  line-height: 1.5;
+}
+
+/* ======================================================
+   DISTANCE / ESTIMATED TIME
+====================================================== */
+
+.shippingEstimate {
+  display: grid;
+
+  grid-template-columns:
+    minmax(0, 1fr)
+    1px
+    minmax(0, 1fr);
+
+  align-items: center;
+
+  padding: 13px 14px;
+
+  background:
+    var(--color-surface);
+
+  border:
+    1px solid
+    var(--color-border);
+
+  border-radius:
+    var(--radius-md);
+
+  box-shadow:
+    var(--shadow-xs);
+}
+
+.estimateItem {
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+
+  padding:
+    0
+    8px;
+}
+
+.estimateIcon {
+  width: 36px;
+  height: 36px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  flex-shrink: 0;
+
+  color:
+    var(--color-primary);
+
+  background:
+    var(--color-primary-light);
+
+  border-radius: 9px;
+}
+
+.estimateItem > div:last-child {
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 2px;
+}
+
+.estimateItem span {
+  color:
+    var(--color-text-muted);
+
+  font-size: 8px;
+  font-weight:
+    var(--font-weight-bold);
+
+  letter-spacing: 0.04em;
+}
+
+.estimateItem strong {
+  color:
+    var(--color-text-primary);
+
+  font-size:
+    var(--font-size-sm);
+
+  font-weight:
+    var(--font-weight-extrabold);
+}
+
+.estimateDivider {
+  width: 1px;
+  height: 38px;
+
+  background:
+    var(--color-border);
+}
+
+/* ======================================================
+   ESTIMATE SUCCESS
+====================================================== */
+
+.estimateSuccess {
+  display: flex;
+  align-items: flex-start;
+
+  gap: 7px;
+
+  padding: 9px 10px;
+
+  color: #047857;
+
+  background: #ecfdf5;
+
+  border: 1px solid #a7f3d0;
+
+  border-radius:
+    var(--radius-sm);
+
+  font-size: 10px;
+
+  line-height: 1.5;
+}
+
+.estimateSuccess svg {
+  margin-top: 1px;
+
+  flex-shrink: 0;
+}
+
+.estimateSuccess strong {
+  font-weight:
+    var(--font-weight-bold);
+}
+
+/* ======================================================
+   MOCK NOTICE
+====================================================== */
+
+.mockNotice {
+  padding: 9px 10px;
+
+  color:
+    var(--color-text-muted);
+
+  background:
+    var(--color-background-soft);
+
+  border:
+    1px dashed
+    var(--color-border-dark);
+
+  border-radius:
+    var(--radius-sm);
+
+  font-size: 9px;
+
+  line-height: 1.55;
+}
+
+/* ======================================================
+   MAIN ACTION
+====================================================== */
 
 .modalPrimaryButton {
   width: 100%;
-  min-height: 43px;
+  min-height: 45px;
 
   display: inline-flex;
   align-items: center;
@@ -216,20 +752,43 @@
 
   padding: 9px 16px;
 
-  color: var(--color-text-inverse);
-  background: var(--color-primary);
+  color:
+    var(--color-text-inverse);
 
-  border-radius: var(--radius-md);
+  background:
+    var(--color-primary);
 
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-bold);
+  border-radius:
+    var(--radius-md);
 
-  transition: background var(--transition-fast);
+  font-size:
+    var(--font-size-xs);
+
+  font-weight:
+    var(--font-weight-bold);
+
+  box-shadow:
+    var(--shadow-xs);
+
+  transition:
+    background
+      var(--transition-fast),
+    transform
+      var(--transition-fast);
 }
 
 .modalPrimaryButton:hover {
-  background: var(--color-primary-hover);
+  background:
+    var(--color-primary-hover);
 }
+
+.modalPrimaryButton:active {
+  transform: translateY(1px);
+}
+
+/* ======================================================
+   RESPONSIVE
+====================================================== */
 
 @media (max-width: 650px) {
   .modalOverlay {
@@ -237,10 +796,58 @@
   }
 
   .modalBox {
-    border-radius: var(--radius-lg);
+    border-radius:
+      var(--radius-lg);
+  }
+
+  .newOrderModal {
+    max-height: 95vh;
+  }
+
+  .modalHeader {
+    padding: 14px 16px;
+  }
+
+  .modalBody {
+    padding: 16px;
+
+    gap: 17px;
   }
 
   .orderTypeSelector {
     grid-template-columns: 1fr;
+  }
+
+  .orderTypeSelector button {
+    min-height: 56px;
+
+    flex-direction: row;
+  }
+
+  .shippingGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .addressRow {
+    grid-template-columns: 1fr;
+  }
+
+  .estimateButton {
+    width: 100%;
+  }
+
+  .shippingEstimate {
+    grid-template-columns: 1fr;
+
+    gap: 10px;
+  }
+
+  .estimateDivider {
+    width: 100%;
+    height: 1px;
+  }
+
+  .estimateItem {
+    padding: 2px 0;
   }
 }
