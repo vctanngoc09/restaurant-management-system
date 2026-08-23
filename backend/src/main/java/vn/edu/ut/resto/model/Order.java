@@ -15,16 +15,21 @@ public class Order {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
     private LocalDateTime createdAt;
 
+    @Column(nullable = false)
     private Double totalPrice;
 
     @Enumerated(EnumType.STRING)
-    @Column(length = 30)
+    @Column(nullable = false, length = 30)
     private EOrderType orderType;
 
+    @Column(length = 500)
+    private String note;
+
     @Enumerated(EnumType.STRING)
-    @Column(length = 30)
+    @Column(nullable = false, length = 30)
     private EOrderStatus status;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -46,18 +51,21 @@ public class Order {
 
     public Order() {
         this.createdAt = LocalDateTime.now();
+        this.totalPrice = 0D;
     }
 
-    public Order(ShippingDetail shippingDetail, List<Payment> payments, List<OrderItem> orderItems, RestaurantTable table, User user, EOrderStatus status, EOrderType orderType, Double totalPrice, LocalDateTime createdAt) {
-        this.shippingDetail = shippingDetail;
-        this.payments = payments;
-        this.orderItems = orderItems;
-        this.table = table;
-        this.user = user;
-        this.status = status;
-        this.orderType = orderType;
-        this.totalPrice = totalPrice;
+    public Order(Long id, LocalDateTime createdAt, Double totalPrice, EOrderType orderType, String note, EOrderStatus status, User user, RestaurantTable table, List<OrderItem> orderItems, List<Payment> payments, ShippingDetail shippingDetail) {
+        this.id = id;
         this.createdAt = createdAt;
+        this.totalPrice = totalPrice;
+        this.orderType = orderType;
+        this.note = note;
+        this.status = status;
+        this.user = user;
+        this.table = table;
+        this.orderItems = orderItems;
+        this.payments = payments;
+        this.shippingDetail = shippingDetail;
     }
 
     public Long getId() {
@@ -90,6 +98,14 @@ public class Order {
 
     public void setOrderType(EOrderType orderType) {
         this.orderType = orderType;
+    }
+
+    public String getNote() {
+        return note;
+    }
+
+    public void setNote(String note) {
+        this.note = note;
     }
 
     public EOrderStatus getStatus() {
