@@ -33,7 +33,6 @@ import styles from "./Tables.module.css";
 const EMPTY_TABLE_FORM = {
   number: "",
   areaId: "",
-  qrUrl: "",
 };
 
 function Tables() {
@@ -172,8 +171,6 @@ function Tables() {
       number: "",
 
       areaId: areas[0]?.id ? String(areas[0].id) : "",
-
-      qrUrl: "",
     });
 
     setIsModalOpen(true);
@@ -186,24 +183,12 @@ function Tables() {
   const handleOpenEdit = (table) => {
     setEditingTable(table);
 
-    /*
-      Backend:
-      T-01
-      N-05
-
-      Form chỉ cần:
-      01
-      05
-    */
-
     const number = table.tableNumber?.replace(/\D/g, "") || "";
 
     setTableForm({
       number,
 
       areaId: String(table.areaId || ""),
-
-      qrUrl: table.qrUrl || "",
     });
 
     setIsModalOpen(true);
@@ -217,8 +202,6 @@ function Tables() {
     event.preventDefault();
 
     const number = tableForm.number.trim();
-
-    const qrUrl = tableForm.qrUrl.trim();
 
     // =========================
     // VALIDATE
@@ -268,9 +251,6 @@ function Tables() {
 
     const payload = {
       tableNumber,
-
-      qrUrl: qrUrl || null,
-
       areaId: Number(tableForm.areaId),
     };
 

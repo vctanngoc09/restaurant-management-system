@@ -13,8 +13,10 @@ import vn.edu.ut.resto.mapper.RestaurantTableMapper;
 import vn.edu.ut.resto.model.Area;
 import vn.edu.ut.resto.model.RestaurantTable;
 
+import vn.edu.ut.resto.model.enums.EOrderStatus;
 import vn.edu.ut.resto.model.enums.ETableStatus;
 import vn.edu.ut.resto.repository.AreaRepository;
+import vn.edu.ut.resto.repository.OrderRepository;
 import vn.edu.ut.resto.repository.RestaurantTableRepository;
 
 import vn.edu.ut.resto.service.RestaurantTableService;
@@ -25,10 +27,9 @@ import org.springframework.data.domain.Pageable;
 
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.List;
 
 @Service
 public class RestaurantTableServiceImpl
@@ -38,10 +39,20 @@ public class RestaurantTableServiceImpl
     private RestaurantTableRepository tableRepository;
 
     @Autowired
+    private OrderRepository orderRepository;
+
+    @Autowired
     private AreaRepository areaRepository;
 
     @Autowired
     private RestaurantTableMapper tableMapper;
+
+    private static final Set<EOrderStatus> ACTIVE_ORDER_STATUSES =
+            EnumSet.of(
+                    EOrderStatus.PENDING,
+                    EOrderStatus.PROCESSING,
+                    EOrderStatus.AWAITING_PAYMENT
+            );
 
 
     // =========================
@@ -49,14 +60,16 @@ public class RestaurantTableServiceImpl
     // =========================
 
     @Override
+    @Transactional
     public RestaurantTable createTable(
             RestaurantTableRequest request
     ) {
 
-        // Check duplicate table number
-        if (tableRepository.existsByTableNumber(
-                request.getTableNumber()
-        )) {
+        if (
+                tableRepository.existsByTableNumber(
+                        request.getTableNumber()
+                )
+        ) {
 
             throw new DuplicateException(
                     "Số bàn đã tồn tại!"
@@ -64,27 +77,32 @@ public class RestaurantTableServiceImpl
         }
 
 
-        // Find area
-        Area area = areaRepository
-                .findById(request.getAreaId())
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "Không tìm thấy khu vực có ID: "
-                                        + request.getAreaId()
-                        )
-                );
+        Area area =
+                areaRepository
+                        .findById(request.getAreaId())
+                        .orElseThrow(() ->
+                                new ResourceNotFoundException(
+                                        "Không tìm thấy khu vực có ID: "
+                                                + request.getAreaId()
+                                )
+                        );
 
 
-        // DTO -> ENTITY
         RestaurantTable table =
                 tableMapper.toEntity(request);
 
 
-        // Set relationship
+        table.setStatus(
+                ETableStatus.AVAILABLE
+        );
+
+        table.setQrToken(
+                generateUniqueQrToken()
+        );
+
         table.setArea(area);
 
 
-        // Save database
         return tableRepository.save(table);
     }
 
@@ -300,23 +318,59 @@ public class RestaurantTableServiceImpl
     // =========================
 
     @Override
+    @Transactional
     public void deleteTable(Long id) {
 
-        RestaurantTable table = tableRepository
-                .findById(id)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "Không tìm thấy bàn có ID: " + id
-                        )
-                );
+        RestaurantTable table =
+                tableRepository
+                        .findById(id)
+                        .orElseThrow(() ->
+                                new ResourceNotFoundException(
+                                        "Không tìm thấy bàn có ID: " + id
+                                )
+                        );
+
+
 
         if (table.getStatus() == ETableStatus.INACTIVE) {
+
             throw new InvalidOperationException(
                     "Bàn này đã ngừng hoạt động."
             );
         }
 
-        table.setStatus(ETableStatus.INACTIVE);
+
+        boolean hasActiveOrder =
+                orderRepository.existsByTable_IdAndStatusIn(
+                        table.getId(),
+                        ACTIVE_ORDER_STATUSES
+                );
+
+
+        if (hasActiveOrder) {
+
+            throw new InvalidOperationException(
+                    "Không thể ngừng hoạt động bàn đang có đơn hàng chưa hoàn tất."
+            );
+        }
+
+
+        if (table.getStatus() == ETableStatus.OCCUPIED) {
+
+            throw new InvalidOperationException(
+                    "Bàn đang ở trạng thái có khách nhưng không tìm thấy đơn hàng đang hoạt động."
+            );
+        }
+
+
+        // =========================
+        // SOFT DELETE
+        // =========================
+
+        table.setStatus(
+                ETableStatus.INACTIVE
+        );
+
 
         tableRepository.save(table);
     }
@@ -344,23 +398,74 @@ public class RestaurantTableServiceImpl
     }
 
     @Override
+    @Transactional
     public RestaurantTable maintenanceTable(Long id) {
 
-        RestaurantTable table = tableRepository
-                .findById(id)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "Không tìm thấy bàn có ID: " + id
-                        )
-                );
+        RestaurantTable table =
+                tableRepository
+                        .findById(id)
+                        .orElseThrow(() ->
+                                new ResourceNotFoundException(
+                                        "Không tìm thấy bàn có ID: " + id
+                                )
+                        );
+
+
         if (table.getStatus() == ETableStatus.MAINTENANCE) {
+
             throw new InvalidOperationException(
-                    "Bàn này đã tạm dừng hoạt động."
+                    "Bàn này đã tạm dừng để bảo trì."
             );
         }
 
-        table.setStatus(ETableStatus.MAINTENANCE);
+
+        if (table.getStatus() == ETableStatus.INACTIVE) {
+
+            throw new InvalidOperationException(
+                    "Không thể bảo trì bàn đã ngừng hoạt động."
+            );
+        }
+
+
+        boolean hasActiveOrder =
+                orderRepository.existsByTable_IdAndStatusIn(
+                        table.getId(),
+                        ACTIVE_ORDER_STATUSES
+                );
+
+
+        if (hasActiveOrder) {
+
+            throw new InvalidOperationException(
+                    "Không thể bảo trì bàn đang có đơn hàng chưa hoàn tất."
+            );
+        }
+
+
+        if (table.getStatus() == ETableStatus.OCCUPIED) {
+
+            throw new InvalidOperationException(
+                    "Bàn đang ở trạng thái có khách nhưng không tìm thấy đơn hàng đang hoạt động."
+            );
+        }
+
+        table.setStatus(
+                ETableStatus.MAINTENANCE
+        );
+
 
         return tableRepository.save(table);
+    }
+
+    private String generateUniqueQrToken() {
+
+        String token;
+
+        do {
+
+            token = UUID.randomUUID().toString();
+
+        } while (tableRepository.existsByQrToken(token));
+        return token;
     }
 }

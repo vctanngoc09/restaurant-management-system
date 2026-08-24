@@ -10,8 +10,6 @@ public class RestaurantTableRequest {
     @Size(max = 20, message = "Số bàn không được vượt quá 20 ký tự")
     private String tableNumber;
 
-    private String qrUrl;
-
     @NotNull(message = "Khu vực không được để trống")
     private Long areaId;
 
@@ -20,11 +18,9 @@ public class RestaurantTableRequest {
 
     public RestaurantTableRequest(
             String tableNumber,
-            String qrUrl,
             Long areaId
     ) {
         this.tableNumber = tableNumber;
-        this.qrUrl = qrUrl;
         this.areaId = areaId;
     }
 
@@ -34,14 +30,6 @@ public class RestaurantTableRequest {
 
     public void setTableNumber(String tableNumber) {
         this.tableNumber = tableNumber;
-    }
-
-    public String getQrUrl() {
-        return qrUrl;
-    }
-
-    public void setQrUrl(String qrUrl) {
-        this.qrUrl = qrUrl;
     }
 
     public Long getAreaId() {

@@ -105,18 +105,7 @@ function TableFormModal({
             </strong>
           </div>
 
-          <div className={styles.field}>
-            <label>URL QR Code</label>
-
-            <input
-              type="url"
-              value={form.qrUrl}
-              onChange={(event) => updateField("qrUrl", event.target.value)}
-              placeholder="https://example.com/qr/table-01"
-            />
-
-            <small>Có thể để trống và cập nhật sau.</small>
-          </div>
+          
 
           {/* FOOTER */}
 

@@ -109,6 +109,10 @@ public class WebSecurityConfig {
                                         "/api/auth/login"
                                 )
                                 .permitAll()
+                                .requestMatchers(
+                                        "/api/public/**"
+                                )
+                                .permitAll()
 
                                 .requestMatchers(
                                         "/error"

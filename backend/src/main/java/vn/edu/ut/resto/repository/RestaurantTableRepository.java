@@ -14,6 +14,7 @@ import vn.edu.ut.resto.model.RestaurantTable;
 import vn.edu.ut.resto.model.enums.ETableStatus;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface RestaurantTableRepository
@@ -28,6 +29,9 @@ public interface RestaurantTableRepository
 
     boolean existsByAreaId(Long areaId);
 
+    boolean existsByQrToken(String qrToken);
+
+    Optional<RestaurantTable> findByQrToken(String qrToken);
 
     // =========================
     // PAGINATION - STEP 1

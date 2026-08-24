@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import vn.edu.ut.resto.model.enums.ETableStatus;
 
 @Entity
-@Table(name = "tables") // Tránh trùng từ khóa SQL
+@Table(name = "tables")
 public class RestaurantTable {
 
     @Id
@@ -18,9 +18,9 @@ public class RestaurantTable {
     @Column(length = 20)
     private ETableStatus status;
 
-    private String qrUrl;
+    @Column(nullable = false, unique = true)
+    private String qrToken;
 
-    // Quan hệ N Bàn thuộc về 1 Khu vực
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "area_id")
     private Area area;
@@ -28,12 +28,17 @@ public class RestaurantTable {
     public RestaurantTable() {
     }
 
-    public RestaurantTable(String tableNumber, ETableStatus status, String qrUrl, Area area) {
+
+    public RestaurantTable(
+            String tableNumber,
+            ETableStatus status,
+            Area area
+    ) {
         this.tableNumber = tableNumber;
         this.status = status;
-        this.qrUrl = qrUrl;
         this.area = area;
     }
+
 
     public Long getId() {
         return id;
@@ -59,12 +64,12 @@ public class RestaurantTable {
         this.status = status;
     }
 
-    public String getQrUrl() {
-        return qrUrl;
+    public String getQrToken() {
+        return qrToken;
     }
 
-    public void setQrUrl(String qrUrl) {
-        this.qrUrl = qrUrl;
+    public void setQrToken(String qrToken) {
+        this.qrToken = qrToken;
     }
 
     public Area getArea() {

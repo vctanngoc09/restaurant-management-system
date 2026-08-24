@@ -25,14 +25,6 @@ public class RestaurantTableMapper {
                 request.getTableNumber()
         );
 
-        table.setQrUrl(
-                request.getQrUrl()
-        );
-
-        table.setStatus(
-                ETableStatus.AVAILABLE
-        );
-
         return table;
     }
 
@@ -48,10 +40,6 @@ public class RestaurantTableMapper {
 
         table.setTableNumber(
                 request.getTableNumber()
-        );
-
-        table.setQrUrl(
-                request.getQrUrl()
         );
     }
 
@@ -78,7 +66,7 @@ public class RestaurantTableMapper {
                 table.getStatus() != null
                         ? table.getStatus().name()
                         : null,
-                table.getQrUrl(),
+                table.getQrToken(),
                 areaId,
                 areaName
         );

@@ -5,7 +5,7 @@ public class TableResponse {
     private Long id;
     private String tableNumber;
     private String status;
-    private String qrUrl;
+    private String qrToken;
 
     private Long areaId;
     private String areaName;
@@ -13,18 +13,11 @@ public class TableResponse {
     public TableResponse() {
     }
 
-    public TableResponse(
-            Long id,
-            String tableNumber,
-            String status,
-            String qrUrl,
-            Long areaId,
-            String areaName
-    ) {
+    public TableResponse(Long id, String tableNumber, String status, String qrToken, Long areaId, String areaName) {
         this.id = id;
         this.tableNumber = tableNumber;
         this.status = status;
-        this.qrUrl = qrUrl;
+        this.qrToken = qrToken;
         this.areaId = areaId;
         this.areaName = areaName;
     }
@@ -53,12 +46,12 @@ public class TableResponse {
         this.status = status;
     }
 
-    public String getQrUrl() {
-        return qrUrl;
+    public String getQrToken() {
+        return qrToken;
     }
 
-    public void setQrUrl(String qrUrl) {
-        this.qrUrl = qrUrl;
+    public void setQrToken(String qrToken) {
+        this.qrToken = qrToken;
     }
 
     public Long getAreaId() {

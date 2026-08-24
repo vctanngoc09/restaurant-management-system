@@ -21,6 +21,7 @@ import vn.edu.ut.resto.mapper.RestaurantTableMapper;
 import vn.edu.ut.resto.model.RestaurantTable;
 
 import vn.edu.ut.resto.model.enums.ETableStatus;
+import vn.edu.ut.resto.service.QrCodeService;
 import vn.edu.ut.resto.service.RestaurantTableService;
 
 import java.util.List;
@@ -35,6 +36,9 @@ public class RestaurantTableController {
 
     @Autowired
     private RestaurantTableMapper tableMapper;
+
+    @Autowired
+    private QrCodeService qrCodeService;
 
     
     // GET ALL TABLE
@@ -226,4 +230,29 @@ public class RestaurantTableController {
                 )
         );
     }
+
+    @GetMapping("/{id}/qr")
+    public ResponseEntity<byte[]> getTableQrCode(
+            @PathVariable Long id
+    ) {
+
+        RestaurantTable table =
+                tableService.getTableById(id);
+
+        byte[] qrImage =
+                qrCodeService.generateTableQrCode(
+                        table.getQrToken(),
+                        300,
+                        300
+                );
+
+
+        return ResponseEntity.ok()
+                .header(
+                        "Content-Type",
+                        "image/png"
+                )
+                .body(qrImage);
+    }
+
 }
