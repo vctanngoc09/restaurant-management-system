@@ -11,6 +11,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 
 import org.springframework.web.bind.annotation.*;
 
+import vn.edu.ut.resto.dto.request.AddOrderItemsRequest;
 import vn.edu.ut.resto.dto.request.CreateOrderRequest;
 
 import vn.edu.ut.resto.dto.response.ApiResponse;
@@ -117,6 +118,34 @@ public class OrderController {
                 new ApiResponse<>(
                         200,
                         "Lấy đơn hàng hiện tại của bàn thành công!",
+                        response
+                )
+        );
+    }
+
+
+    // ==================================================
+    // ADD ITEMS TO ACTIVE ORDER
+    // GỌI THÊM MÓN
+    // ==================================================
+
+    @PostMapping("/{orderId}/items")
+    @PreAuthorize("hasAnyRole('WAITER', 'CASHIER', 'ADMIN')")
+    public ResponseEntity<ApiResponse<OrderResponse>>
+    addItemsToOrder(@PathVariable Long orderId,
+            @Valid
+            @RequestBody
+            AddOrderItemsRequest request
+    ) {
+
+        Order order = orderService.addItemsToOrder(orderId, request);
+
+        OrderResponse response = orderMapper.toResponse(order);
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        200,
+                        "Gọi thêm món thành công!",
                         response
                 )
         );

@@ -3,6 +3,8 @@ package vn.edu.ut.resto.repository;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import vn.edu.ut.resto.model.Order;
 import vn.edu.ut.resto.model.enums.EOrderStatus;
 
@@ -39,5 +41,23 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     findFirstByTable_IdAndStatusInOrderByCreatedAtDesc(
             Long tableId,
             Collection<EOrderStatus> statuses
+    );
+
+    @EntityGraph(
+            attributePaths = {
+                    "table",
+                    "user",
+                    "orderItems",
+                    "orderItems.product"
+            }
+    )
+    @Query("""
+            SELECT o
+            FROM Order o
+            WHERE o.id = :orderId
+            """)
+    Optional<Order> findByIdWithDetails(
+            @Param("orderId")
+            Long orderId
     );
 }
