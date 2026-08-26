@@ -11,6 +11,33 @@ import { useState } from "react";
 
 import styles from "./WaiterCart.module.css";
 
+const ITEM_STATUS = {
+  pending: {
+    label: "Chờ chế biến",
+    className: "pendingStatus",
+  },
+
+  cooking: {
+    label: "Đang chế biến",
+    className: "cookingStatus",
+  },
+
+  ready: {
+    label: "Sẵn sàng",
+    className: "readyStatus",
+  },
+
+  served: {
+    label: "Đã phục vụ",
+    className: "servedStatus",
+  },
+
+  out_of_stock: {
+    label: "Hết món",
+    className: "outOfStockStatus",
+  },
+};
+
 function WaiterCart({
   table,
   orderType,
@@ -34,14 +61,27 @@ function WaiterCart({
 
   const [tempNote, setTempNote] = useState("");
 
+  // ==================================================
+  // SAVE NOTE
+  // ==================================================
+
   const saveNote = (index) => {
     onUpdateNote(index, tempNote.trim());
 
     setEditingIndex(null);
+
     setTempNote("");
   };
 
+  // ==================================================
+  // NEW ITEM COUNT
+  // ==================================================
+
   const newItemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+
+  // ==================================================
+  // TITLE
+  // ==================================================
 
   const title =
     orderType === "dine_in"
@@ -52,12 +92,18 @@ function WaiterCart({
 
   return (
     <aside className={styles.cart}>
-      <div>
+      {/* ==================================================
+          TOP
+      ================================================== */}
+
+      <div className={styles.cartBody}>
+        {/* =========================
+            HEADER
+        ========================= */}
+
         <div className={styles.header}>
           <div>
             <h2>Chi Tiết Đơn Gọi</h2>
-
-            <p>{title}</p>
           </div>
 
           {cart.length > 0 && (
@@ -67,7 +113,15 @@ function WaiterCart({
           )}
         </div>
 
+        {/* =========================
+            SCROLL CONTENT
+        ========================= */}
+
         <div className={styles.content}>
+          {/* ==================================================
+              NEW ITEMS
+          ================================================== */}
+
           {cart.length > 0 && (
             <section className={styles.newItemsSection}>
               <span className={styles.sectionBadge}>
@@ -94,7 +148,7 @@ function WaiterCart({
                           type="button"
                           onClick={() => onUpdateQuantity(index, -1)}
                         >
-                          <Minus size={12} />
+                          <Minus size={13} />
                         </button>
 
                         <strong>{item.quantity}</strong>
@@ -103,7 +157,7 @@ function WaiterCart({
                           type="button"
                           onClick={() => onUpdateQuantity(index, 1)}
                         >
-                          <Plus size={12} />
+                          <Plus size={13} />
                         </button>
                       </div>
                     </div>
@@ -130,7 +184,7 @@ function WaiterCart({
                           setTempNote(item.note || "");
                         }}
                       >
-                        <MessageSquare size={12} />
+                        <MessageSquare size={13} />
 
                         {item.note ? `Ghi chú: ${item.note}` : "+ Thêm ghi chú"}
                       </button>
@@ -141,33 +195,83 @@ function WaiterCart({
             </section>
           )}
 
+          {/* ==================================================
+              EXISTING ORDER
+          ================================================== */}
+
           {existingOrder?.items?.length > 0 && (
             <section className={styles.existingSection}>
-              <span className={styles.existingBadge}>
-                Món đang phục vụ ({existingOrder.items.length} món)
-              </span>
+              <div className={styles.existingHeader}>
+                <span className={styles.existingBadge}>Món đang phục vụ</span>
+
+                <span className={styles.existingCount}>
+                  {existingOrder.items.length} món
+                </span>
+              </div>
 
               <div className={styles.existingItems}>
-                {existingOrder.items.map((item) => (
-                  <article key={item.id} className={styles.existingItem}>
-                    <div>
-                      <p>
-                        <strong>{item.quantity}x</strong>
+                {existingOrder.items.map((item) => {
+                  const status =
+                    ITEM_STATUS[item.status] || ITEM_STATUS.pending;
 
-                        <span>{item.name}</span>
-                      </p>
+                  return (
+                    <article key={item.id} className={styles.existingItem}>
+                      {/* =========================
+                            MAIN
+                        ========================= */}
 
-                      {item.note && <small>Ghi chú: {item.note}</small>}
-                    </div>
+                      <div className={styles.existingItemMain}>
+                        <div className={styles.existingItemInfo}>
+                          <div className={styles.existingItemName}>
+                            <span className={styles.quantityBadge}>
+                              {item.quantity}x
+                            </span>
 
-                    <strong>
-                      {(item.price * item.quantity).toLocaleString("vi-VN")}đ
-                    </strong>
-                  </article>
-                ))}
+                            <h3>{item.name}</h3>
+                          </div>
+
+                          {item.note && (
+                            <div className={styles.existingNote}>
+                              <MessageSquare size={13} />
+
+                              <span>{item.note}</span>
+                            </div>
+                          )}
+                        </div>
+
+                        <strong className={styles.existingPrice}>
+                          {(item.price * item.quantity).toLocaleString("vi-VN")}
+                          đ
+                        </strong>
+                      </div>
+
+                      {/* =========================
+                            FOOTER
+                        ========================= */}
+
+                      <div className={styles.existingItemFooter}>
+                        <span
+                          className={`${styles.statusBadge} ${
+                            styles[status.className]
+                          }`}
+                        >
+                          {status.label}
+                        </span>
+
+                        <span className={styles.unitPrice}>
+                          {item.price.toLocaleString("vi-VN")}đ / món
+                        </span>
+                      </div>
+                    </article>
+                  );
+                })}
               </div>
             </section>
           )}
+
+          {/* ==================================================
+              EMPTY
+          ================================================== */}
 
           {cart.length === 0 && !existingOrder?.items?.length && (
             <div className={styles.emptyCart}>
@@ -182,6 +286,10 @@ function WaiterCart({
           )}
         </div>
       </div>
+
+      {/* ==================================================
+          SUMMARY - LUÔN CỐ ĐỊNH
+      ================================================== */}
 
       <div className={styles.summary}>
         <div className={styles.calculation}>
@@ -204,21 +312,24 @@ function WaiterCart({
           </div>
         </div>
 
-        <button type="button" className={styles.sendButton} onClick={onSend}>
-          <Send size={17} />
-          Gửi Đơn Xuống Bếp
-        </button>
+        <div className={styles.actions}>
+          <button type="button" className={styles.sendButton} onClick={onSend}>
+            <Send size={16} />
 
-        {existingOrder && (
-          <button
-            type="button"
-            className={styles.paymentButton}
-            onClick={onRequestPayment}
-          >
-            <CreditCard size={16} />
-            Yêu Cầu Thanh Toán
+            {existingOrder ? "Gửi Thêm Món" : "Gửi Đơn Xuống Bếp"}
           </button>
-        )}
+
+          {existingOrder && (
+            <button
+              type="button"
+              className={styles.paymentButton}
+              onClick={onRequestPayment}
+            >
+              <CreditCard size={15} />
+              Yêu Cầu Thanh Toán
+            </button>
+          )}
+        </div>
       </div>
     </aside>
   );

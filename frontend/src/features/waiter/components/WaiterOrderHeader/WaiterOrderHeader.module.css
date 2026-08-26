@@ -1,21 +1,33 @@
+/* ======================================================
+   HEADER
+====================================================== */
+
 .header {
+  min-height: 70px;
+
   display: flex;
   align-items: center;
   justify-content: space-between;
 
-  gap: 15px;
+  gap: 24px;
 
-  padding: 15px 16px;
+  padding: 11px 15px;
 
-  margin-bottom: 18px;
+  margin-bottom: 12px;
 
   background: #ffffff;
 
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
+  border-radius: 12px;
 
-  box-shadow: var(--shadow-xs);
+  box-shadow:
+          0 1px 2px rgba(15, 23, 42, 0.04);
 }
+
+
+/* ======================================================
+   LEFT
+====================================================== */
 
 .left {
   min-width: 0;
@@ -26,176 +38,255 @@
   gap: 13px;
 }
 
+
+/* ======================================================
+   BACK BUTTON
+====================================================== */
+
 .backButton {
-  min-height: 37px;
+  min-height: 36px;
 
   display: inline-flex;
   align-items: center;
   justify-content: center;
 
-  gap: 5px;
+  gap: 6px;
 
-  padding: 0 12px;
+  padding: 0 11px;
 
   flex-shrink: 0;
 
   color: var(--waiter-text);
-  background: var(--waiter-bg);
+
+  background: #f8fafc;
 
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-
-  font-size: var(--font-size-xs);
-  font-weight: 700;
-}
-
-.backButton:hover {
-  background: var(--color-border);
-}
-
-.titleRow {
-  display: flex;
-  align-items: center;
-
-  gap: 8px;
-
-  flex-wrap: wrap;
-}
-
-.titleRow h1 {
-  color: var(--waiter-text);
-
-  font-size: 18px;
-  font-weight: 700;
-}
-
-.servingBadge,
-.emptyBadge {
-  padding: 3px 8px;
-
-  border-radius: 6px;
-
-  font-family: monospace;
+  border-radius: 8px;
 
   font-size: 10px;
   font-weight: 700;
+
+  transition:
+          background var(--transition-fast),
+          border-color var(--transition-fast);
 }
 
-.servingBadge {
-  color: #92400e;
-  background: #fef3c7;
+
+.backButton:hover {
+  background: #f1f5f9;
+
+  border-color: #cbd5e1;
 }
 
-.emptyBadge {
-  color: #065f46;
-  background: #d1fae5;
+
+/* ======================================================
+   TITLE
+====================================================== */
+
+.titleBlock {
+  min-width: 0;
 }
 
-.left p {
+
+.titleBlock h1 {
+  color: var(--waiter-text);
+
+  font-size: 18px;
+  font-weight: 750;
+
+  line-height: 1.2;
+
+  letter-spacing: -0.015em;
+}
+
+
+.titleBlock p {
   margin-top: 3px;
 
   color: var(--waiter-muted);
 
-  font-size: var(--font-size-xs);
+  font-size: 10px;
 }
 
-.left p strong {
-  color: var(--waiter-text);
-}
 
-.guests {
-  min-height: 40px;
+/* ======================================================
+   RIGHT
+====================================================== */
+
+.right {
+  min-width: 0;
 
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  align-items: flex-end;
 
-  gap: 10px;
-
-  padding: 5px 9px;
+  gap: 7px;
 
   flex-shrink: 0;
-
-  background: var(--waiter-bg);
-
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
 }
 
-.guests > span {
+
+/* ======================================================
+   STATUS
+====================================================== */
+
+.servingBadge,
+.emptyBadge {
+  display: inline-flex;
+  align-items: center;
+
+  width: fit-content;
+
+  padding: 3px 8px;
+
+  border-radius: 6px;
+
+  font-size: 8px;
+  font-weight: 700;
+
+  white-space: nowrap;
+}
+
+
+.servingBadge {
+  color: #92400e;
+
+  background: #fef3c7;
+
+  border: 1px solid #fde68a;
+}
+
+
+.emptyBadge {
+  color: #065f46;
+
+  background: #ecfdf5;
+
+  border: 1px solid #a7f3d0;
+}
+
+
+/* ======================================================
+   META
+====================================================== */
+
+.meta {
   display: flex;
   align-items: center;
 
-  gap: 5px;
+  gap: 14px;
+}
+
+
+.meta > span {
+  display: inline-flex;
+  align-items: center;
+
+  gap: 4px;
+
+  color: var(--waiter-muted);
+
+  font-size: 10px;
+
+  white-space: nowrap;
+}
+
+
+.meta svg {
+  flex-shrink: 0;
+
+  color: #94a3b8;
+}
+
+
+.meta strong {
+  margin-left: 1px;
 
   color: var(--waiter-text);
 
-  font-size: var(--font-size-xs);
   font-weight: 700;
 }
 
-.guests > span svg {
-  color: var(--waiter-muted);
-}
 
-.guests > div {
-  display: flex;
-  align-items: center;
+/* ======================================================
+   TABLET
+====================================================== */
 
-  gap: 5px;
-}
-
-.guests button {
-  width: 25px;
-  height: 25px;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  background: #ffffff;
-
-  border: 1px solid var(--color-border);
-  border-radius: 7px;
-
-  box-shadow: var(--shadow-xs);
-}
-
-.guests strong {
-  min-width: 24px;
-
-  text-align: center;
-
-  font-family: monospace;
-
-  font-size: var(--font-size-xs);
-}
-
-@media (max-width: 750px) {
+@media (max-width: 850px) {
   .header {
     align-items: flex-start;
-    flex-direction: column;
+
+    gap: 15px;
   }
 
-  .guests {
-    align-self: flex-end;
+  .meta {
+    flex-direction: column;
+    align-items: flex-end;
+
+    gap: 4px;
   }
 }
 
-@media (max-width: 500px) {
+
+/* ======================================================
+   MOBILE
+====================================================== */
+
+@media (max-width: 650px) {
+  .header {
+    flex-direction: column;
+
+    gap: 11px;
+
+    padding: 11px;
+  }
+
+
   .left {
-    align-items: flex-start;
+    width: 100%;
   }
 
-  .backButton {
-    padding: 0 9px;
+
+  .right {
+    width: 100%;
+
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
   }
 
+
+  .meta {
+    flex-direction: row;
+    align-items: center;
+
+    gap: 8px;
+  }
+}
+
+
+@media (max-width: 500px) {
   .backButton {
+    width: 36px;
+
+    padding: 0;
+
     font-size: 0;
   }
 
+
   .backButton svg {
-    width: 18px;
-    height: 18px;
+    width: 17px;
+    height: 17px;
+  }
+
+
+  .titleBlock h1 {
+    font-size: 16px;
+  }
+
+
+  .meta > span:first-child {
+    display: none;
   }
 }

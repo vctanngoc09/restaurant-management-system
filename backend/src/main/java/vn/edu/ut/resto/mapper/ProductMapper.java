@@ -42,16 +42,6 @@ public class ProductMapper {
                 request.getPrice()
         );
 
-
-        product.setUrlImg(
-                request.getUrlImg()
-        );
-
-
-        /*
-         * Món mới tạo mặc định
-         * là đang bán.
-         */
         product.setStatus(
                 EProductStatus.AVAILABLE
         );
@@ -71,10 +61,10 @@ public class ProductMapper {
     ) {
 
         if (
-                request == null ||
+                request == null
+                        ||
                         product == null
         ) {
-
             return;
         }
 
@@ -88,18 +78,6 @@ public class ProductMapper {
                 request.getPrice()
         );
 
-
-        product.setUrlImg(
-                request.getUrlImg()
-        );
-
-
-        /*
-         * KHÔNG update status ở đây.
-         *
-         * Status được xử lý bởi
-         * API riêng.
-         */
     }
 
 

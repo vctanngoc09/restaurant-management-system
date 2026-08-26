@@ -128,4 +128,20 @@ public interface ProductRepository
             @Param("ids")
             List<Long> ids
     );
+
+    @Query("""
+    SELECT p
+
+    FROM Product p
+
+    LEFT JOIN FETCH p.category
+
+    WHERE p.status <> :inactiveStatus
+
+    ORDER BY p.id DESC
+""")
+    List<Product> findMenuProducts(
+            @Param("inactiveStatus")
+            EProductStatus inactiveStatus
+    );
 }

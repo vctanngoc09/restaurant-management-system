@@ -21,6 +21,8 @@ public interface ProductService {
             EProductStatus status
     );
 
+    List<Product> getMenuProducts();
+
     Product getProductById(Long id);
 
     Product updateProduct(

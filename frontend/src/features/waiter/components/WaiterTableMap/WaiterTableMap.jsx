@@ -23,9 +23,42 @@ function WaiterTableMap({
 
   const [statusFilter, setStatusFilter] = useState("all");
 
+  // =========================================
+  // GET UNIQUE AREAS FROM BACKEND TABLE DATA
+  // =========================================
+
+  const areas = useMemo(() => {
+    const areaMap = new Map();
+
+    tables.forEach((table) => {
+      if (table.areaId && table.areaName) {
+        areaMap.set(table.areaId, {
+          id: table.areaId,
+
+          name: table.areaName,
+        });
+      }
+    });
+
+    return Array.from(areaMap.values());
+  }, [tables]);
+
+  // =========================================
+  // FILTER TABLES
+  // =========================================
+
   const filteredTables = useMemo(() => {
     return tables.filter((table) => {
-      const matchArea = areaFilter === "all" || table.area === areaFilter;
+      /*
+       * INACTIVE là bàn đã soft-delete.
+       * Waiter không cần nhìn thấy.
+       */
+      if (table.status === "inactive") {
+        return false;
+      }
+
+      const matchArea =
+        areaFilter === "all" || String(table.areaId) === areaFilter;
 
       const matchStatus =
         statusFilter === "all" || table.status === statusFilter;
@@ -34,6 +67,10 @@ function WaiterTableMap({
     });
   }, [tables, areaFilter, statusFilter]);
 
+  // =========================================
+  // TAKEAWAY COUNT
+  // =========================================
+
   const takeawayCount = orders.filter(
     (order) =>
       order.orderType === "take_away" &&
@@ -41,12 +78,20 @@ function WaiterTableMap({
       order.status !== "cancelled",
   ).length;
 
+  // =========================================
+  // DELIVERY COUNT
+  // =========================================
+
   const deliveryCount = orders.filter(
     (order) =>
       order.orderType === "delivery" &&
       order.status !== "completed" &&
       order.status !== "cancelled",
   ).length;
+
+  // =========================================
+  // FIND ACTIVE ORDER OF TABLE
+  // =========================================
 
   const findTableOrder = (table) => {
     return orders.find(
@@ -60,9 +105,13 @@ function WaiterTableMap({
 
   return (
     <div className={styles.container}>
-      <WaiterMapHeader tables={tables} currentUserName={currentUserName} />
+      <WaiterMapHeader
+        tables={tables.filter((table) => table.status !== "inactive")}
+        currentUserName={currentUserName}
+      />
 
       <WaiterTableFilters
+        areas={areas}
         areaFilter={areaFilter}
         statusFilter={statusFilter}
         onAreaChange={setAreaFilter}

@@ -35,7 +35,9 @@ const EMPTY_MENU_FORM = {
 
   price: "",
 
-  urlImg: "",
+  image: null,
+
+  removeImage: false,
 };
 
 function Menu() {
@@ -230,7 +232,9 @@ function Menu() {
 
       price: item.price ?? "",
 
-      urlImg: item.urlImg || "",
+      image: null,
+
+      removeImage: false,
     });
 
     setIsModalOpen(true);
@@ -256,9 +260,6 @@ function Menu() {
   const handleSave = async (event) => {
     event.preventDefault();
 
-    // =============================
-    // NORMALIZE
-    // =============================
 
     const name = menuForm.name.trim();
 
@@ -266,11 +267,6 @@ function Menu() {
 
     const categoryId = Number(menuForm.categoryId);
 
-    const urlImg = menuForm.urlImg?.trim() || null;
-
-    // =============================
-    // VALIDATE NAME
-    // =============================
 
     if (!name) {
       toast.error("Vui lòng nhập tên món ăn.");
@@ -278,19 +274,12 @@ function Menu() {
       return;
     }
 
-    // =============================
-    // VALIDATE PRICE
-    // =============================
-
     if (Number.isNaN(price) || price <= 0) {
       toast.error("Đơn giá phải lớn hơn 0.");
 
       return;
     }
 
-    // =============================
-    // VALIDATE CATEGORY
-    // =============================
 
     if (Number.isNaN(categoryId) || categoryId <= 0) {
       toast.error("Vui lòng chọn danh mục.");
@@ -298,9 +287,6 @@ function Menu() {
       return;
     }
 
-    // =============================
-    // CHECK CATEGORY EXISTS
-    // =============================
 
     const selectedCategory = categories.find(
       (category) => Number(category.id) === categoryId,
@@ -312,31 +298,23 @@ function Menu() {
       return;
     }
 
-    // =============================
-    // PAYLOAD
-    // =============================
 
     const payload = {
       name,
 
       price,
 
-      urlImg,
-
       categoryId,
+
+      image: menuForm.image,
+
+      removeImage: menuForm.removeImage,
     };
 
     try {
-      // =============================
-      // UPDATE
-      // =============================
 
       if (editingItem) {
-        await productService.update(
-          editingItem.id,
-
-          payload,
-        );
+        await productService.update(editingItem.id, payload);
 
         toast.success(`Cập nhật món "${name}" thành công!`);
       }
@@ -350,24 +328,7 @@ function Menu() {
         toast.success(`Thêm món "${name}" thành công!`);
       }
 
-      // =============================
-      // CLOSE MODAL
-      // =============================
-
       handleCloseModal();
-
-      // =============================
-      // REFRESH
-      // =============================
-
-      /*
-       * CREATE:
-       * Product mới sort ID DESC
-       * nên đưa về page 0.
-       *
-       * UPDATE:
-       * giữ page hiện tại.
-       */
 
       if (!editingItem && page !== 0) {
         setPage(0);

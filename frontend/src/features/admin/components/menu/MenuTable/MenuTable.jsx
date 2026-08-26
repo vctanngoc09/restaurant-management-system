@@ -1,4 +1,6 @@
-import { ImageIcon, Ban } from "lucide-react";
+import { useState } from "react";
+
+import { ImageIcon, Ban, X } from "lucide-react";
 
 import StockToggleButton from "../../../../../components/common/StockToggleButton";
 
@@ -12,6 +14,8 @@ import { formatCurrency } from "../../../../../utils/formatCurrency";
 import styles from "./MenuTable.module.css";
 
 function MenuTable({ menuItems, onEdit, onDelete, onRestore, onToggleStock }) {
+  const [previewImage, setPreviewImage] = useState(null);
+  
   return (
     <div className={styles.wrapper}>
       <table className={styles.table}>
@@ -62,7 +66,17 @@ function MenuTable({ menuItems, onEdit, onDelete, onRestore, onToggleStock }) {
                     <div className={styles.food}>
                       <div className={styles.image}>
                         {item.urlImg ? (
-                          <img src={item.urlImg} alt={item.name} />
+                          <img
+                            src={item.urlImg}
+                            alt={item.name}
+                            onClick={() =>
+                              setPreviewImage({
+                                url: item.urlImg,
+                                name: item.name,
+                              })
+                            }
+                            className={styles.clickableImage}
+                          />
                         ) : (
                           <ImageIcon size={20} />
                         )}
@@ -141,6 +155,29 @@ function MenuTable({ menuItems, onEdit, onDelete, onRestore, onToggleStock }) {
           )}
         </tbody>
       </table>
+      {previewImage && (
+        <div
+          className={styles.imageModal}
+          onClick={() => setPreviewImage(null)}
+        >
+          <div
+            className={styles.imageModalContent}
+            onClick={(event) => event.stopPropagation()}
+          >
+            <button
+              type="button"
+              className={styles.imageModalClose}
+              onClick={() => setPreviewImage(null)}
+            >
+              <X size={22} />
+            </button>
+
+            <img src={previewImage.url} alt={previewImage.name} />
+
+            <strong>{previewImage.name}</strong>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

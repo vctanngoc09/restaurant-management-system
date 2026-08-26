@@ -3,6 +3,7 @@ package vn.edu.ut.resto.service.impl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import org.springframework.web.multipart.MultipartFile;
 import vn.edu.ut.resto.dto.request.ProductRequest;
 
 import vn.edu.ut.resto.exception.InvalidOperationException;
@@ -28,6 +29,7 @@ import vn.edu.ut.resto.model.enums.EProductStatus;
 import vn.edu.ut.resto.repository.CategoryRepository;
 import vn.edu.ut.resto.repository.ProductRepository;
 
+import vn.edu.ut.resto.service.CloudinaryService;
 import vn.edu.ut.resto.service.ProductService;
 
 import java.util.List;
@@ -44,20 +46,29 @@ public class ProductServiceImpl implements ProductService {
     @Autowired
     private ProductMapper productMapper;
 
+    @Autowired
+    private CloudinaryService cloudinaryService;
+
 
     // =========================
     // CREATE PRODUCT
     // =========================
 
     @Override
+    @Transactional
     public Product createProduct(
             ProductRequest request
     ) {
 
-        // Find Category
+        // =========================
+        // CATEGORY
+        // =========================
+
         Category category =
                 categoryRepository
-                        .findById(request.getCategoryId())
+                        .findById(
+                                request.getCategoryId()
+                        )
                         .orElseThrow(() ->
                                 new ResourceNotFoundException(
                                         "Không tìm thấy danh mục có ID: "
@@ -66,28 +77,77 @@ public class ProductServiceImpl implements ProductService {
                         );
 
 
-        // DTO -> Entity
+        // =========================
+        // DTO -> ENTITY
+        // =========================
+
         Product product =
-                productMapper.toEntity(request);
+                productMapper.toEntity(
+                        request
+                );
 
 
-        // Set Relationship
-        product.setCategory(category);
+        product.setCategory(
+                category
+        );
 
 
-        // Save
-        return productRepository.save(product);
+        /*
+         * Save lần đầu để PostgreSQL
+         * sinh Product ID.
+         *
+         * Ví dụ:
+         *
+         * id = 15
+         */
+        Product savedProduct =
+                productRepository.save(
+                        product
+                );
+
+
+        // =========================
+        // IMAGE
+        // =========================
+
+        MultipartFile image =
+                request.getImage();
+
+
+        if (
+                image != null
+                        &&
+                        !image.isEmpty()
+        ) {
+
+            /*
+             * Cloudinary:
+             *
+             * resto/products/product_15
+             */
+            String imageUrl =
+                    cloudinaryService
+                            .uploadProductImage(
+                                    savedProduct.getId(),
+                                    image
+                            );
+
+
+            savedProduct.setUrlImg(
+                    imageUrl
+            );
+        }
+
+
+        // =========================
+        // SAVE FINAL PRODUCT
+        // =========================
+
+        return productRepository.save(
+                savedProduct
+        );
     }
 
-
-    // =========================
-    // GET ALL PRODUCTS
-    // =========================
-
-    // =========================
-// GET ALL PRODUCTS
-// PAGINATION + FILTER
-// =========================
 
     @Override
     @Transactional(readOnly = true)
@@ -234,6 +294,16 @@ public class ProductServiceImpl implements ProductService {
         );
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public List<Product> getMenuProducts() {
+
+        return productRepository
+                .findMenuProducts(
+                        EProductStatus.INACTIVE
+                );
+    }
+
 
     // =========================
     // GET PRODUCT BY ID
@@ -258,10 +328,15 @@ public class ProductServiceImpl implements ProductService {
     // =========================
 
     @Override
+    @Transactional
     public Product updateProduct(
             Long id,
             ProductRequest request
     ) {
+
+        // =========================
+        // PRODUCT
+        // =========================
 
         Product product =
                 productRepository
@@ -274,9 +349,15 @@ public class ProductServiceImpl implements ProductService {
                         );
 
 
+        // =========================
+        // CATEGORY
+        // =========================
+
         Category category =
                 categoryRepository
-                        .findById(request.getCategoryId())
+                        .findById(
+                                request.getCategoryId()
+                        )
                         .orElseThrow(() ->
                                 new ResourceNotFoundException(
                                         "Không tìm thấy danh mục có ID: "
@@ -285,18 +366,117 @@ public class ProductServiceImpl implements ProductService {
                         );
 
 
-        // Update normal fields
+        // =========================
+        // NORMAL FIELDS
+        // =========================
+
         productMapper.updateEntity(
                 request,
                 product
         );
 
 
-        // Update category
-        product.setCategory(category);
+        product.setCategory(
+                category
+        );
 
 
-        return productRepository.save(product);
+        // =========================
+        // IMAGE LOGIC
+        // =========================
+
+        MultipartFile newImage =
+                request.getImage();
+
+
+        boolean removeImage =
+                Boolean.TRUE.equals(
+                        request.getRemoveImage()
+                );
+
+
+        /*
+         * Không cho vừa upload ảnh mới
+         * vừa yêu cầu xóa ảnh.
+         */
+        if (
+                removeImage
+                        &&
+                        newImage != null
+                        &&
+                        !newImage.isEmpty()
+        ) {
+
+            throw new InvalidOperationException(
+                    "Không thể vừa cập nhật ảnh mới vừa yêu cầu xóa ảnh."
+            );
+        }
+
+
+        // =========================
+        // CASE 1:
+        // UPLOAD / REPLACE IMAGE
+        // =========================
+
+        if (
+                newImage != null
+                        &&
+                        !newImage.isEmpty()
+        ) {
+
+            String imageUrl =
+                    cloudinaryService
+                            .uploadProductImage(
+                                    product.getId(),
+                                    newImage
+                            );
+
+
+            product.setUrlImg(
+                    imageUrl
+            );
+        }
+
+
+        // =========================
+        // CASE 2:
+        // REMOVE CURRENT IMAGE
+        // =========================
+
+        else if (removeImage) {
+
+            if (
+                    product.getUrlImg() != null
+                            &&
+                            !product.getUrlImg().isBlank()
+            ) {
+
+                cloudinaryService
+                        .deleteProductImage(
+                                product.getId()
+                        );
+
+
+                product.setUrlImg(
+                        null
+                );
+            }
+        }
+
+
+        // =========================
+        // CASE 3:
+        //
+        // Không gửi image
+        // removeImage = false
+        //
+        // → GIỮ NGUYÊN ẢNH CŨ
+        // =========================
+
+
+        return productRepository.save(
+                product
+        );
     }
 
 

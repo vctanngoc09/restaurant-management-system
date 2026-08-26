@@ -1,67 +1,136 @@
+/* ======================================================
+   MENU
+====================================================== */
+
 .menu {
   min-width: 0;
+  min-height: 0;
+
+  height: 100%;
+
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  padding-right: 4px;
+  padding-bottom: 18px;
+
+  overscroll-behavior: contain;
+
+  scrollbar-gutter: stable;
 }
+
+/* ======================================================
+   SCROLLBAR
+====================================================== */
+
+.menu::-webkit-scrollbar {
+  width: 5px;
+}
+
+.menu::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.menu::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+
+  border-radius: 999px;
+}
+
+.menu::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* ======================================================
+   FILTER
+====================================================== */
 
 .filters {
-  padding: 14px;
+  position: sticky;
 
-  margin-bottom: 14px;
+  top: 0;
 
-  background: #ffffff;
+  z-index: 10;
+
+  padding: 10px 11px;
+
+  margin-bottom: 10px;
+
+  background: rgba(255, 255, 255, 0.98);
 
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
 
-  box-shadow: var(--shadow-xs);
+  border-radius: 12px;
+
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
 }
+
+/* ======================================================
+   CATEGORY
+====================================================== */
 
 .categories {
   display: flex;
 
   gap: 5px;
 
-  padding-bottom: 4px;
+  padding-bottom: 3px;
 
   overflow-x: auto;
 }
 
 .categories button {
-  padding: 6px 11px;
+  min-height: 28px;
+
+  padding: 4px 10px;
 
   flex-shrink: 0;
 
   color: var(--waiter-muted);
-  background: var(--waiter-bg);
 
-  border-radius: var(--radius-md);
+  background: #f1f5f9;
+
+  border-radius: 8px;
 
   font-size: 10px;
   font-weight: 500;
 
   white-space: nowrap;
+
+  transition:
+    color var(--transition-fast),
+    background var(--transition-fast);
 }
 
 .categories button:hover {
-  background: var(--color-border);
+  color: var(--waiter-text);
+
+  background: #e2e8f0;
 }
 
 .categories .categoryActive {
   color: #ffffff;
-  background: var(--waiter-text);
+
+  background: #111827;
 
   font-weight: 600;
 }
 
+/* ======================================================
+   SEARCH
+====================================================== */
+
 .search {
   position: relative;
 
-  margin-top: 10px;
+  margin-top: 8px;
 }
 
 .search svg {
   position: absolute;
+
   top: 50%;
-  left: 12px;
+  left: 11px;
 
   color: var(--waiter-muted);
 
@@ -70,73 +139,90 @@
 
 .search input {
   width: 100%;
-  height: 37px;
+  height: 34px;
 
-  padding:
-    0
-    12px
-    0
-    37px;
+  padding: 0 11px 0 34px;
 
   color: var(--waiter-text);
-  background: var(--waiter-bg);
+
+  background: #f8fafc;
 
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
 
-  font-size: var(--font-size-xs);
+  border-radius: 9px;
+
+  font-size: 11px;
 }
 
 .search input:focus {
   background: #ffffff;
 
-  border-color: var(--waiter-text);
+  border-color: #94a3b8;
 
-  box-shadow:
-    0 0 0 1px
-    var(--waiter-text);
+  box-shadow: 0 0 0 2px rgba(148, 163, 184, 0.12);
 }
+
+/* ======================================================
+   GRID
+====================================================== */
 
 .grid {
   display: grid;
 
-  grid-template-columns:
-    repeat(
-      4,
-      minmax(0, 1fr)
-    );
+  grid-template-columns: repeat(4, minmax(0, 1fr));
 
-  gap: 12px;
+  gap: 10px;
 }
+
+/* ======================================================
+   MENU ITEM
+====================================================== */
+
+/* ======================================================
+   MENU ITEM
+====================================================== */
 
 .menuItem {
   min-width: 0;
 
   overflow: hidden;
 
+  display: flex;
+  flex-direction: column;
+
   background: #ffffff;
 
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
 
-  box-shadow: var(--shadow-xs);
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.04);
 
   transition:
     transform var(--transition-fast),
+    border-color var(--transition-fast),
     box-shadow var(--transition-fast);
 }
 
 .menuItem:hover {
-  transform: translateY(-1px);
+  transform: translateY(-2px);
 
-  box-shadow: var(--shadow-sm);
+  border-color: #cbd5e1;
+
+  box-shadow:
+    0 6px 16px rgba(15, 23, 42, 0.08);
 }
+
+
+/* ======================================================
+   IMAGE
+====================================================== */
 
 .imageBox {
   position: relative;
 
   width: 100%;
-  height: 130px;
+  height: 118px;
 
   overflow: hidden;
 
@@ -147,97 +233,152 @@
   width: 100%;
   height: 100%;
 
+  display: block;
+
   object-fit: cover;
 
   transition:
-    transform
-    var(--transition-normal);
+    transform var(--transition-normal),
+    opacity var(--transition-fast);
 }
 
-.menuItem:hover img {
-  transform: scale(1.04);
+.menuItem:hover .imageBox img {
+  transform: scale(1.035);
 }
 
-.outOverlay {
+.outOfStockImage {
+  opacity: 0.55;
+
+  filter: grayscale(0.25);
+}
+
+
+/* ======================================================
+   STOCK BADGE
+====================================================== */
+
+.stockBadge {
   position: absolute;
-  inset: 0;
 
-  display: flex;
+  top: 8px;
+  left: 8px;
+
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
 
-  background:
-    rgba(
-      15,
-      23,
-      42,
-      0.75
-    );
-}
+  gap: 5px;
 
-.outOverlay span {
-  padding: 3px 7px;
+  min-height: 24px;
 
-  color: #ffffff;
-  background: #dc2626;
+  padding: 4px 8px;
 
-  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.94);
+
+  border-radius: 999px;
+
+  box-shadow:
+    0 1px 5px rgba(15, 23, 42, 0.12);
 
   font-size: 9px;
-  font-weight: 800;
+  font-weight: 700;
+
+  backdrop-filter: blur(4px);
 }
+
+.stockBadge i {
+  width: 7px;
+  height: 7px;
+
+  flex-shrink: 0;
+
+  border-radius: 50%;
+}
+
+.availableBadge {
+  color: #047857;
+}
+
+.availableBadge i {
+  background: #10b981;
+}
+
+.outOfStockBadge {
+  color: #dc2626;
+}
+
+.outOfStockBadge i {
+  background: #ef4444;
+}
+
+
+/* ======================================================
+   CART COUNT
+====================================================== */
 
 .cartCount {
   position: absolute;
-  top: 7px;
-  right: 7px;
 
-  width: 25px;
+  top: 8px;
+  right: 8px;
+
+  min-width: 25px;
   height: 25px;
 
   display: flex;
   align-items: center;
   justify-content: center;
 
+  padding: 0 6px;
+
   color: #ffffff;
+
   background: var(--waiter-primary);
 
-  border-radius: var(--radius-full);
+  border: 2px solid #ffffff;
+  border-radius: 999px;
 
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-xs);
 
-  font-family: monospace;
-
-  font-size: 10px;
+  font-size: 9px;
   font-weight: 700;
 }
 
-.menuInfo {
-  min-height: 110px;
 
+/* ======================================================
+   INFO
+====================================================== */
+
+.menuInfo {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
 
-  padding: 11px;
+  padding: 10px 11px 11px;
 }
 
-.menuInfo h3 {
+.menuText {
+  min-width: 0;
+}
+
+.menuText h3 {
   overflow: hidden;
+
+  margin: 0;
 
   color: var(--waiter-text);
 
-  font-size: var(--font-size-xs);
+  font-size: 12px;
   font-weight: 700;
+
+  line-height: 1.35;
 
   white-space: nowrap;
   text-overflow: ellipsis;
 }
 
-.menuInfo p {
+.menuText p {
   overflow: hidden;
 
-  margin-top: 2px;
+  margin: 3px 0 0;
 
   color: var(--waiter-muted);
 
@@ -247,143 +388,156 @@
   text-overflow: ellipsis;
 }
 
-.menuInfo > div:first-child > strong {
-  display: block;
 
-  margin-top: 5px;
+/* ======================================================
+   PRICE + ADD
+====================================================== */
 
-  color: var(--waiter-text);
-
-  font-size: 11px;
-  font-weight: 700;
-}
-
-.addArea {
+.menuFooter {
   display: flex;
-  justify-content: flex-end;
 
-  padding-top: 7px;
-  margin-top: 7px;
+  align-items: center;
+  justify-content: space-between;
 
-  border-top:
-    1px solid
-    var(--color-border-light);
+  gap: 8px;
+
+  margin-top: 9px;
 }
 
-.addArea button {
+.price {
+  color: #111827;
+
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.addButton {
   width: 31px;
   height: 31px;
 
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  flex-shrink: 0;
+
+  display: grid;
+  place-items: center;
+
+  padding: 0;
 
   color: #ffffff;
+
   background: var(--waiter-primary);
 
-  border-radius: var(--radius-full);
+  border-radius: 9px;
 
-  box-shadow: var(--shadow-xs);
+  box-shadow:
+    0 2px 5px rgba(79, 70, 229, 0.22);
+
+  cursor: pointer;
 
   transition:
     transform var(--transition-fast),
-    background var(--transition-fast);
+    background var(--transition-fast),
+    box-shadow var(--transition-fast);
 }
 
-.addArea button:hover {
+.addButton:hover:not(:disabled) {
   background: var(--waiter-primary-hover);
 
-  transform: scale(1.06);
+  transform: translateY(-1px);
+
+  box-shadow:
+    0 4px 8px rgba(79, 70, 229, 0.28);
 }
 
-.addArea button:disabled {
-  opacity: 0.4;
+.addButton:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.addButton:disabled {
+  color: #94a3b8;
+
+  background: #e2e8f0;
+
+  box-shadow: none;
 
   cursor: not-allowed;
-
-  transform: none;
 }
 
-.noData {
-  padding: 45px 20px;
 
-  color: var(--waiter-muted);
+/* ======================================================
+   IMAGE PLACEHOLDER
+====================================================== */
 
-  text-align: center;
+.imagePlaceholder {
+  width: 100%;
+  height: 100%;
 
-  background: #ffffff;
+  display: grid;
+  place-items: center;
 
-  border: 1px dashed var(--color-border-dark);
-  border-radius: var(--radius-lg);
+  color: #94a3b8;
 
-  font-size: var(--font-size-xs);
+  background: #f1f5f9;
 }
+
+/* ======================================================
+   RESPONSIVE
+====================================================== */
 
 @media (max-width: 1250px) {
   .grid {
-    grid-template-columns:
-      repeat(
-        3,
-        minmax(0, 1fr)
-      );
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
 @media (max-width: 1050px) {
-  .grid {
-    grid-template-columns:
-      repeat(
-        3,
-        minmax(0, 1fr)
-      );
+  .menu {
+    height: auto;
+
+    overflow: visible;
+
+    padding-right: 0;
+  }
+
+  .filters {
+    position: static;
   }
 }
 
 @media (max-width: 750px) {
   .grid {
-    grid-template-columns:
-      repeat(
-        2,
-        minmax(0, 1fr)
-      );
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
 @media (max-width: 520px) {
+
   .grid {
     grid-template-columns: 1fr;
   }
 
   .menuItem {
-    display: flex;
+    display: grid;
 
-    padding: 10px;
-
-    gap: 11px;
+    grid-template-columns:
+      90px minmax(0, 1fr);
   }
 
   .imageBox {
-    width: 78px;
-    height: 78px;
+    width: 90px;
+    height: 90px;
 
-    flex-shrink: 0;
-
-    border-radius: var(--radius-md);
+    border-radius: 0;
   }
 
   .menuInfo {
     min-width: 0;
-    min-height: 78px;
 
-    flex: 1;
+    justify-content: center;
 
-    padding: 0;
+    padding: 9px 10px;
   }
 
-  .addArea {
-    padding-top: 3px;
-    margin-top: 3px;
-
-    border-top: none;
+  .menuFooter {
+    margin-top: 6px;
   }
 }

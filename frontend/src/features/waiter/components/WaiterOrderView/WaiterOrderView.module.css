@@ -1,37 +1,81 @@
 .container {
-  width: min(1400px, 100%);
+  width: min(1440px, 100%);
+
+  height: calc(100dvh - 78px);
+
+  min-height: 0;
+
+  display: flex;
+  flex-direction: column;
 
   margin: 0 auto;
 
-  padding-bottom: 20px;
+  overflow: hidden;
 }
 
+
+/* ======================================================
+   WORKSPACE
+====================================================== */
+
 .workspace {
+  min-height: 0;
+
+  flex: 1;
+
   display: grid;
 
   grid-template-columns:
-    minmax(0, 8fr)
-    minmax(340px, 4fr);
+    minmax(0, 1fr)
+    375px;
 
-  align-items: start;
+  align-items: stretch;
 
-  gap: 20px;
+  gap: 14px;
+
+  overflow: hidden;
 }
 
+
+/* ======================================================
+   TABLET
+====================================================== */
+
+@media (max-width: 1150px) {
+  .workspace {
+    grid-template-columns:
+      minmax(0, 1fr)
+      350px;
+  }
+}
+
+
+/* ======================================================
+   MOBILE
+====================================================== */
+
 @media (max-width: 1050px) {
+  .container {
+    height: auto;
+
+    min-height: calc(100dvh - 76px);
+
+    padding-bottom: 95px;
+
+    overflow: visible;
+  }
+
   .workspace {
     display: flex;
 
     flex-direction: column;
+
+    gap: 12px;
+
+    overflow: visible;
   }
 
   .workspace > :last-child {
     order: -1;
-  }
-}
-
-@media (max-width: 1050px) {
-  .container {
-    padding-bottom: 100px;
   }
 }

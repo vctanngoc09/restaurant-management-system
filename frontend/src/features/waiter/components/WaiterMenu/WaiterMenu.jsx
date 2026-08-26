@@ -1,82 +1,65 @@
-import { Plus, Search } from "lucide-react";
+import { ImageIcon, Plus, Search } from "lucide-react";
 
 import { useMemo, useState } from "react";
 
 import styles from "./WaiterMenu.module.css";
-
-const CATEGORIES = [
-  {
-    id: "all",
-    label: "Tất cả món",
-  },
-
-  {
-    id: "hu_tieu",
-    label: "Hủ Tiếu",
-  },
-
-  {
-    id: "khai_vi",
-    label: "Khai Vị",
-  },
-
-  {
-    id: "do_uong",
-    label: "Đồ Uống",
-  },
-
-  {
-    id: "trang_mieng",
-    label: "Tráng Miệng",
-  },
-
-  {
-    id: "mon_them",
-    label: "Món Thêm",
-  },
-
-  {
-    id: "combo",
-    label: "Combo",
-  },
-];
-
-function getFoodImage(item) {
-  if (item.image) {
-    return item.image;
-  }
-
-  switch (item.category) {
-    case "hu_tieu":
-      return "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=500&q=80";
-
-    case "khai_vi":
-      return "https://images.unsplash.com/photo-1541544741938-0af808871cc0?auto=format&fit=crop&w=500&q=80";
-
-    case "do_uong":
-      return "https://images.unsplash.com/photo-1556679343-c7306c1976bc?auto=format&fit=crop&w=500&q=80";
-
-    case "trang_mieng":
-      return "https://images.unsplash.com/photo-1551024709-8f23befc6f87?auto=format&fit=crop&w=500&q=80";
-
-    case "mon_them":
-      return "https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?auto=format&fit=crop&w=500&q=80";
-
-    default:
-      return "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=500&q=80";
-  }
-}
 
 function WaiterMenu({ menuItems, cart, onAddToCart }) {
   const [category, setCategory] = useState("all");
 
   const [search, setSearch] = useState("");
 
+  // ==================================================
+  // CATEGORIES
+  // TẠO TỪ PRODUCT DATA BACKEND
+  // ==================================================
+
+  const categories = useMemo(() => {
+    const categoryMap = new Map();
+
+    menuItems.forEach((item) => {
+      if (item.categoryId && item.categoryName) {
+        categoryMap.set(
+          String(item.categoryId),
+
+          {
+            id: String(item.categoryId),
+
+            label: item.categoryName,
+          },
+        );
+      }
+    });
+
+    return [
+      {
+        id: "all",
+
+        label: "Tất cả món",
+      },
+
+      ...Array.from(categoryMap.values()),
+    ];
+  }, [menuItems]);
+
+  // ==================================================
+  // FILTER MENU
+  // ==================================================
+
   const filteredItems = useMemo(() => {
     const query = search.trim().toLowerCase();
 
     return menuItems.filter((item) => {
-      const categoryMatch = category === "all" || item.category === category;
+      // =========================
+      // CATEGORY
+      // =========================
+
+      const categoryMatch =
+        category === "all" || String(item.categoryId) === category;
+
+      // =========================
+      // SEARCH
+      // =========================
 
       const searchMatch = !query || item.name.toLowerCase().includes(query);
 
@@ -86,9 +69,15 @@ function WaiterMenu({ menuItems, cart, onAddToCart }) {
 
   return (
     <main className={styles.menu}>
+      {/* ==================================================
+          FILTERS
+      ================================================== */}
+
       <div className={styles.filters}>
+        {/* CATEGORY */}
+
         <div className={styles.categories}>
-          {CATEGORIES.map((item) => (
+          {categories.map((item) => (
             <button
               type="button"
               key={item.id}
@@ -100,17 +89,23 @@ function WaiterMenu({ menuItems, cart, onAddToCart }) {
           ))}
         </div>
 
+        {/* SEARCH */}
+
         <div className={styles.search}>
           <Search size={16} />
 
           <input
             value={search}
             type="text"
-            placeholder="Tìm tên món..."
+            placeholder={"Tìm tên món..."}
             onChange={(event) => setSearch(event.target.value)}
           />
         </div>
       </div>
+
+      {/* ==================================================
+          MENU GRID
+      ================================================== */}
 
       <div className={styles.grid}>
         {filteredItems.map((item) => {
@@ -122,40 +117,68 @@ function WaiterMenu({ menuItems, cart, onAddToCart }) {
 
           return (
             <article key={item.id} className={styles.menuItem}>
-              <div className={styles.imageBox}>
-                <img
-                  src={getFoodImage(item)}
-                  alt={item.name}
-                  referrerPolicy="no-referrer"
-                />
+              {/* =========================
+      IMAGE
+  ========================= */}
 
-                {!inStock && (
-                  <div className={styles.outOverlay}>
-                    <span>HẾT</span>
+              <div className={styles.imageBox}>
+                {item.urlImg ? (
+                  <img
+                    src={item.urlImg}
+                    alt={item.name}
+                    className={!inStock ? styles.outOfStockImage : ""}
+                  />
+                ) : (
+                  <div className={styles.imagePlaceholder}>
+                    <ImageIcon size={34} />
                   </div>
                 )}
 
+                {/* STOCK BADGE */}
+
+                <span
+                  className={`${styles.stockBadge} ${
+                    inStock ? styles.availableBadge : styles.outOfStockBadge
+                  }`}
+                >
+                  <i />
+
+                  {inStock ? "Còn món" : "Hết món"}
+                </span>
+
+                {/* CART COUNT */}
+
                 {cartItem && (
-                  <span className={styles.cartCount}>{cartItem.quantity}</span>
+                  <span className={styles.cartCount}>{cartItem.quantity}x</span>
                 )}
               </div>
 
+              {/* =========================
+      INFO
+  ========================= */}
+
               <div className={styles.menuInfo}>
-                <div>
-                  <h3>{item.name}</h3>
+                <div className={styles.menuText}>
+                  <h3 title={item.name}>{item.name}</h3>
 
-                  {item.description && <p>{item.description}</p>}
-
-                  <strong>{item.price.toLocaleString("vi-VN")}đ</strong>
+                  <p>{item.categoryName}</p>
                 </div>
 
-                <div className={styles.addArea}>
+                {/* PRICE + ADD */}
+
+                <div className={styles.menuFooter}>
+                  <strong className={styles.price}>
+                    {item.price.toLocaleString("vi-VN")}đ
+                  </strong>
+
                   <button
                     type="button"
+                    className={styles.addButton}
                     disabled={!inStock}
+                    title={inStock ? `Thêm ${item.name}` : "Món hiện đã hết"}
                     onClick={() => onAddToCart(item)}
                   >
-                    <Plus size={17} />
+                    <Plus size={19} />
                   </button>
                 </div>
               </div>
@@ -163,6 +186,10 @@ function WaiterMenu({ menuItems, cart, onAddToCart }) {
           );
         })}
       </div>
+
+      {/* ==================================================
+          EMPTY
+      ================================================== */}
 
       {filteredItems.length === 0 && (
         <div className={styles.noData}>Không tìm thấy món phù hợp.</div>

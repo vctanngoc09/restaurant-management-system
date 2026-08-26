@@ -5,12 +5,14 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
 import org.springframework.security.access.prepost.PreAuthorize;
 
 import org.springframework.web.bind.annotation.*;
 
+import org.springframework.web.multipart.MultipartFile;
 import vn.edu.ut.resto.dto.request.ProductRequest;
 
 import vn.edu.ut.resto.dto.response.ApiResponse;
@@ -128,23 +130,38 @@ public class ProductController {
     // CREATE PRODUCT
     // =========================
 
-    @PostMapping
-    public ResponseEntity<ApiResponse<ProductResponse>>
+    @PostMapping(
+            consumes =
+                    MediaType.MULTIPART_FORM_DATA_VALUE
+    )
+    public ResponseEntity<
+            ApiResponse<ProductResponse>
+            >
     createProduct(
+
             @Valid
-            @RequestBody ProductRequest request
+            @ModelAttribute
+            ProductRequest request
     ) {
 
         Product product =
-                productService.createProduct(request);
+                productService
+                        .createProduct(
+                                request
+                        );
+
 
         return ResponseEntity
-                .status(HttpStatus.CREATED)
+                .status(
+                        HttpStatus.CREATED
+                )
                 .body(
                         new ApiResponse<>(
                                 201,
                                 "Thêm sản phẩm thành công!",
-                                productMapper.toResponse(product)
+                                productMapper.toResponse(
+                                        product
+                                )
                         )
                 );
     }
@@ -154,26 +171,39 @@ public class ProductController {
     // UPDATE PRODUCT
     // =========================
 
-    @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<ProductResponse>>
+    @PutMapping(
+            value = "/{id}",
+            consumes =
+                    MediaType.MULTIPART_FORM_DATA_VALUE
+    )
+    public ResponseEntity<
+            ApiResponse<ProductResponse>
+            >
     updateProduct(
-            @PathVariable Long id,
+
+            @PathVariable
+            Long id,
 
             @Valid
-            @RequestBody ProductRequest request
+            @ModelAttribute
+            ProductRequest request
     ) {
 
         Product product =
-                productService.updateProduct(
-                        id,
-                        request
-                );
+                productService
+                        .updateProduct(
+                                id,
+                                request
+                        );
+
 
         return ResponseEntity.ok(
                 new ApiResponse<>(
                         200,
                         "Cập nhật sản phẩm thành công!",
-                        productMapper.toResponse(product)
+                        productMapper.toResponse(
+                                product
+                        )
                 )
         );
     }

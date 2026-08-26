@@ -1,92 +1,110 @@
-import { ArrowLeft, Minus, Plus, Users } from "lucide-react";
+import { ArrowLeft, MapPin, User } from "lucide-react";
 
 import styles from "./WaiterOrderHeader.module.css";
 
+
 function WaiterOrderHeader({
-  table,
-  orderType,
+                             table,
+                             orderType,
 
-  guestCount,
+                             currentUserName,
 
-  currentUserName,
+                             onBack,
+                           }) {
+  const dineIn =
+      orderType === "dine_in";
 
-  onGuestCountChange,
-  onBack,
-}) {
-  const dineIn = orderType === "dine_in";
 
   const title =
-    orderType === "take_away"
-      ? "Đơn Mang Về"
-      : orderType === "delivery"
-        ? "Đơn Giao Hàng"
-        : `Bàn ${table?.number || ""}`;
+      orderType === "take_away"
+          ? "Đơn Mang Về"
+          : orderType === "delivery"
+              ? "Đơn Giao Hàng"
+              : `Bàn ${table?.number || ""}`;
+
+
+  const subtitle =
+      orderType === "take_away"
+          ? "Đơn khách mang về"
+          : orderType === "delivery"
+              ? "Đơn giao hàng"
+              : "Order tại bàn";
+
 
   return (
-    <section className={styles.header}>
-      <div className={styles.left}>
-        <button type="button" className={styles.backButton} onClick={onBack}>
-          <ArrowLeft size={16} />
-          Sơ đồ bàn
-        </button>
+      <section className={styles.header}>
 
-        <div>
-          <div className={styles.titleRow}>
+        {/* ==================================================
+          LEFT
+      ================================================== */}
+
+        <div className={styles.left}>
+
+          <button
+              type="button"
+              className={styles.backButton}
+              onClick={onBack}
+          >
+            <ArrowLeft size={16} />
+
+            Sơ đồ bàn
+          </button>
+
+
+          <div className={styles.titleBlock}>
+
             <h1>{title}</h1>
 
-            {dineIn && table && (
+            <p>{subtitle}</p>
+
+          </div>
+
+        </div>
+
+
+        {/* ==================================================
+          RIGHT
+      ================================================== */}
+
+        <div className={styles.right}>
+
+          {/* STATUS */}
+
+          {dineIn && table && (
               <span
-                className={
-                  table.status === "occupied"
-                    ? styles.servingBadge
-                    : styles.emptyBadge
-                }
+                  className={
+                    table.status === "occupied"
+                        ? styles.servingBadge
+                        : styles.emptyBadge
+                  }
               >
-                {table.status === "occupied" ? "Đang phục vụ" : "Bàn trống"}
-              </span>
-            )}
-          </div>
-
-          <p>
-            Nhân viên: <strong>{currentUserName}</strong>
-            {dineIn && table && (
-              <>
-                {" "}
-                • Khu vực: {table.area === "indoor" ? "Trong nhà" : "Sân vườn"}
-              </>
-            )}
-          </p>
-        </div>
-      </div>
-
-      {dineIn && (
-        <div className={styles.guests}>
-          <span>
-            <Users size={14} />
-            Số khách:
+            {table.status === "occupied"
+                ? "Đang phục vụ"
+                : "Bàn trống"}
           </span>
+          )}
 
-          <div>
-            <button
-              type="button"
-              onClick={() => onGuestCountChange(Math.max(1, guestCount - 1))}
-            >
-              <Minus size={13} />
-            </button>
 
-            <strong>{guestCount}</strong>
+          {/* META */}
 
-            <button
-              type="button"
-              onClick={() => onGuestCountChange(guestCount + 1)}
-            >
-              <Plus size={13} />
-            </button>
+          <div className={styles.meta}>
+
+            {dineIn && table && (
+                <span>
+              <MapPin size={13} />
+
+                  {table.areaName ||
+                      "Chưa phân khu"}
+            </span>
+            )}
+
           </div>
+
         </div>
-      )}
-    </section>
+
+      </section>
   );
 }
+
 
 export default WaiterOrderHeader;
