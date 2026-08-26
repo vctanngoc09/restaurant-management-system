@@ -126,8 +126,8 @@ function WaiterOrderView({
 
   const newItemCount = cart.reduce((total, item) => total + item.quantity, 0);
 
-  const handleSend = () => {
-    const result = onSendToKitchen({
+  const handleSend = async () => {
+    const result = await onSendToKitchen({
       guestCount,
       cartItems: cart,
     });
