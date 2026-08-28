@@ -31,6 +31,10 @@ public class OrderItem {
     @JoinColumn(name = "product_id")
     private Product product;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "kitchen_ticket_id")
+    private KitchenTicket kitchenTicket;
+
     public OrderItem() {}
 
     public OrderItem(Double price, Integer quantity, String note, EOrderItemStatus status, Order order, Product product) {
@@ -96,5 +100,13 @@ public class OrderItem {
 
     public void setProduct(Product product) {
         this.product = product;
+    }
+
+    public KitchenTicket getKitchenTicket() {
+        return kitchenTicket;
+    }
+
+    public void setKitchenTicket(KitchenTicket kitchenTicket) {
+        this.kitchenTicket = kitchenTicket;
     }
 }

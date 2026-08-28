@@ -50,6 +50,26 @@ function WaiterDashboard() {
     setViewMode("order");
   };
 
+  const handleSendToKitchen = async (data) => {
+    const result = await waiter.sendToKitchen({
+      ...data,
+
+      orderType: selectedOrderType,
+
+      tableNumber: selectedTableNumber,
+    });
+
+    if (!result) {
+      return null;
+    }
+
+    if (selectedOrderType === "take_away") {
+      setViewMode("table_map");
+    }
+
+    return result;
+  };
+
   return (
     <div className={styles.waiterPage}>
       {viewMode === "table_map" && (
@@ -70,15 +90,7 @@ function WaiterDashboard() {
           menuItems={waiter.menuItems}
           currentUserName={currentUserName}
           onBack={() => setViewMode("table_map")}
-          onSendToKitchen={(data) =>
-            waiter.sendToKitchen({
-              ...data,
-
-              orderType: selectedOrderType,
-
-              tableNumber: selectedTableNumber,
-            })
-          }
+          onSendToKitchen={handleSendToKitchen}
           onRequestPayment={() => waiter.requestPayment(existingOrder?.id)}
         />
       )}

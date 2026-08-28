@@ -45,6 +45,8 @@ function WaiterCart({
   existingOrder,
 
   cart,
+  orderNote,
+  onOrderNoteChange,
 
   subtotal,
   vatAmount,
@@ -111,6 +113,49 @@ function WaiterCart({
               Xóa tất cả
             </button>
           )}
+        </div>
+
+        {/* ==================================================
+    ORDER NOTE
+================================================== */}
+
+        <div className={styles.orderNote}>
+          <div className={styles.orderNoteTitle}>
+            <MessageSquare size={14} />
+
+            <span>Ghi chú đơn hàng</span>
+          </div>
+
+          {existingOrder ? (
+            /*
+             * Order đã tạo rồi.
+             *
+             * Hiện backend chưa có
+             * API update Order.note,
+             * nên chỉ hiển thị.
+             */
+            <div className={styles.existingOrderNote}>
+              {existingOrder.note ? (
+                existingOrder.note
+              ) : (
+                <span>Không có ghi chú</span>
+              )}
+            </div>
+          ) : (
+            /*
+             * Order mới:
+             * cho phép nhập note.
+             */
+            <textarea
+              value={orderNote}
+              maxLength={500}
+              rows={2}
+              placeholder="Ví dụ: Khách cần lên món nhanh, khách có trẻ nhỏ..."
+              onChange={(event) => onOrderNoteChange(event.target.value)}
+            />
+          )}
+
+          {!existingOrder && <small>{orderNote.length}/500</small>}
         </div>
 
         {/* =========================

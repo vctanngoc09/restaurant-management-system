@@ -1,36 +1,41 @@
 import api from "../../../services/api";
 
-const ORDER_URL = "/api/orders";
+// ==================================================
+// WAITER ORDER API
+// ==================================================
+
+const WAITER_ORDER_URL = "/api/waiter/orders";
 
 const waiterOrderService = {
-  // ==================================================
-  // CREATE ORDER
-  // ==================================================
-
   async createOrder(data) {
-    const response = await api.post(ORDER_URL, data);
+    const response = await api.post(WAITER_ORDER_URL, data);
 
     return response.data;
   },
 
-  // ==================================================
-  // GET ACTIVE ORDER BY TABLE
-  // ==================================================
 
   async getActiveByTable(tableId) {
-    const response = await api.get(`${ORDER_URL}/table/${tableId}/active`);
+    const response = await api.get(
+      `${WAITER_ORDER_URL}/table/${tableId}/active`,
+    );
 
     return response.data;
   },
 
-  // ==================================================
-  // ADD ITEMS TO ORDER
-  // ==================================================
 
   async addItemsToOrder(orderId, items) {
-    const response = await api.post(`${ORDER_URL}/${orderId}/items`, {
+    const response = await api.post(`${WAITER_ORDER_URL}/${orderId}/items`, {
       items,
     });
+
+    return response.data;
+  },
+
+
+  async serveItem(orderItemId) {
+    const response = await api.patch(
+      `${WAITER_ORDER_URL}/items/${orderItemId}/serve`,
+    );
 
     return response.data;
   },

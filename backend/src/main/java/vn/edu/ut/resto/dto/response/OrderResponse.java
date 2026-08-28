@@ -30,6 +30,8 @@ public class OrderResponse {
 
     private String staffName;
 
+    private ShippingDetailResponse shippingDetail;
+
 
     private List<OrderItemResponse> items;
 
@@ -139,6 +141,13 @@ public class OrderResponse {
         this.staffName = staffName;
     }
 
+    public ShippingDetailResponse getShippingDetail() {
+        return shippingDetail;
+    }
+
+    public void setShippingDetail(ShippingDetailResponse shippingDetail) {
+        this.shippingDetail = shippingDetail;
+    }
 
     public List<OrderItemResponse> getItems() {
         return items;

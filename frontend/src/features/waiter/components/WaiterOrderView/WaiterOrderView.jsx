@@ -3,11 +3,8 @@ import { useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 
 import WaiterOrderHeader from "../WaiterOrderHeader/WaiterOrderHeader";
-
 import WaiterCart from "../WaiterCart/WaiterCart";
-
 import WaiterMenu from "../WaiterMenu/WaiterMenu";
-
 import WaiterMobileBar from "../WaiterMobileBar/WaiterMobileBar";
 
 import styles from "./WaiterOrderView.module.css";
@@ -29,11 +26,27 @@ function WaiterOrderView({
 
   const [cart, setCart] = useState([]);
 
+  const [orderNote, setOrderNote] = useState("");
+
+
   useEffect(() => {
     setCart([]);
 
     setGuestCount(table?.guestCount > 0 ? table.guestCount : 2);
-  }, [table?.id, orderType]);
+
+    /*
+     * Nếu bàn đã có Order:
+     * lấy note hiện tại để hiển thị.
+     *
+     * Nếu Order mới:
+     * reset note.
+     */
+    setOrderNote(existingOrder?.note || "");
+  }, [table?.id, orderType, existingOrder?.id]);
+
+  // ==================================================
+  // ADD TO CART
+  // ==================================================
 
   const addToCart = (menuItem) => {
     if (menuItem.status === "out_of_stock") {
@@ -126,14 +139,33 @@ function WaiterOrderView({
 
   const newItemCount = cart.reduce((total, item) => total + item.quantity, 0);
 
+  // ==================================================
+  // SEND
+  // ==================================================
+
   const handleSend = async () => {
     const result = await onSendToKitchen({
       guestCount,
+
       cartItems: cart,
+
+      // =========================
+      // ORDER NOTE
+      // =========================
+
+      orderNote: orderNote.trim(),
     });
 
     if (result) {
       setCart([]);
+
+      /*
+       * Nếu vừa tạo Order mới,
+       * note đã được lưu Backend.
+       *
+       * Giữ lại để UI hiển thị
+       * note hiện tại của Order.
+       */
     }
   };
 
@@ -156,6 +188,12 @@ function WaiterOrderView({
           orderType={orderType}
           existingOrder={existingOrder}
           cart={cart}
+          // =========================
+          // ORDER NOTE
+          // =========================
+
+          orderNote={orderNote}
+          onOrderNoteChange={setOrderNote}
           subtotal={combinedSubtotal}
           vatAmount={vatAmount}
           totalAmount={totalAmount}

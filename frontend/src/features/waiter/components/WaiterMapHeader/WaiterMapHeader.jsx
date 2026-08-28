@@ -16,7 +16,7 @@ function WaiterMapHeader({ tables, currentUserName }) {
 
         <p>
           Nhân viên ca trực: <strong>{currentUserName}</strong> • Chạm vào bàn
-          hoặc loại đơn để bắt đầu gọi món
+          để bắt đầu gọi món
         </p>
       </div>
 

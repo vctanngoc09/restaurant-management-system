@@ -21,16 +21,19 @@ import vn.edu.ut.resto.mapper.OrderMapper;
 
 import vn.edu.ut.resto.model.Order;
 
-import vn.edu.ut.resto.service.OrderService;
+import vn.edu.ut.resto.service.WaiterService;
 
 
 @RestController
-@RequestMapping("/api/orders")
-public class OrderController {
+@RequestMapping("/api/waiter/orders")
+@PreAuthorize(
+        "hasAnyRole('WAITER', 'ADMIN')"
+)
+public class WaiterController {
 
 
     @Autowired
-    private OrderService orderService;
+    private WaiterService waiterService;
 
 
     @Autowired
@@ -38,33 +41,23 @@ public class OrderController {
 
 
     // ==================================================
-    // CREATE ORDER
+    // CREATE DINE IN
     // ==================================================
 
     @PostMapping
-    @PreAuthorize(
-            "hasAnyRole('WAITER', 'CASHIER', 'ADMIN')"
-    )
     public ResponseEntity<
             ApiResponse<OrderResponse>
             >
-    createOrder(
+    createDineInOrder(
             @Valid
             @RequestBody
             CreateOrderRequest request
     ) {
 
         Order order =
-                orderService
-                        .createOrder(
+                waiterService
+                        .createDineInOrder(
                                 request
-                        );
-
-
-        OrderResponse response =
-                orderMapper
-                        .toResponse(
-                                order
                         );
 
 
@@ -75,78 +68,117 @@ public class OrderController {
                 .body(
                         new ApiResponse<>(
                                 201,
-                                "Tạo đơn hàng thành công!",
-                                response
+                                "Tạo đơn tại bàn thành công!",
+                                orderMapper.toResponse(
+                                        order
+                                )
                         )
                 );
     }
 
 
     // ==================================================
-    // GET ACTIVE ORDER BY TABLE
+    // ACTIVE ORDER BY TABLE
     // ==================================================
 
     @GetMapping(
             "/table/{tableId}/active"
     )
-    @PreAuthorize(
-            "hasAnyRole('WAITER', 'CASHIER', 'ADMIN')"
-    )
     public ResponseEntity<
             ApiResponse<OrderResponse>
             >
-    getActiveOrderByTable(
+    getActiveOrder(
             @PathVariable
             Long tableId
     ) {
 
         Order order =
-                orderService
+                waiterService
                         .getActiveOrderByTable(
                                 tableId
-                        );
-
-
-        OrderResponse response =
-                orderMapper
-                        .toResponse(
-                                order
                         );
 
 
         return ResponseEntity.ok(
                 new ApiResponse<>(
                         200,
-                        "Lấy đơn hàng hiện tại của bàn thành công!",
-                        response
+                        "Lấy đơn hiện tại của bàn thành công!",
+                        orderMapper.toResponse(
+                                order
+                        )
                 )
         );
     }
 
 
     // ==================================================
-    // ADD ITEMS TO ACTIVE ORDER
-    // GỌI THÊM MÓN
+    // ADD ITEMS
     // ==================================================
 
-    @PostMapping("/{orderId}/items")
-    @PreAuthorize("hasAnyRole('WAITER', 'CASHIER', 'ADMIN')")
-    public ResponseEntity<ApiResponse<OrderResponse>>
-    addItemsToOrder(@PathVariable Long orderId,
+    @PostMapping(
+            "/{orderId}/items"
+    )
+    public ResponseEntity<
+            ApiResponse<OrderResponse>
+            >
+    addItems(
+            @PathVariable
+            Long orderId,
+
             @Valid
             @RequestBody
             AddOrderItemsRequest request
     ) {
 
-        Order order = orderService.addItemsToOrder(orderId, request);
+        Order order =
+                waiterService
+                        .addItems(
+                                orderId,
+                                request
+                        );
 
-        OrderResponse response = orderMapper.toResponse(order);
 
         return ResponseEntity.ok(
                 new ApiResponse<>(
                         200,
                         "Gọi thêm món thành công!",
-                        response
+                        orderMapper.toResponse(
+                                order
+                        )
+                )
+        );
+    }
+
+
+    // ==================================================
+    // SERVE
+    // ==================================================
+
+    @PatchMapping(
+            "/items/{orderItemId}/serve"
+    )
+    public ResponseEntity<
+            ApiResponse<OrderResponse>
+            >
+    serveItem(
+            @PathVariable
+            Long orderItemId
+    ) {
+
+        Order order =
+                waiterService
+                        .serveItem(
+                                orderItemId
+                        );
+
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        200,
+                        "Đã xác nhận phục vụ món!",
+                        orderMapper.toResponse(
+                                order
+                        )
                 )
         );
     }

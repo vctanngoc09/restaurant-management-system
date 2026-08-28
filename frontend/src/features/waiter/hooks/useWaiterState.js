@@ -1,29 +1,13 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { toast } from "react-toastify";
 
-import { CASHIER_ORDERS } from "../../../data/cashierMockData";
-
 import waiterMenuService from "../services/waiterMenuService";
-
 import waiterTableService from "../services/waiterTableService";
-
 import waiterOrderService from "../services/waiterOrderService";
 
 // ==================================================
-// VIRTUAL ORDERS
-//
-// TAKE_AWAY + DELIVERY hiện chưa có Backend.
-//
-// DINE_IN sẽ dùng hoàn toàn Backend.
-// ==================================================
-
-const INITIAL_VIRTUAL_ORDERS = CASHIER_ORDERS.filter(
-  (order) => order.orderType !== "dine_in",
-);
-
-// ==================================================
-// NORMALIZE TABLE STATUS
+// TABLE STATUS
 // BACKEND -> FRONTEND
 // ==================================================
 
@@ -47,42 +31,22 @@ function normalizeTableStatus(status) {
 }
 
 // ==================================================
-// NORMALIZE TABLE
-// BACKEND -> WAITER UI
+// TABLE
 // ==================================================
 
 function normalizeTable(table) {
   return {
-    // =========================
-    // TABLE
-    // =========================
-
     id: table.id,
 
     number: table.tableNumber,
 
     status: normalizeTableStatus(table.status),
 
-    // =========================
-    // AREA
-    // =========================
-
     areaId: table.areaId,
 
     areaName: table.areaName || "Chưa phân khu",
 
-    // =========================
-    // QR
-    // =========================
-
     qrToken: table.qrToken,
-
-    // =========================
-    // ACTIVE ORDER INFO
-    //
-    // loadActiveOrders()
-    // sẽ bổ sung sau.
-    // =========================
 
     guestCount: 0,
 
@@ -95,42 +59,7 @@ function normalizeTable(table) {
 }
 
 // ==================================================
-// NORMALIZE ORDER TYPE
-// BACKEND -> FRONTEND
-// ==================================================
-
-function normalizeOrderType(orderType) {
-  switch (orderType) {
-    case "DINE_IN":
-      return "dine_in";
-
-    case "TAKE_AWAY":
-      return "take_away";
-
-    case "DELIVERY":
-      return "delivery";
-
-    default:
-      return orderType?.toLowerCase() || "dine_in";
-  }
-}
-
-// ==================================================
-// NORMALIZE ORDER STATUS
-//
-// BACKEND
-// PENDING
-// PROCESSING
-// AWAITING_PAYMENT
-// COMPLETED
-// CANCELLED
-//
-// FRONTEND
-// pending
-// cooking
-// pending_payment
-// completed
-// cancelled
+// ORDER STATUS
 // ==================================================
 
 function normalizeOrderStatus(status) {
@@ -156,7 +85,7 @@ function normalizeOrderStatus(status) {
 }
 
 // ==================================================
-// NORMALIZE ORDER ITEM STATUS
+// ORDER ITEM STATUS
 // ==================================================
 
 function normalizeOrderItemStatus(status) {
@@ -182,33 +111,20 @@ function normalizeOrderItemStatus(status) {
 }
 
 // ==================================================
-// NORMALIZE ORDER ITEM
-// BACKEND -> WAITER UI
+// ORDER ITEM
 // ==================================================
 
 function normalizeOrderItem(item) {
   const itemStatus = normalizeOrderItemStatus(item.status);
 
   return {
-    // =========================
-    // ORDER ITEM
-    // =========================
-
     id: item.id,
-
-    // =========================
-    // PRODUCT
-    // =========================
 
     productId: item.productId,
 
     menuItemId: item.productId,
 
     name: item.productName,
-
-    // =========================
-    // PRICE
-    // =========================
 
     price: Number(item.price) || 0,
 
@@ -217,97 +133,11 @@ function normalizeOrderItem(item) {
     lineTotal:
       Number(item.lineTotal) || Number(item.price) * Number(item.quantity),
 
-    // =========================
-    // NOTE
-    // =========================
-
     note: item.note || "",
-
-    // =========================
-    // STATUS
-    // =========================
 
     status: itemStatus,
 
     kdsStatus: itemStatus,
-  };
-}
-
-// ==================================================
-// NORMALIZE ORDER
-// BACKEND -> WAITER UI
-// ==================================================
-
-function normalizeOrder(order) {
-  const items = Array.isArray(order?.items)
-    ? order.items.map(normalizeOrderItem)
-    : [];
-
-  const orderStatus = normalizeOrderStatus(order?.status);
-
-  const totalPrice = Number(order?.totalPrice) || 0;
-
-  return {
-    // =========================
-    // ORDER
-    // =========================
-
-    id: order.id,
-
-    createdAt: order.createdAt,
-
-    orderType: normalizeOrderType(order.orderType),
-
-    status: orderStatus,
-
-    note: order.note || "",
-
-    // =========================
-    // TABLE
-    // =========================
-
-    tableId: order.tableId,
-
-    tableNumber: order.tableNumber,
-
-    tableName: `Bàn ${order.tableNumber || ""}`,
-
-    // =========================
-    // STAFF
-    // =========================
-
-    staffId: order.staffId,
-
-    staffName: order.staffName,
-
-    waiterName: order.staffName || "Phục vụ",
-
-    // =========================
-    // ITEMS
-    // =========================
-
-    items,
-
-    // =========================
-    // TOTAL
-    //
-    // Backend totalPrice hiện
-    // chưa tính VAT.
-    // =========================
-
-    subtotal: totalPrice,
-
-    vatAmount: 0,
-
-    totalAmount: totalPrice,
-
-    // =========================
-    // UI PROGRESS
-    // =========================
-
-    progressPercentage: getProgressPercentage(orderStatus),
-
-    progressLabel: getProgressLabel(orderStatus),
   };
 }
 
@@ -361,8 +191,79 @@ function getProgressLabel(status) {
 }
 
 // ==================================================
-// NORMALIZE PRODUCT STATUS
-// BACKEND -> WAITER UI
+// ORDER
+// ==================================================
+
+function normalizeOrder(order) {
+  const items = Array.isArray(order?.items)
+    ? order.items.map(normalizeOrderItem)
+    : [];
+
+  const orderStatus = normalizeOrderStatus(order?.status);
+
+  const totalPrice = Number(order?.totalPrice) || 0;
+
+  return {
+    id: order.id,
+
+    createdAt: order.createdAt,
+
+    orderType: "dine_in",
+
+    status: orderStatus,
+
+    note: order.note || "",
+
+    // ==================================================
+    // TABLE
+    // ==================================================
+
+    tableId: order.tableId,
+
+    tableNumber: order.tableNumber,
+
+    tableName: `Bàn ${order.tableNumber || ""}`,
+
+    // ==================================================
+    // STAFF
+    // ==================================================
+
+    staffId: order.staffId,
+
+    staffName: order.staffName,
+
+    waiterName: order.staffName || "Phục vụ",
+
+    // ==================================================
+    // ITEMS
+    // ==================================================
+
+    items,
+
+    // ==================================================
+    // TOTAL
+    //
+    // Backend totalPrice hiện là tổng món.
+    // ==================================================
+
+    subtotal: totalPrice,
+
+    vatAmount: 0,
+
+    totalAmount: totalPrice,
+
+    // ==================================================
+    // PROGRESS
+    // ==================================================
+
+    progressPercentage: getProgressPercentage(orderStatus),
+
+    progressLabel: getProgressLabel(orderStatus),
+  };
+}
+
+// ==================================================
+// PRODUCT STATUS
 // ==================================================
 
 function normalizeProductStatus(status) {
@@ -382,8 +283,7 @@ function normalizeProductStatus(status) {
 }
 
 // ==================================================
-// NORMALIZE PRODUCT
-// BACKEND -> WAITER MENU
+// MENU ITEM
 // ==================================================
 
 function normalizeMenuItem(product) {
@@ -394,23 +294,11 @@ function normalizeMenuItem(product) {
 
     price: Number(product.price) || 0,
 
-    // =========================
-    // CLOUDINARY IMAGE
-    // =========================
-
     urlImg: product.urlImg || null,
-
-    // =========================
-    // CATEGORY
-    // =========================
 
     categoryId: product.categoryId,
 
     categoryName: product.categoryName || "Chưa phân loại",
-
-    // =========================
-    // STATUS
-    // =========================
 
     status: normalizeProductStatus(product.status),
 
@@ -419,11 +307,7 @@ function normalizeMenuItem(product) {
 }
 
 // ==================================================
-// BUILD ORDER ITEM REQUEST
-//
-// Cart frontend
-// ->
-// OrderItemRequest backend
+// CART -> BACKEND ITEM REQUEST
 // ==================================================
 
 function buildOrderItemsRequest(cartItems) {
@@ -437,44 +321,12 @@ function buildOrderItemsRequest(cartItems) {
 }
 
 // ==================================================
-// BUILD LOCAL VIRTUAL ITEM
-//
-// Chỉ dùng TAKE_AWAY / DELIVERY
-// khi Backend chưa làm.
-// ==================================================
-
-function buildVirtualOrderItems(cartItems) {
-  return cartItems.map((item, index) => ({
-    id: `OI-${Date.now()}-${index}`,
-
-    productId: item.menuItem.id,
-
-    menuItemId: item.menuItem.id,
-
-    name: item.menuItem.name,
-
-    price: item.menuItem.price,
-
-    quantity: item.quantity,
-
-    note: item.note || "",
-
-    status: "pending",
-
-    kdsStatus: "pending",
-
-    lineTotal: item.menuItem.price * item.quantity,
-  }));
-}
-
-// ==================================================
 // WAITER STATE
 // ==================================================
 
 function useWaiterState() {
   // ==================================================
-  // TABLES
-  // BACKEND
+  // TABLE
   // ==================================================
 
   const [tables, setTables] = useState([]);
@@ -486,18 +338,14 @@ function useWaiterState() {
   // ==================================================
   // ORDERS
   //
-  // DINE_IN:
-  // Backend
-  //
-  // TAKE_AWAY / DELIVERY:
-  // Local mock
+  // WAITER:
+  // DINE_IN ONLY
   // ==================================================
 
-  const [orders, setOrders] = useState(INITIAL_VIRTUAL_ORDERS);
+  const [orders, setOrders] = useState([]);
 
   // ==================================================
   // MENU
-  // BACKEND
   // ==================================================
 
   const [menuItems, setMenuItems] = useState([]);
@@ -507,41 +355,29 @@ function useWaiterState() {
   const [menuError, setMenuError] = useState(null);
 
   // ==================================================
+  // PREVENT DOUBLE SUBMIT
+  // ==================================================
+
+  const sendingRef = useRef(false);
+
+  // ==================================================
   // LOAD MENU
   // ==================================================
 
   const loadMenu = useCallback(async () => {
     try {
-      // =========================
-      // START
-      // =========================
-
       setMenuLoading(true);
 
       setMenuError(null);
-
-      // =========================
-      // API
-      // =========================
 
       const response = await waiterMenuService.getAll();
 
       const productList = Array.isArray(response?.data) ? response.data : [];
 
-      // =========================
-      // NORMALIZE
-      // =========================
-
       const normalizedMenu = productList
 
         .map(normalizeMenuItem)
 
-        /*
-         * Backend đã loại INACTIVE.
-         *
-         * Filter thêm để frontend
-         * an toàn hơn.
-         */
         .filter((item) => item.productStatus !== "INACTIVE");
 
       setMenuItems(normalizedMenu);
@@ -564,35 +400,30 @@ function useWaiterState() {
   }, []);
 
   // ==================================================
-  // LOAD ACTIVE ORDERS
+  // LOAD ACTIVE DINE IN ORDERS
   // ==================================================
 
   const loadActiveOrders = useCallback(async (currentTables) => {
-    /*
-     * Chỉ bàn OCCUPIED mới
-     * cần tìm Active Order.
-     */
     const occupiedTables = currentTables.filter(
       (table) => table.status === "occupied",
     );
 
-    // =========================
-    // KHÔNG CÓ BÀN OCCUPIED
-    // =========================
+    // ==================================================
+    // NO OCCUPIED TABLE
+    // ==================================================
 
     if (occupiedTables.length === 0) {
-      setOrders(INITIAL_VIRTUAL_ORDERS);
+      setOrders([]);
 
       return {
         orders: [],
-
         tables: currentTables,
       };
     }
 
-    // =========================
-    // CALL API SONG SONG
-    // =========================
+    // ==================================================
+    // CALL ACTIVE ORDER API
+    // ==================================================
 
     const results = await Promise.allSettled(
       occupiedTables.map(async (table) => {
@@ -606,9 +437,9 @@ function useWaiterState() {
       }),
     );
 
-    // =========================
-    // SUCCESS ORDERS
-    // =========================
+    // ==================================================
+    // SUCCESS
+    // ==================================================
 
     const activeOrders = [];
 
@@ -619,14 +450,6 @@ function useWaiterState() {
         return;
       }
 
-      /*
-       * DB có thể bị lệch:
-       *
-       * Table = OCCUPIED
-       * nhưng không có Order.
-       *
-       * Không toast để tránh spam.
-       */
       const table = occupiedTables[index];
 
       console.warn(
@@ -635,19 +458,11 @@ function useWaiterState() {
       );
     });
 
-    // =========================
-    // UPDATE ORDER STATE
-    //
-    // Virtual
-    // +
-    // Backend DINE_IN
-    // =========================
+    setOrders(activeOrders);
 
-    setOrders([...INITIAL_VIRTUAL_ORDERS, ...activeOrders]);
-
-    // =========================
+    // ==================================================
     // ENRICH TABLE
-    // =========================
+    // ==================================================
 
     const updatedTables = currentTables.map((table) => {
       const activeOrder = activeOrders.find(
@@ -693,52 +508,26 @@ function useWaiterState() {
 
   // ==================================================
   // LOAD TABLES
-  // THEN ACTIVE ORDERS
   // ==================================================
 
   const loadTables = useCallback(async () => {
     try {
-      // =========================
-      // START
-      // =========================
-
       setTablesLoading(true);
 
       setTablesError(null);
 
-      // =========================
-      // API
-      // =========================
-
       const response = await waiterTableService.getAll({
         page: 0,
-
         size: 50,
       });
-
-      // =========================
-      // PAGE DATA
-      // =========================
 
       const pageData = response?.data;
 
       const tableList = pageData?.content || pageData?.items || [];
 
-      // =========================
-      // NORMALIZE
-      // =========================
-
       const normalizedTables = tableList.map(normalizeTable);
 
-      // =========================
-      // SET TABLES FIRST
-      // =========================
-
       setTables(normalizedTables);
-
-      // =========================
-      // LOAD ACTIVE ORDERS
-      // =========================
 
       await loadActiveOrders(normalizedTables);
     } catch (error) {
@@ -758,16 +547,12 @@ function useWaiterState() {
   }, [loadActiveOrders]);
 
   // ==================================================
-  // INITIAL LOAD TABLES
+  // INITIAL LOAD
   // ==================================================
 
   useEffect(() => {
     loadTables();
   }, [loadTables]);
-
-  // ==================================================
-  // INITIAL LOAD MENU
-  // ==================================================
 
   useEffect(() => {
     loadMenu();
@@ -775,112 +560,137 @@ function useWaiterState() {
 
   // ==================================================
   // FIND ACTIVE ORDER
+  //
+  // Giữ signature cũ để
+  // WaiterDashboard chưa cần sửa.
   // ==================================================
 
   const findActiveOrder = (orderType, tableId) => {
-    return orders.find((order) => {
-      // =========================
-      // IGNORE FINISHED
-      // =========================
+    if (orderType !== "dine_in") {
+      return null;
+    }
 
-      if (order.status === "completed" || order.status === "cancelled") {
-        return false;
-      }
+    return orders.find(
+      (order) =>
+        order.orderType === "dine_in" &&
+        order.tableId === tableId &&
+        order.status !== "completed" &&
+        order.status !== "cancelled",
+    );
+  };
 
-      // =========================
-      // TAKE AWAY
-      // =========================
+  // ==================================================
+  // SYNC ORDER -> UI STATE
+  // ==================================================
 
-      if (orderType === "take_away") {
-        return order.orderType === "take_away";
-      }
+  const syncOrderState = (updatedOrder, tableId) => {
+    setOrders((prev) => [
+      updatedOrder,
 
-      // =========================
-      // DELIVERY
-      // =========================
+      ...prev.filter((order) => order.id !== updatedOrder.id),
+    ]);
 
-      if (orderType === "delivery") {
-        return order.orderType === "delivery";
-      }
+    const itemCount = updatedOrder.items.reduce(
+      (total, item) => total + item.quantity,
+      0,
+    );
 
-      // =========================
-      // DINE IN
-      // =========================
+    setTables((prev) =>
+      prev.map((table) => {
+        if (table.id !== tableId) {
+          return table;
+        }
 
-      return order.orderType === "dine_in" && order.tableId === tableId;
-    });
+        return {
+          ...table,
+
+          status: "occupied",
+
+          itemCount,
+
+          currentTotal: updatedOrder.totalAmount,
+
+          currentOrderId: updatedOrder.id,
+        };
+      }),
+    );
   };
 
   // ==================================================
   // SEND TO KITCHEN
   //
-  // DINE_IN:
-  //
-  // chưa có Order
-  // -> POST /api/orders
-  //
-  // đã có Order
-  // -> POST /api/orders/{id}/items
-  //
-  // TAKE_AWAY / DELIVERY:
-  // local tạm thời
+  // WAITER = DINE_IN ONLY
   // ==================================================
 
   const sendToKitchen = async ({
     orderType,
-    tableNumber,
-    guestCount,
-    cartItems,
-  }) => {
-    // =========================
-    // VALIDATE CART
-    // =========================
 
-    if (!cartItems || cartItems.length === 0) {
-      toast.warning("Vui lòng chọn ít nhất một món trước khi gửi bếp.");
+    tableNumber,
+
+    cartItems,
+
+    orderNote,
+  }) => {
+    // ==================================================
+    // ROLE GUARD
+    // ==================================================
+
+    if (orderType !== "dine_in") {
+      toast.error("Nhân viên phục vụ chỉ được tạo đơn tại bàn.");
 
       return null;
     }
 
+    // ==================================================
+    // VALIDATE TABLE
+    // ==================================================
+
     /*
-     * WaiterDashboard hiện truyền:
-     *
-     * selectedTableNumber
-     *
-     * nhưng giá trị thực tế là:
-     *
-     * table.id
-     *
-     * Giữ lại để chưa phải
-     * sửa nhiều component.
+     * tableNumber trong
+     * WaiterDashboard hiện đang
+     * chứa table.id.
      */
     const tableId = tableNumber;
 
-    // =========================
-    // FIND EXISTING ORDER
-    // =========================
+    if (!tableId) {
+      toast.error("Không xác định được bàn.");
 
-    const existingOrder = findActiveOrder(orderType, tableId);
+      return null;
+    }
 
     // ==================================================
-    // DINE IN
-    // EXISTING ORDER
-    //
-    // GỌI THÊM MÓN
+    // VALIDATE CART
     // ==================================================
 
-    if (existingOrder && orderType === "dine_in") {
-      // =========================
-      // BUILD REQUEST
-      // =========================
+    if (!cartItems || cartItems.length === 0) {
+      toast.warning("Vui lòng chọn ít nhất một món.");
+
+      return null;
+    }
+
+    // ==================================================
+    // PREVENT DOUBLE CLICK
+    // ==================================================
+
+    if (sendingRef.current) {
+      return null;
+    }
+
+    sendingRef.current = true;
+
+    try {
+      const existingOrder = findActiveOrder(orderType, tableId);
 
       const items = buildOrderItemsRequest(cartItems);
 
-      try {
-        // =========================
-        // API
-        // =========================
+      // ==================================================
+      // EXISTING ORDER
+      //
+      // CREATE NEW KITCHEN TICKET
+      // BACKEND tự xử lý.
+      // ==================================================
 
+      if (existingOrder) {
         const response = await waiterOrderService.addItemsToOrder(
           existingOrder.id,
           items,
@@ -888,48 +698,7 @@ function useWaiterState() {
 
         const updatedOrder = normalizeOrder(response.data);
 
-        // =========================
-        // UPDATE ORDER STATE
-        // =========================
-
-        setOrders((prev) =>
-          prev.map((order) =>
-            order.id === existingOrder.id ? updatedOrder : order,
-          ),
-        );
-
-        // =========================
-        // UPDATE TABLE
-        // =========================
-
-        setTables((prev) =>
-          prev.map((table) => {
-            if (table.id !== tableId) {
-              return table;
-            }
-
-            const itemCount = updatedOrder.items.reduce(
-              (total, item) => total + item.quantity,
-              0,
-            );
-
-            return {
-              ...table,
-
-              status: "occupied",
-
-              itemCount,
-
-              currentTotal: updatedOrder.totalAmount,
-
-              currentOrderId: updatedOrder.id,
-            };
-          }),
-        );
-
-        // =========================
-        // SUCCESS
-        // =========================
+        syncOrderState(updatedOrder, tableId);
 
         const selectedTable = tables.find((table) => table.id === tableId);
 
@@ -938,263 +707,105 @@ function useWaiterState() {
         );
 
         return updatedOrder;
-      } catch (error) {
-        console.error("ADD ITEMS TO ORDER ERROR:", error);
-
-        const message =
-          error.response?.data?.message ||
-          error.message ||
-          "Không thể gọi thêm món.";
-
-        toast.error(message);
-
-        return null;
-      }
-    }
-
-    // ==================================================
-    // DINE IN
-    // CREATE NEW ORDER
-    //
-    // POST /api/orders
-    // ==================================================
-
-    if (!existingOrder && orderType === "dine_in") {
-      // =========================
-      // CHECK TABLE ID
-      // =========================
-
-      if (!tableId) {
-        toast.error("Không xác định được bàn để tạo đơn.");
-
-        return null;
       }
 
-      // =========================
-      // ITEMS
-      // =========================
-
-      const items = buildOrderItemsRequest(cartItems);
-
-      // =========================
-      // REQUEST BODY
-      // =========================
+      // ==================================================
+      // CREATE NEW DINE IN ORDER
+      // ==================================================
 
       const request = {
         orderType: "DINE_IN",
 
-        tableId: tableId,
+        tableId,
 
-        /*
-         * Hiện frontend chưa có
-         * ghi chú toàn Order.
-         */
-        note: null,
+        note: orderNote?.trim() || null,
 
         items,
       };
 
-      try {
-        // =========================
-        // CREATE ORDER API
-        // =========================
+      const response = await waiterOrderService.createOrder(request);
 
-        const response = await waiterOrderService.createOrder(request);
+      const createdOrder = normalizeOrder(response.data);
 
-        // =========================
-        // NORMALIZE RESPONSE
-        // =========================
+      syncOrderState(createdOrder, tableId);
 
-        const createdOrder = normalizeOrder(response.data);
+      const selectedTable = tables.find((table) => table.id === tableId);
 
-        // =========================
-        // UPDATE ORDERS
-        // =========================
+      toast.success(
+        `Đã tạo đơn cho Bàn ${selectedTable?.number || tableId} thành công.`,
+      );
 
-        setOrders((prev) => [
-          createdOrder,
+      return createdOrder;
+    } catch (error) {
+      console.error("WAITER ORDER ERROR:", error);
 
-          ...prev.filter((order) => order.id !== createdOrder.id),
-        ]);
+      const message =
+        error.response?.data?.message ||
+        error.message ||
+        "Không thể gửi đơn xuống bếp.";
 
-        // =========================
-        // UPDATE TABLE
-        //
-        // Backend đã đổi DB:
-        //
-        // AVAILABLE
-        // ->
-        // OCCUPIED
-        //
-        // Frontend đổi state ngay
-        // để không phải reload.
-        // =========================
+      toast.error(message);
 
-        setTables((prev) =>
-          prev.map((table) => {
-            if (table.id !== tableId) {
-              return table;
-            }
+      return null;
+    } finally {
+      sendingRef.current = false;
+    }
+  };
 
-            const itemCount = createdOrder.items.reduce(
-              (total, item) => total + item.quantity,
-              0,
-            );
+  // ==================================================
+  // SERVE ITEM
+  //
+  // READY -> SERVED
+  // ==================================================
 
-            return {
-              ...table,
-
-              status: "occupied",
-
-              itemCount,
-
-              currentTotal: createdOrder.totalAmount,
-
-              currentOrderId: createdOrder.id,
-            };
-          }),
-        );
-
-        // =========================
-        // SUCCESS
-        // =========================
-
-        const selectedTable = tables.find((table) => table.id === tableId);
-
-        toast.success(
-          `Đã tạo đơn cho Bàn ${selectedTable?.number || tableId} thành công.`,
-        );
-
-        return createdOrder;
-      } catch (error) {
-        console.error("CREATE DINE-IN ORDER ERROR:", error);
-
-        const message =
-          error.response?.data?.message ||
-          error.message ||
-          "Không thể tạo đơn tại bàn.";
-
-        toast.error(message);
-
-        return null;
-      }
+  const serveItem = async (orderItemId) => {
+    if (!orderItemId) {
+      return null;
     }
 
-    // ==================================================
-    // TAKE AWAY / DELIVERY
-    //
-    // BACKEND CHƯA LÀM
-    //
-    // TẠM THỜI GIỮ LOCAL
-    // ==================================================
+    try {
+      const response = await waiterOrderService.serveItem(orderItemId);
 
-    const newOrderItems = buildVirtualOrderItems(cartItems);
+      const updatedOrder = normalizeOrder(response.data);
 
-    const prefix =
-      orderType === "take_away" ? "TA" : orderType === "delivery" ? "DL" : "DI";
+      syncOrderState(updatedOrder, updatedOrder.tableId);
 
-    const orderId = `#${prefix}${String(Date.now()).slice(-4)}`;
+      toast.success("Đã xác nhận phục vụ món.");
 
-    const subtotal = newOrderItems.reduce(
-      (total, item) => total + item.price * item.quantity,
-      0,
-    );
+      return updatedOrder;
+    } catch (error) {
+      console.error("SERVE ITEM ERROR:", error);
 
-    const vatAmount = Math.round(subtotal * 0.08);
+      const message =
+        error.response?.data?.message ||
+        error.message ||
+        "Không thể xác nhận phục vụ món.";
 
-    const totalAmount = subtotal + vatAmount;
+      toast.error(message);
 
-    let tableName = "";
-
-    if (orderType === "take_away") {
-      tableName = "Mang Về";
+      return null;
     }
-
-    if (orderType === "delivery") {
-      tableName = "Giao Hàng";
-    }
-
-    // =========================
-    // LOCAL ORDER
-    // =========================
-
-    const newOrder = {
-      id: orderId,
-
-      orderType,
-
-      tableId: null,
-
-      tableName,
-
-      customerName: "",
-
-      guestCount,
-
-      waiterName: "Phục vụ",
-
-      createdAt: new Date().toLocaleString("vi-VN"),
-
-      status: "cooking",
-
-      progressPercentage: 40,
-
-      progressLabel: "Đang chế biến",
-
-      items: newOrderItems,
-
-      subtotal,
-
-      vatAmount,
-
-      totalAmount,
-    };
-
-    setOrders((prev) => [newOrder, ...prev]);
-
-    toast.success("Đã tạo đơn tạm thời thành công.");
-
-    return newOrder;
   };
 
   // ==================================================
   // REQUEST PAYMENT
   //
-  // HIỆN TẠI LOCAL
+  // Backend API chưa làm.
   //
-  // Sau này nối:
-  //
-  // PROCESSING
-  // ->
-  // AWAITING_PAYMENT
+  // Không fake trạng thái local nữa,
+  // vì refresh trang sẽ bị sai dữ liệu.
   // ==================================================
 
   const requestPayment = (orderId) => {
     if (!orderId) {
       toast.warning("Chưa có đơn hàng để yêu cầu thanh toán.");
 
-      return;
+      return null;
     }
 
-    setOrders((prev) =>
-      prev.map((order) => {
-        if (order.id !== orderId) {
-          return order;
-        }
+    toast.info("Chức năng yêu cầu thanh toán sẽ được nối API ở bước Payment.");
 
-        return {
-          ...order,
-
-          status: "pending_payment",
-
-          progressPercentage: 100,
-
-          progressLabel: "Chờ thanh toán",
-        };
-      }),
-    );
-
-    toast.success("Đã gửi yêu cầu thanh toán tới Thu Ngân.");
+    return null;
   };
 
   // ==================================================
@@ -1202,9 +813,7 @@ function useWaiterState() {
   // ==================================================
 
   return {
-    // =========================
-    // TABLES
-    // =========================
+    // TABLE
 
     tables,
 
@@ -1214,9 +823,7 @@ function useWaiterState() {
 
     reloadTables: loadTables,
 
-    // =========================
-    // ORDERS
-    // =========================
+    // ORDER
 
     orders,
 
@@ -1224,11 +831,11 @@ function useWaiterState() {
 
     sendToKitchen,
 
+    serveItem,
+
     requestPayment,
 
-    // =========================
     // MENU
-    // =========================
 
     menuItems,
 

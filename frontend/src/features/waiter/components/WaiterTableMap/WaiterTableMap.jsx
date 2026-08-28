@@ -6,8 +6,6 @@ import WaiterTableFilters from "../WaiterTableFilters/WaiterTableFilters";
 
 import WaiterTableCard from "../WaiterTableCard/WaiterTableCard";
 
-import WaiterVirtualCard from "../WaiterVirtualCard/WaiterVirtualCard";
-
 import styles from "./WaiterTableMap.module.css";
 
 function WaiterTableMap({
@@ -17,15 +15,14 @@ function WaiterTableMap({
   currentUserName,
 
   onSelectTable,
-  onSelectVirtual,
 }) {
   const [areaFilter, setAreaFilter] = useState("all");
 
   const [statusFilter, setStatusFilter] = useState("all");
 
-  // =========================================
-  // GET UNIQUE AREAS FROM BACKEND TABLE DATA
-  // =========================================
+  // ==================================================
+  // AREAS
+  // ==================================================
 
   const areas = useMemo(() => {
     const areaMap = new Map();
@@ -43,16 +40,12 @@ function WaiterTableMap({
     return Array.from(areaMap.values());
   }, [tables]);
 
-  // =========================================
+  // ==================================================
   // FILTER TABLES
-  // =========================================
+  // ==================================================
 
   const filteredTables = useMemo(() => {
     return tables.filter((table) => {
-      /*
-       * INACTIVE là bàn đã soft-delete.
-       * Waiter không cần nhìn thấy.
-       */
       if (table.status === "inactive") {
         return false;
       }
@@ -67,31 +60,9 @@ function WaiterTableMap({
     });
   }, [tables, areaFilter, statusFilter]);
 
-  // =========================================
-  // TAKEAWAY COUNT
-  // =========================================
-
-  const takeawayCount = orders.filter(
-    (order) =>
-      order.orderType === "take_away" &&
-      order.status !== "completed" &&
-      order.status !== "cancelled",
-  ).length;
-
-  // =========================================
-  // DELIVERY COUNT
-  // =========================================
-
-  const deliveryCount = orders.filter(
-    (order) =>
-      order.orderType === "delivery" &&
-      order.status !== "completed" &&
-      order.status !== "cancelled",
-  ).length;
-
-  // =========================================
-  // FIND ACTIVE ORDER OF TABLE
-  // =========================================
+  // ==================================================
+  // ACTIVE ORDER OF TABLE
+  // ==================================================
 
   const findTableOrder = (table) => {
     return orders.find(
@@ -119,18 +90,6 @@ function WaiterTableMap({
       />
 
       <div className={styles.grid}>
-        <WaiterVirtualCard
-          type="take_away"
-          count={takeawayCount}
-          onClick={onSelectVirtual}
-        />
-
-        <WaiterVirtualCard
-          type="delivery"
-          count={deliveryCount}
-          onClick={onSelectVirtual}
-        />
-
         {filteredTables.map((table) => (
           <WaiterTableCard
             key={table.id}

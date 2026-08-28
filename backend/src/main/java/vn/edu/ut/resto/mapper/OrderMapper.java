@@ -7,8 +7,10 @@ import vn.edu.ut.resto.dto.request.CreateOrderRequest;
 import vn.edu.ut.resto.dto.response.OrderItemResponse;
 import vn.edu.ut.resto.dto.response.OrderResponse;
 
+import vn.edu.ut.resto.dto.response.ShippingDetailResponse;
 import vn.edu.ut.resto.model.Order;
 import vn.edu.ut.resto.model.OrderItem;
+import vn.edu.ut.resto.model.ShippingDetail;
 
 import java.util.List;
 
@@ -110,6 +112,15 @@ public class OrderMapper {
             );
         }
 
+        if (order.getShippingDetail() != null) {
+
+            response.setShippingDetail(
+                    toShippingDetailResponse(
+                            order.getShippingDetail()
+                    )
+            );
+        }
+
 
         return response;
     }
@@ -161,6 +172,42 @@ public class OrderMapper {
                             .getName()
             );
         }
+
+
+        return response;
+    }
+
+    private ShippingDetailResponse toShippingDetailResponse(
+            ShippingDetail shippingDetail
+    ) {
+
+        ShippingDetailResponse response =
+                new ShippingDetailResponse();
+
+
+        response.setId(
+                shippingDetail.getId()
+        );
+
+        response.setCustomerName(
+                shippingDetail.getCustomerName()
+        );
+
+        response.setCustomerPhone(
+                shippingDetail.getCustomerPhone()
+        );
+
+        response.setAddress(
+                shippingDetail.getAddress()
+        );
+
+        response.setDistance(
+                shippingDetail.getDistance()
+        );
+
+        response.setEstimatedTime(
+                shippingDetail.getEstimatedTime()
+        );
 
 
         return response;

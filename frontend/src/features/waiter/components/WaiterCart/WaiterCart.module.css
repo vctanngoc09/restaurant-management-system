@@ -781,3 +781,125 @@
     display: none;
   }
 }
+
+/* ======================================================
+   ORDER NOTE
+====================================================== */
+
+.orderNote {
+  position: relative;
+
+  flex-shrink: 0;
+
+  padding: 10px 13px;
+
+  background: #ffffff;
+
+  border-bottom: 1px solid #f1f5f9;
+}
+
+
+.orderNoteTitle {
+  display: flex;
+  align-items: center;
+
+  gap: 5px;
+
+  margin-bottom: 6px;
+
+  color: #475569;
+
+  font-size: 9px;
+  font-weight: 700;
+}
+
+
+.orderNoteTitle svg {
+  color: #6366f1;
+}
+
+
+.orderNote textarea {
+  width: 100%;
+
+  min-height: 52px;
+  max-height: 90px;
+
+  resize: vertical;
+
+  padding: 8px 9px;
+
+  color: #0f172a;
+
+  background: #f8fafc;
+
+  border: 1px solid #dbe3ef;
+  border-radius: 8px;
+
+  outline: none;
+
+  font-family: inherit;
+
+  font-size: 10px;
+
+  line-height: 1.45;
+
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+
+.orderNote textarea::placeholder {
+  color: #94a3b8;
+}
+
+
+.orderNote textarea:focus {
+  background: #ffffff;
+
+  border-color: #818cf8;
+
+  box-shadow:
+    0 0 0 3px rgba(99, 102, 241, 0.08);
+}
+
+
+.orderNote small {
+  display: block;
+
+  margin-top: 4px;
+
+  color: #94a3b8;
+
+  text-align: right;
+
+  font-size: 8px;
+}
+
+
+/* ======================================================
+   EXISTING ORDER NOTE
+====================================================== */
+
+.existingOrderNote {
+  padding: 8px 9px;
+
+  color: #475569;
+
+  background: #f8fafc;
+
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+
+  font-size: 9px;
+
+  line-height: 1.45;
+}
+
+
+.existingOrderNote span {
+  color: #94a3b8;
+
+  font-style: italic;
+}

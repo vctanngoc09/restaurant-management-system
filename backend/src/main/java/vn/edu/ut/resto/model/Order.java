@@ -5,6 +5,7 @@ import vn.edu.ut.resto.model.enums.EOrderStatus;
 import vn.edu.ut.resto.model.enums.EOrderType;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -53,6 +54,13 @@ public class Order {
         this.createdAt = LocalDateTime.now();
         this.totalPrice = 0D;
     }
+
+    @OneToMany(
+            mappedBy = "order",
+            cascade = CascadeType.ALL
+    )
+    private List<KitchenTicket> kitchenTickets =
+            new ArrayList<>();
 
     public Order(Long id, LocalDateTime createdAt, Double totalPrice, EOrderType orderType, String note, EOrderStatus status, User user, RestaurantTable table, List<OrderItem> orderItems, List<Payment> payments, ShippingDetail shippingDetail) {
         this.id = id;
@@ -154,5 +162,13 @@ public class Order {
 
     public void setShippingDetail(ShippingDetail shippingDetail) {
         this.shippingDetail = shippingDetail;
+    }
+
+    public List<KitchenTicket> getKitchenTickets() {
+        return kitchenTickets;
+    }
+
+    public void setKitchenTickets(List<KitchenTicket> kitchenTickets) {
+        this.kitchenTickets = kitchenTickets;
     }
 }

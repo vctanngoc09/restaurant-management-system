@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import vn.edu.ut.resto.dto.request.AddOrderItemsRequest;
 import vn.edu.ut.resto.dto.request.CreateOrderRequest;
 import vn.edu.ut.resto.dto.request.OrderItemRequest;
+import vn.edu.ut.resto.dto.request.ShippingDetailRequest;
 
 import vn.edu.ut.resto.exception.InvalidOperationException;
 import vn.edu.ut.resto.exception.ResourceNotFoundException;
@@ -18,18 +19,23 @@ import vn.edu.ut.resto.exception.UnauthorizedException;
 
 import vn.edu.ut.resto.mapper.OrderMapper;
 
+import vn.edu.ut.resto.model.KitchenTicket;
 import vn.edu.ut.resto.model.Order;
 import vn.edu.ut.resto.model.OrderItem;
 import vn.edu.ut.resto.model.Product;
 import vn.edu.ut.resto.model.RestaurantTable;
+import vn.edu.ut.resto.model.ShippingDetail;
 import vn.edu.ut.resto.model.User;
 
+import vn.edu.ut.resto.model.enums.EKitchenTicketStatus;
 import vn.edu.ut.resto.model.enums.EOrderItemStatus;
 import vn.edu.ut.resto.model.enums.EOrderStatus;
 import vn.edu.ut.resto.model.enums.EOrderType;
 import vn.edu.ut.resto.model.enums.EProductStatus;
 import vn.edu.ut.resto.model.enums.ETableStatus;
 
+import vn.edu.ut.resto.repository.KitchenTicketRepository;
+import vn.edu.ut.resto.repository.OrderItemRepository;
 import vn.edu.ut.resto.repository.OrderRepository;
 import vn.edu.ut.resto.repository.ProductRepository;
 import vn.edu.ut.resto.repository.RestaurantTableRepository;
@@ -37,7 +43,10 @@ import vn.edu.ut.resto.repository.UserRepository;
 
 import vn.edu.ut.resto.service.OrderService;
 
+import java.time.LocalDateTime;
+
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
@@ -49,13 +58,9 @@ public class OrderServiceImpl
 
 
     // ==================================================
-    // ACTIVE ORDER STATUSES
+    // ACTIVE ORDER
     // ==================================================
 
-    /*
-     * Những trạng thái cho biết
-     * Order vẫn chưa kết thúc.
-     */
     private static final Set<EOrderStatus>
             ACTIVE_ORDER_STATUSES =
             EnumSet.of(
@@ -65,16 +70,10 @@ public class OrderServiceImpl
             );
 
 
-    /*
-     * Chỉ cho phép gọi thêm món
-     * khi Order chưa bước vào thanh toán.
-     *
-     * PENDING:
-     * đơn vừa được tạo.
-     *
-     * PROCESSING:
-     * bếp đang xử lý đơn.
-     */
+    // ==================================================
+    // DINE IN ADD ITEM
+    // ==================================================
+
     private static final Set<EOrderStatus>
             ADD_ITEM_ALLOWED_STATUSES =
             EnumSet.of(
@@ -88,7 +87,17 @@ public class OrderServiceImpl
 
 
     @Autowired
-    private RestaurantTableRepository tableRepository;
+    private OrderItemRepository orderItemRepository;
+
+
+    @Autowired
+    private KitchenTicketRepository
+            kitchenTicketRepository;
+
+
+    @Autowired
+    private RestaurantTableRepository
+            tableRepository;
 
 
     @Autowired
@@ -113,104 +122,79 @@ public class OrderServiceImpl
             CreateOrderRequest request
     ) {
 
-        // ==================================================
-        // CURRENTLY ONLY SUPPORT DINE IN
-        // ==================================================
+        validateCreateOrderRequest(
+                request
+        );
 
-        if (
-                request.getOrderType()
-                        != EOrderType.DINE_IN
-        ) {
-
-            throw new InvalidOperationException(
-                    "Hiện tại chức năng tạo đơn chỉ hỗ trợ đơn tại bàn."
-            );
-        }
-
-
-        // ==================================================
-        // TABLE REQUIRED
-        // ==================================================
-
-        if (request.getTableId() == null) {
-
-            throw new InvalidOperationException(
-                    "Đơn tại chỗ bắt buộc phải chọn bàn."
-            );
-        }
-
-
-        // ==================================================
-        // FIND TABLE
-        // ==================================================
-
-        RestaurantTable table =
-                tableRepository
-                        .findById(
-                                request.getTableId()
-                        )
-                        .orElseThrow(() ->
-                                new ResourceNotFoundException(
-                                        "Không tìm thấy bàn có ID: "
-                                                + request.getTableId()
-                                )
-                        );
-
-
-        // ==================================================
-        // CHECK TABLE STATUS
-        // ==================================================
-
-        if (
-                table.getStatus()
-                        != ETableStatus.AVAILABLE
-        ) {
-
-            throw new InvalidOperationException(
-                    "Bàn "
-                            + table.getTableNumber()
-                            + " hiện không khả dụng."
-            );
-        }
-
-
-        // ==================================================
-        // CHECK ACTIVE ORDER
-        // ==================================================
-
-        if (
-                orderRepository
-                        .existsByTable_IdAndStatusIn(
-                                table.getId(),
-                                ACTIVE_ORDER_STATUSES
-                        )
-        ) {
-
-            throw new InvalidOperationException(
-                    "Bàn "
-                            + table.getTableNumber()
-                            + " đang có đơn hàng chưa hoàn tất."
-            );
-        }
-
-
-        // ==================================================
-        // CURRENT USER
-        // ==================================================
 
         User currentUser =
                 getCurrentUser();
 
 
+        RestaurantTable table =
+                null;
+
+
         // ==================================================
-        // CREATE ORDER
+        // DINE IN TABLE
+        // ==================================================
+
+        if (
+                request.getOrderType()
+                        == EOrderType.DINE_IN
+        ) {
+
+            table =
+                    tableRepository
+                            .findById(
+                                    request.getTableId()
+                            )
+                            .orElseThrow(() ->
+                                    new ResourceNotFoundException(
+                                            "Không tìm thấy bàn có ID: "
+                                                    + request.getTableId()
+                                    )
+                            );
+
+
+            if (
+                    table.getStatus()
+                            != ETableStatus.AVAILABLE
+            ) {
+
+                throw new InvalidOperationException(
+                        "Bàn "
+                                + table.getTableNumber()
+                                + " hiện không khả dụng."
+                );
+            }
+
+
+            if (
+                    orderRepository
+                            .existsByTable_IdAndStatusIn(
+                                    table.getId(),
+                                    ACTIVE_ORDER_STATUSES
+                            )
+            ) {
+
+                throw new InvalidOperationException(
+                        "Bàn "
+                                + table.getTableNumber()
+                                + " đang có đơn hàng chưa hoàn tất."
+                );
+            }
+        }
+
+
+        // ==================================================
+        // ORDER
         // ==================================================
 
         Order order =
-                orderMapper
-                        .toEntity(
-                                request
-                        );
+                orderMapper.toEntity(
+                        request
+                );
 
 
         order.setUser(
@@ -223,122 +207,30 @@ public class OrderServiceImpl
         );
 
 
-        order.setStatus(
-                EOrderStatus.PENDING
-        );
-
-
         // ==================================================
-        // CREATE ORDER ITEMS
+        // INITIAL STATUS
         // ==================================================
 
-        List<OrderItem> orderItems =
-                new ArrayList<>();
-
-
-        double totalPrice = 0D;
-
-
-        for (
-                OrderItemRequest itemRequest
-                : request.getItems()
+        if (
+                request.getOrderType()
+                        == EOrderType.DINE_IN
         ) {
 
-            Product product =
-                    productRepository
-                            .findById(
-                                    itemRequest.getProductId()
-                            )
-                            .orElseThrow(() ->
-                                    new ResourceNotFoundException(
-                                            "Không tìm thấy sản phẩm có ID: "
-                                                    + itemRequest.getProductId()
-                                    )
-                            );
+            order.setStatus(
+                    EOrderStatus.PENDING
+            );
 
-
-            // ==================================================
-            // CHECK PRODUCT AVAILABLE
-            // ==================================================
-
-            if (
-                    product.getStatus()
-                            != EProductStatus.AVAILABLE
-            ) {
-
-                throw new InvalidOperationException(
-                        "Món "
-                                + product.getName()
-                                + " hiện không thể gọi."
-                );
-            }
-
-
-            // ==================================================
-            // CREATE ORDER ITEM
-            // ==================================================
-
-            OrderItem orderItem =
-                    new OrderItem();
-
+        } else {
 
             /*
-             * Lưu giá tại thời điểm gọi món.
+             * TAKE_AWAY / DELIVERY
              *
-             * Sau này Admin thay đổi giá Product
-             * thì Order cũ vẫn giữ nguyên.
+             * phải thanh toán trước.
              */
-            orderItem.setPrice(
-                    product.getPrice()
+            order.setStatus(
+                    EOrderStatus.AWAITING_PAYMENT
             );
-
-
-            orderItem.setQuantity(
-                    itemRequest.getQuantity()
-            );
-
-
-            orderItem.setNote(
-                    normalizeNote(
-                            itemRequest.getNote()
-                    )
-            );
-
-
-            orderItem.setStatus(
-                    EOrderItemStatus.PENDING
-            );
-
-
-            orderItem.setProduct(
-                    product
-            );
-
-
-            orderItem.setOrder(
-                    order
-            );
-
-
-            orderItems.add(
-                    orderItem
-            );
-
-
-            totalPrice +=
-                    product.getPrice()
-                            * itemRequest.getQuantity();
         }
-
-
-        order.setOrderItems(
-                orderItems
-        );
-
-
-        order.setTotalPrice(
-                totalPrice
-        );
 
 
         order.setNote(
@@ -349,16 +241,127 @@ public class OrderServiceImpl
 
 
         // ==================================================
-        // TABLE -> OCCUPIED
+        // ITEMS
         // ==================================================
 
-        table.setStatus(
-                ETableStatus.OCCUPIED
+        List<OrderItem> orderItems =
+                new ArrayList<>();
+
+
+        for (
+                OrderItemRequest itemRequest
+                : request.getItems()
+        ) {
+
+            OrderItem item =
+                    createOrderItem(
+                            order,
+                            itemRequest
+                    );
+
+
+            /*
+             * Quan trọng:
+             *
+             * Chưa assign KitchenTicket ở đây.
+             *
+             * DINE_IN:
+             * assign sau khi Order save.
+             *
+             * TAKE_AWAY / DELIVERY:
+             * giữ null tới khi payment success.
+             */
+            orderItems.add(
+                    item
+            );
+        }
+
+
+        order.setOrderItems(
+                orderItems
+        );
+
+
+        recalculateTotal(
+                order
         );
 
 
         // ==================================================
-        // SAVE
+        // DELIVERY
+        // ==================================================
+
+        if (
+                request.getOrderType()
+                        == EOrderType.DELIVERY
+        ) {
+
+            ShippingDetailRequest shippingRequest =
+                    request.getShippingDetail();
+
+
+            ShippingDetail shippingDetail =
+                    new ShippingDetail();
+
+
+            shippingDetail.setCustomerName(
+                    shippingRequest
+                            .getCustomerName()
+                            .trim()
+            );
+
+
+            shippingDetail.setCustomerPhone(
+                    shippingRequest
+                            .getCustomerPhone()
+                            .trim()
+            );
+
+
+            shippingDetail.setAddress(
+                    shippingRequest
+                            .getAddress()
+                            .trim()
+            );
+
+
+            shippingDetail.setDistance(
+                    shippingRequest
+                            .getDistance()
+            );
+
+
+            shippingDetail.setEstimatedTime(
+                    shippingRequest
+                            .getEstimatedTime()
+            );
+
+
+            shippingDetail.setOrder(
+                    order
+            );
+
+
+            order.setShippingDetail(
+                    shippingDetail
+            );
+        }
+
+
+        // ==================================================
+        // TABLE OCCUPIED
+        // ==================================================
+
+        if (table != null) {
+
+            table.setStatus(
+                    ETableStatus.OCCUPIED
+            );
+        }
+
+
+        // ==================================================
+        // SAVE ORDER FIRST
         // ==================================================
 
         Order savedOrder =
@@ -367,12 +370,35 @@ public class OrderServiceImpl
                 );
 
 
-        tableRepository.save(
-                table
+        /*
+         * DINE_IN:
+         *
+         * tạo KitchenTicket ngay vì
+         * không cần thanh toán trước.
+         */
+        if (
+                savedOrder.getOrderType()
+                        == EOrderType.DINE_IN
+        ) {
+
+            createKitchenTicket(
+                    savedOrder,
+                    savedOrder.getOrderItems()
+            );
+        }
+
+
+        if (table != null) {
+
+            tableRepository.save(
+                    table
+            );
+        }
+
+
+        return getOrderDetails(
+                savedOrder.getId()
         );
-
-
-        return savedOrder;
     }
 
 
@@ -413,24 +439,49 @@ public class OrderServiceImpl
 
 
     // ==================================================
-    // ADD ITEMS TO ORDER
-    // GỌI THÊM MÓN
+    // GET ACTIVE BY TYPE
     // ==================================================
 
     @Override
+    @Transactional(readOnly = true)
+    public List<Order> getActiveOrdersByType(
+            EOrderType orderType
+    ) {
+
+        return orderRepository
+                .findByOrderTypeAndStatusInOrderByCreatedAtDesc(
+                        orderType,
+                        ACTIVE_ORDER_STATUSES
+                );
+    }
+
+
+    // ==================================================
+// ADD ITEMS
+//
+// DINE_IN ONLY
+//
+// Mỗi lần gọi thêm món
+// = một KitchenTicket mới.
+// ==================================================
+
+    @Override
     @Transactional
-    public Order addItemsToOrder(
+    public Order addItemsToDineInOrder(
             Long orderId,
             AddOrderItemsRequest request
     ) {
 
         // ==================================================
-        // FIND ORDER
+        // FIND ORDER + LOCK
+        //
+        // Tránh 2 request đồng thời
+        // tạo cùng batchNumber.
         // ==================================================
 
         Order order =
                 orderRepository
-                        .findByIdWithDetails(
+                        .findByIdForUpdate(
                                 orderId
                         )
                         .orElseThrow(() ->
@@ -442,7 +493,7 @@ public class OrderServiceImpl
 
 
         // ==================================================
-        // ONLY DINE IN FOR NOW
+        // ONLY DINE IN
         // ==================================================
 
         if (
@@ -451,7 +502,7 @@ public class OrderServiceImpl
         ) {
 
             throw new InvalidOperationException(
-                    "Chức năng gọi thêm món hiện chỉ áp dụng cho đơn tại bàn."
+                    "Chức năng gọi thêm món chỉ áp dụng cho đơn tại bàn."
             );
         }
 
@@ -479,7 +530,7 @@ public class OrderServiceImpl
 
 
             throw new InvalidOperationException(
-                    "Đơn hàng này không còn cho phép gọi thêm món."
+                    "Đơn hàng không còn cho phép gọi thêm món."
             );
         }
 
@@ -500,10 +551,6 @@ public class OrderServiceImpl
         }
 
 
-        // ==================================================
-        // TABLE MUST BE OCCUPIED
-        // ==================================================
-
         if (
                 table.getStatus()
                         != ETableStatus.OCCUPIED
@@ -518,166 +565,595 @@ public class OrderServiceImpl
 
 
         // ==================================================
-        // GET CURRENT ORDER ITEMS
+        // CREATE NEW ITEMS
+        //
+        // QUAN TRỌNG:
+        //
+        // Chưa add vào
+        // order.getOrderItems() ở đây.
+        //
+        // Nếu add trước rồi save(order),
+        // Cascade MERGE có thể tạo bản copy
+        // và gây duplicate item.
         // ==================================================
 
-        List<OrderItem> orderItems =
-                order.getOrderItems();
+        List<OrderItem> newItems =
+                new ArrayList<>();
 
-
-        if (orderItems == null) {
-
-            orderItems =
-                    new ArrayList<>();
-
-            order.setOrderItems(
-                    orderItems
-            );
-        }
 
         for (
                 OrderItemRequest itemRequest
                 : request.getItems()
         ) {
 
-            // ==================================================
-            // FIND PRODUCT
-            // ==================================================
-
-            Product product =
-                    productRepository
-                            .findById(
-                                    itemRequest.getProductId()
-                            )
-                            .orElseThrow(() ->
-                                    new ResourceNotFoundException(
-                                            "Không tìm thấy sản phẩm có ID: "
-                                                    + itemRequest.getProductId()
-                                    )
-                            );
+            OrderItem item =
+                    createOrderItem(
+                            order,
+                            itemRequest
+                    );
 
 
-            // ==================================================
-            // CHECK PRODUCT STATUS
-            // ==================================================
-
-            if (
-                    product.getStatus()
-                            != EProductStatus.AVAILABLE
-            ) {
-
-                throw new InvalidOperationException(
-                        "Món "
-                                + product.getName()
-                                + " hiện không thể gọi."
-                );
-            }
-
-
-            // ==================================================
-            // CREATE NEW ORDER ITEM
-            // ==================================================
-
-            OrderItem orderItem =
-                    new OrderItem();
-
-
-            /*
-             * Quan trọng:
-             *
-             * Gọi thêm món phải tạo OrderItem mới.
-             *
-             * Không cộng quantity vào item cũ
-             * vì item cũ có thể đã:
-             *
-             * COOKING
-             * READY
-             * SERVED
-             *
-             * Item mới phải bắt đầu từ PENDING.
-             */
-            orderItem.setPrice(
-                    product.getPrice()
-            );
-
-
-            orderItem.setQuantity(
-                    itemRequest.getQuantity()
-            );
-
-
-            orderItem.setNote(
-                    normalizeNote(
-                            itemRequest.getNote()
-                    )
-            );
-
-
-            orderItem.setStatus(
-                    EOrderItemStatus.PENDING
-            );
-
-
-            orderItem.setProduct(
-                    product
-            );
-
-
-            orderItem.setOrder(
-                    order
-            );
-
-
-            orderItems.add(
-                    orderItem
+            newItems.add(
+                    item
             );
         }
 
 
         // ==================================================
-        // RECALCULATE TOTAL PRICE
+        // CREATE KITCHEN TICKET
+        //
+        // Method này:
+        //
+        // 1. tạo ticket
+        // 2. gắn ticket vào item
+        // 3. saveAll(newItems)
+        //
+        // Mỗi OrderItem chỉ persist 1 lần.
         // ==================================================
 
-        double totalPrice =
-                orderItems
+        createKitchenTicket(
+                order,
+                newItems
+        );
+
+
+        // ==================================================
+        // ADD ITEMS TO MANAGED ORDER
+        //
+        // Sau khi item đã được persist
+        // và đã có ID.
+        // ==================================================
+
+        order.getOrderItems()
+                .addAll(
+                        newItems
+                );
+
+
+        // ==================================================
+        // RECALCULATE TOTAL
+        // ==================================================
+
+        recalculateTotal(
+                order
+        );
+
+
+        /*
+         * KHÔNG gọi:
+         *
+         * orderRepository.save(order);
+         *
+         * Order được find bên trên đang là
+         * Managed Entity vì đang nằm trong
+         * @Transactional.
+         *
+         * Hibernate Dirty Checking sẽ tự:
+         *
+         * UPDATE orders
+         * SET total_price = ...
+         */
+
+
+        // ==================================================
+        // FLUSH
+        //
+        // Đẩy INSERT item + UPDATE total
+        // xuống DB trước khi query response.
+        // ==================================================
+
+        orderRepository.flush();
+
+
+        // ==================================================
+        // RETURN FRESH ORDER
+        // ==================================================
+
+        return getOrderDetails(
+                order.getId()
+        );
+    }
+
+
+    // ==================================================
+    // SERVE ITEM
+    //
+    // READY -> SERVED
+    // ==================================================
+
+    @Override
+    @Transactional
+    public Order serveOrderItem(
+            Long orderItemId,
+
+            Collection<EOrderType>
+                    allowedOrderTypes
+    ) {
+
+        OrderItem item =
+                orderItemRepository
+                        .findWithDetailsById(
+                                orderItemId
+                        )
+                        .orElseThrow(() ->
+                                new ResourceNotFoundException(
+                                        "Không tìm thấy món trong đơn có ID: "
+                                                + orderItemId
+                                )
+                        );
+
+
+        Order order =
+                item.getOrder();
+
+
+        if (order == null) {
+
+            throw new InvalidOperationException(
+                    "Món không thuộc đơn hàng nào."
+            );
+        }
+
+
+        // ==================================================
+        // ROLE BUSINESS GUARD
+        // ==================================================
+
+        if (
+                allowedOrderTypes == null
+                        ||
+                        !allowedOrderTypes.contains(
+                                order.getOrderType()
+                        )
+        ) {
+
+            throw new InvalidOperationException(
+                    "Bạn không được phép phục vụ loại đơn hàng này."
+            );
+        }
+
+
+        // ==================================================
+        // READY ONLY
+        // ==================================================
+
+        if (
+                item.getStatus()
+                        != EOrderItemStatus.READY
+        ) {
+
+            throw new InvalidOperationException(
+                    "Chỉ món READY mới có thể được phục vụ."
+            );
+        }
+
+
+        item.setStatus(
+                EOrderItemStatus.SERVED
+        );
+
+
+        orderItemRepository.save(
+                item
+        );
+
+
+        // ==================================================
+        // KITCHEN TICKET DONE?
+        // ==================================================
+
+        KitchenTicket ticket =
+                item.getKitchenTicket();
+
+
+        if (ticket != null) {
+
+            boolean hasUnservedItem =
+                    orderItemRepository
+                            .existsByKitchenTicket_IdAndStatusNot(
+                                    ticket.getId(),
+                                    EOrderItemStatus.SERVED
+                            );
+
+
+            if (!hasUnservedItem) {
+
+                ticket.setStatus(
+                        EKitchenTicketStatus.DONE
+                );
+
+
+                ticket.setDoneAt(
+                        LocalDateTime.now()
+                );
+
+
+                kitchenTicketRepository.save(
+                        ticket
+                );
+            }
+        }
+
+
+        // ==================================================
+        // ORDER ALL SERVED?
+        // ==================================================
+
+        boolean orderHasUnservedItem =
+                orderItemRepository
+                        .existsByOrder_IdAndStatusNot(
+                                order.getId(),
+                                EOrderItemStatus.SERVED
+                        );
+
+
+        /*
+         * TAKE_AWAY / DELIVERY
+         *
+         * đã thanh toán trước.
+         * giao hết món -> COMPLETED.
+         */
+        if (
+                !orderHasUnservedItem
+                        &&
+                        (
+                                order.getOrderType()
+                                        == EOrderType.TAKE_AWAY
+                                        ||
+                                        order.getOrderType()
+                                                == EOrderType.DELIVERY
+                        )
+        ) {
+
+            order.setStatus(
+                    EOrderStatus.COMPLETED
+            );
+
+
+            orderRepository.save(
+                    order
+            );
+        }
+
+
+        /*
+         * DINE_IN:
+         *
+         * dù tất cả SERVED
+         * Order vẫn PROCESSING.
+         *
+         * Sau này:
+         * request payment
+         * -> AWAITING_PAYMENT.
+         */
+
+
+        return getOrderDetails(
+                order.getId()
+        );
+    }
+
+
+    // ==================================================
+    // FIRE UNFIRED ITEMS
+    //
+    // PAYMENT dùng sau này.
+    // ==================================================
+
+    @Override
+    @Transactional
+    public KitchenTicket fireUnfiredItemsToKitchen(
+            Long orderId
+    ) {
+
+        Order order =
+                orderRepository
+                        .findByIdForUpdate(
+                                orderId
+                        )
+                        .orElseThrow(() ->
+                                new ResourceNotFoundException(
+                                        "Không tìm thấy đơn hàng có ID: "
+                                                + orderId
+                                )
+                        );
+
+
+        if (
+                order.getOrderType()
+                        == EOrderType.DINE_IN
+        ) {
+
+            throw new InvalidOperationException(
+                    "Đơn tại bàn được gửi xuống bếp trực tiếp, không dùng chức năng này."
+            );
+        }
+
+
+        /*
+         * Payment SUCCESS sau này:
+         *
+         * AWAITING_PAYMENT
+         * ->
+         * PENDING
+         *
+         * rồi mới gọi method này.
+         */
+        if (
+                order.getStatus()
+                        != EOrderStatus.PENDING
+        ) {
+
+            throw new InvalidOperationException(
+                    "Đơn hàng chưa sẵn sàng để gửi xuống bếp."
+            );
+        }
+
+
+        List<OrderItem> unfiredItems =
+                order.getOrderItems()
+                        .stream()
+                        .filter(
+                                item ->
+                                        item.getKitchenTicket()
+                                                == null
+                        )
+                        .toList();
+
+
+        if (unfiredItems.isEmpty()) {
+
+            throw new InvalidOperationException(
+                    "Không có món mới cần gửi xuống bếp."
+            );
+        }
+
+
+        return createKitchenTicket(
+                order,
+                unfiredItems
+        );
+    }
+
+
+    // ==================================================
+    // CREATE ORDER ITEM
+    // ==================================================
+
+    private OrderItem createOrderItem(
+            Order order,
+            OrderItemRequest request
+    ) {
+
+        Product product =
+                productRepository
+                        .findById(
+                                request.getProductId()
+                        )
+                        .orElseThrow(() ->
+                                new ResourceNotFoundException(
+                                        "Không tìm thấy sản phẩm có ID: "
+                                                + request.getProductId()
+                                )
+                        );
+
+
+        if (
+                product.getStatus()
+                        != EProductStatus.AVAILABLE
+        ) {
+
+            throw new InvalidOperationException(
+                    "Món "
+                            + product.getName()
+                            + " hiện không thể gọi."
+            );
+        }
+
+
+        OrderItem item =
+                new OrderItem();
+
+
+        /*
+         * Snapshot giá tại thời điểm đặt.
+         */
+        item.setPrice(
+                product.getPrice()
+        );
+
+
+        item.setQuantity(
+                request.getQuantity()
+        );
+
+
+        item.setNote(
+                normalizeNote(
+                        request.getNote()
+                )
+        );
+
+
+        item.setStatus(
+                EOrderItemStatus.PENDING
+        );
+
+
+        item.setProduct(
+                product
+        );
+
+
+        item.setOrder(
+                order
+        );
+
+
+        return item;
+    }
+
+
+    // ==================================================
+    // CREATE KITCHEN TICKET
+    // ==================================================
+
+    private KitchenTicket createKitchenTicket(
+            Order order,
+            List<OrderItem> items
+    ) {
+
+        if (
+                items == null
+                        ||
+                        items.isEmpty()
+        ) {
+
+            throw new InvalidOperationException(
+                    "Phiếu bếp phải có ít nhất một món."
+            );
+        }
+
+
+        Integer maxBatch =
+                kitchenTicketRepository
+                        .findMaxBatchNumberByOrderId(
+                                order.getId()
+                        );
+
+
+        int nextBatch =
+                maxBatch + 1;
+
+
+        KitchenTicket ticket =
+                new KitchenTicket();
+
+
+        ticket.setOrder(
+                order
+        );
+
+
+        ticket.setBatchNumber(
+                nextBatch
+        );
+
+
+        ticket.setStatus(
+                EKitchenTicketStatus.WAITING
+        );
+
+
+        ticket.setFiredAt(
+                LocalDateTime.now()
+        );
+
+
+        /*
+         * Save trước để ticket có ID.
+         */
+        KitchenTicket savedTicket =
+                kitchenTicketRepository.save(
+                        ticket
+                );
+
+
+        // ==================================================
+        // ASSIGN ITEMS
+        // ==================================================
+
+        for (
+                OrderItem item
+                : items
+        ) {
+
+            item.setKitchenTicket(
+                    savedTicket
+            );
+        }
+
+
+        orderItemRepository.saveAll(
+                items
+        );
+
+
+        savedTicket.setItems(
+                new ArrayList<>(
+                        items
+                )
+        );
+
+
+        return savedTicket;
+    }
+
+
+    // ==================================================
+    // RECALCULATE TOTAL
+    // ==================================================
+
+    private void recalculateTotal(
+            Order order
+    ) {
+
+        double total =
+                order.getOrderItems()
                         .stream()
                         .mapToDouble(
                                 item ->
                                         item.getPrice()
-                                                * item.getQuantity()
+                                                *
+                                                item.getQuantity()
                         )
                         .sum();
 
 
         order.setTotalPrice(
-                totalPrice
+                total
         );
+    }
 
 
-        /*
-         * KHÔNG thay đổi status của Order.
-         *
-         * Nếu trước đó:
-         *
-         * PENDING
-         * -> vẫn PENDING
-         *
-         * PROCESSING
-         * -> vẫn PROCESSING
-         *
-         * Chỉ OrderItem mới:
-         * -> PENDING
-         */
+    // ==================================================
+    // GET ORDER DETAILS
+    // ==================================================
 
+    private Order getOrderDetails(
+            Long orderId
+    ) {
 
-        // ==================================================
-        // SAVE ORDER
-        // CascadeType.ALL sẽ lưu luôn OrderItem mới
-        // ==================================================
-
-        return orderRepository.save(
-                order
-        );
+        return orderRepository
+                .findByIdWithDetails(
+                        orderId
+                )
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Không tìm thấy đơn hàng có ID: "
+                                        + orderId
+                        )
+                );
     }
 
 
@@ -695,9 +1171,10 @@ public class OrderServiceImpl
 
         if (
                 authentication == null
-                        || !authentication.isAuthenticated()
-                        || "anonymousUser"
-                        .equals(
+                        ||
+                        !authentication.isAuthenticated()
+                        ||
+                        "anonymousUser".equals(
                                 authentication.getPrincipal()
                         )
         ) {
@@ -713,7 +1190,9 @@ public class OrderServiceImpl
 
 
         return userRepository
-                .findByUsername(username)
+                .findByUsername(
+                        username
+                )
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
                                 "Không tìm thấy tài khoản đang đăng nhập."
@@ -739,11 +1218,131 @@ public class OrderServiceImpl
                 note.trim();
 
 
-        if (normalized.isEmpty()) {
-            return null;
+        return normalized.isEmpty()
+                ? null
+                : normalized;
+    }
+
+
+    // ==================================================
+    // VALIDATE CREATE
+    // ==================================================
+
+    private void validateCreateOrderRequest(
+            CreateOrderRequest request
+    ) {
+
+        EOrderType type =
+                request.getOrderType();
+
+
+        // ==================================================
+        // DINE IN
+        // ==================================================
+
+        if (
+                type
+                        == EOrderType.DINE_IN
+        ) {
+
+            if (
+                    request.getTableId()
+                            == null
+            ) {
+
+                throw new InvalidOperationException(
+                        "Đơn tại bàn bắt buộc phải chọn bàn."
+                );
+            }
+
+
+            if (
+                    request.getShippingDetail()
+                            != null
+            ) {
+
+                throw new InvalidOperationException(
+                        "Đơn tại bàn không được chứa thông tin giao hàng."
+                );
+            }
+
+
+            return;
         }
 
 
-        return normalized;
+        // ==================================================
+        // TAKE AWAY
+        // ==================================================
+
+        if (
+                type
+                        == EOrderType.TAKE_AWAY
+        ) {
+
+            if (
+                    request.getTableId()
+                            != null
+            ) {
+
+                throw new InvalidOperationException(
+                        "Đơn mang về không được gắn với bàn ăn."
+                );
+            }
+
+
+            if (
+                    request.getShippingDetail()
+                            != null
+            ) {
+
+                throw new InvalidOperationException(
+                        "Đơn mang về không cần thông tin giao hàng."
+                );
+            }
+
+
+            return;
+        }
+
+
+        // ==================================================
+        // DELIVERY
+        // ==================================================
+
+        if (
+                type
+                        == EOrderType.DELIVERY
+        ) {
+
+            if (
+                    request.getTableId()
+                            != null
+            ) {
+
+                throw new InvalidOperationException(
+                        "Đơn giao hàng không được gắn với bàn ăn."
+                );
+            }
+
+
+            if (
+                    request.getShippingDetail()
+                            == null
+            ) {
+
+                throw new InvalidOperationException(
+                        "Đơn giao hàng bắt buộc phải có thông tin người nhận."
+                );
+            }
+
+
+            return;
+        }
+
+
+        throw new InvalidOperationException(
+                "Loại đơn hàng không hợp lệ."
+        );
     }
 }
