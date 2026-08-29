@@ -3,7 +3,7 @@ import { Bike, Home, Search, ShoppingBag } from "lucide-react";
 import styles from "./KitchenFilters.module.css";
 
 function KitchenFilters({
-  activeOrders,
+  tickets,
 
   orderTypeFilter,
   onOrderTypeChange,
@@ -11,16 +11,16 @@ function KitchenFilters({
   searchQuery,
   onSearchChange,
 }) {
-  const dineInCount = activeOrders.filter(
-    (order) => order.orderType === "dine_in",
+  const dineInCount = tickets.filter(
+    (ticket) => ticket.orderType === "dine_in",
   ).length;
 
-  const takeawayCount = activeOrders.filter(
-    (order) => order.orderType === "take_away",
+  const takeawayCount = tickets.filter(
+    (ticket) => ticket.orderType === "take_away",
   ).length;
 
-  const deliveryCount = activeOrders.filter(
-    (order) => order.orderType === "delivery",
+  const deliveryCount = tickets.filter(
+    (ticket) => ticket.orderType === "delivery",
   ).length;
 
   return (
@@ -31,7 +31,7 @@ function KitchenFilters({
           className={orderTypeFilter === "all" ? styles.active : ""}
           onClick={() => onOrderTypeChange("all")}
         >
-          Tất Cả ({activeOrders.length})
+          Tất Cả ({tickets.length})
         </button>
 
         <button
@@ -68,7 +68,7 @@ function KitchenFilters({
         <input
           type="text"
           value={searchQuery}
-          placeholder="Tìm theo bàn, món..."
+          placeholder="Tìm bàn, mã đơn, món ăn..."
           onChange={(event) => onSearchChange(event.target.value)}
         />
       </div>

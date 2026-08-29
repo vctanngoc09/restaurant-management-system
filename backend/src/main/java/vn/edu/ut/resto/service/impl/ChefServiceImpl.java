@@ -435,4 +435,133 @@ public class ChefServiceImpl
                         )
                 );
     }
+
+
+    @Override
+    @Transactional
+    public KitchenTicket completeTicket(
+            Long ticketId
+    ) {
+
+        // ==================================================
+        // FIND TICKET
+        // ==================================================
+
+        KitchenTicket ticket =
+                kitchenTicketRepository
+                        .findWithDetailsById(
+                                ticketId
+                        )
+                        .orElseThrow(() ->
+                                new ResourceNotFoundException(
+                                        "Không tìm thấy phiếu bếp có ID: "
+                                                + ticketId
+                                )
+                        );
+
+        if (
+                ticket.getStatus()
+                        == EKitchenTicketStatus.READY
+        ) {
+            return ticket;
+        }
+
+
+        if (
+                ticket.getStatus()
+                        != EKitchenTicketStatus.PROCESSING
+        ) {
+
+            if (
+                    ticket.getStatus()
+                            == EKitchenTicketStatus.WAITING
+            ) {
+
+                throw new InvalidOperationException(
+                        "Phiếu bếp phải được bắt đầu chế biến trước khi hoàn tất."
+                );
+            }
+
+
+            if (
+                    ticket.getStatus()
+                            == EKitchenTicketStatus.DONE
+            ) {
+
+                throw new InvalidOperationException(
+                        "Phiếu bếp đã hoàn tất và được phục vụ."
+                );
+            }
+
+
+            throw new InvalidOperationException(
+                    "Phiếu bếp hiện không thể hoàn tất."
+            );
+        }
+
+        List<OrderItem> items =
+                ticket.getItems();
+
+
+        if (
+                items == null
+                        ||
+                        items.isEmpty()
+        ) {
+
+            throw new InvalidOperationException(
+                    "Phiếu bếp không có món ăn."
+            );
+        }
+
+        for (
+                OrderItem item
+                : items
+        ) {
+
+            if (
+                    item.getStatus()
+                            == EOrderItemStatus.SERVED
+            ) {
+
+                continue;
+            }
+
+
+            item.setStatus(
+                    EOrderItemStatus.READY
+            );
+        }
+
+
+        orderItemRepository.saveAll(
+                items
+        );
+
+
+        ticket.setStatus(
+                EKitchenTicketStatus.READY
+        );
+
+
+        ticket.setReadyAt(
+                LocalDateTime.now()
+        );
+
+
+        kitchenTicketRepository.save(
+                ticket
+        );
+
+
+        return kitchenTicketRepository
+                .findWithDetailsById(
+                        ticket.getId()
+                )
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Không tìm thấy phiếu bếp sau khi cập nhật."
+                        )
+                );
+    }
 }

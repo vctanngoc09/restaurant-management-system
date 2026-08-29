@@ -1,102 +1,213 @@
+/* ======================================================
+   COLUMN
+====================================================== */
+
 .column {
+  width: 100%;
+  height: 100%;
+
   min-width: 0;
+  min-height: 0;
+
+  display: flex;
+  flex-direction: column;
+
+  overflow: hidden;
+
+  background: #f7f8fa;
 }
 
+/* ======================================================
+   COLUMN HEADER
+====================================================== */
+
 .columnHeader {
+  min-height: 43px;
+
   display: flex;
   align-items: center;
   justify-content: space-between;
 
-  gap: 10px;
-
-  padding: 0 4px;
-
-  margin-bottom: 14px;
-}
-
-.columnHeader h2 {
-  display: flex;
-  align-items: center;
-
   gap: 8px;
 
-  color: var(--kds-text);
-
-  font-size: var(--font-size-sm);
-  font-weight: 700;
-
-  letter-spacing: 0.06em;
-}
-
-.columnHeader > span {
-  color: var(--kds-muted);
-
-  font-family: monospace;
-  font-size: var(--font-size-xs);
-}
-
-.dot {
-  width: 8px;
-  height: 8px;
+  padding: 0 12px;
 
   flex-shrink: 0;
 
-  border-radius: var(--radius-full);
+  background: #f7f8fa;
+
+  border-bottom: 1px solid #e2e5ea;
 }
 
-.pendingDot {
-  background: var(--kds-text);
-}
+.columnHeader h2 {
+  min-width: 0;
 
-.readyDot {
-  background: #059669;
-}
-
-.tickets {
   display: flex;
-  flex-direction: column;
+  align-items: center;
 
-  gap: 14px;
+  gap: 7px;
+
+  margin: 0;
+
+  color: #172b4d;
+
+  font-size: 11px;
+  font-weight: 800;
+
+  letter-spacing: 0.04em;
+
+  white-space: nowrap;
 }
 
-.emptyState {
-  padding: 48px 20px;
+.columnHeader > span {
+  flex-shrink: 0;
 
-  text-align: center;
+  color: #6b778c;
 
-  background: var(--kds-surface);
-
-  border: 1px solid var(--color-border);
-  border-radius: 16px;
-}
-
-.emptyState svg {
-  margin: 0 auto 8px;
-}
-
-.emptySuccess {
-  color: #059669;
-}
-
-.emptyIcon {
-  color: var(--color-border-dark);
-}
-
-.emptyState h3 {
-  color: var(--kds-text);
-
-  font-size: var(--font-size-sm);
+  font-size: 9px;
   font-weight: 600;
 }
 
+/* ======================================================
+   DOT
+====================================================== */
+
+.dot {
+  width: 7px;
+  height: 7px;
+
+  flex-shrink: 0;
+
+  border-radius: 999px;
+}
+
+.waitingDot {
+  background: #f59e0b;
+}
+
+.processingDot {
+  background: #3b82f6;
+}
+
+.readyDot {
+  background: #10b981;
+}
+
+/* ======================================================
+   LEFT BORDER INDICATOR
+====================================================== */
+
+.waiting .columnHeader {
+  box-shadow: inset 3px 0 0 #f59e0b;
+}
+
+.processing .columnHeader {
+  box-shadow: inset 3px 0 0 #3b82f6;
+}
+
+.ready .columnHeader {
+  box-shadow: inset 3px 0 0 #10b981;
+}
+
+/* ======================================================
+   TICKETS
+====================================================== */
+
+.tickets {
+  min-width: 0;
+  min-height: 0;
+
+  height: 0;
+  flex: 1 1 0;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 8px;
+
+  padding: 8px 6px 12px 8px;
+
+  overflow-x: hidden;
+  overflow-y: scroll;
+
+  overscroll-behavior-y: contain;
+
+  scrollbar-gutter: stable;
+
+  scrollbar-width: thin;
+
+  scrollbar-color: #aeb6c2 #eef1f5;
+}
+
+.tickets::-webkit-scrollbar {
+  width: 7px;
+}
+
+.tickets::-webkit-scrollbar-track {
+  background: #eef1f5;
+}
+
+.tickets::-webkit-scrollbar-thumb {
+  background: #b7bec9;
+
+  border: 2px solid #eef1f5;
+  border-radius: 999px;
+}
+
+.tickets::-webkit-scrollbar-thumb:hover {
+  background: #8993a4;
+}
+
+/* ======================================================
+   EMPTY
+====================================================== */
+
+.emptyState {
+  min-height: 0;
+
+  flex: 1;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  padding: 20px;
+
+  text-align: center;
+
+  color: #97a0af;
+}
+
+.emptyState svg {
+  margin-bottom: 7px;
+}
+
+.emptySuccess {
+  color: #10b981;
+}
+
+.emptyIcon {
+  color: #b3bac5;
+}
+
+.emptyState h3 {
+  margin: 0;
+
+  color: #505f79;
+
+  font-size: 11px;
+  font-weight: 700;
+}
+
 .emptyState p {
-  max-width: 360px;
+  max-width: 220px;
 
-  margin: 5px auto 0;
+  margin: 4px auto 0;
 
-  color: var(--kds-muted);
+  color: #8993a4;
 
-  font-size: var(--font-size-xs);
+  font-size: 9px;
 
-  line-height: 1.6;
+  line-height: 1.45;
 }

@@ -1,69 +1,95 @@
-import { CheckCircle2, PackageCheck } from "lucide-react";
+import { CheckCircle2, ChefHat, PackageCheck } from "lucide-react";
 
 import KitchenTicket from "../KitchenTicket/KitchenTicket";
 
 import styles from "./KitchenColumn.module.css";
 
+const COLUMN_CONFIG = {
+  waiting: {
+    emptyTitle: "Không Có Phiếu Chờ",
+
+    emptyDescription: "Phiếu mới từ phục vụ sẽ xuất hiện tại đây.",
+
+    icon: CheckCircle2,
+  },
+
+  processing: {
+    emptyTitle: "Chưa Có Phiếu Đang Nấu",
+
+    emptyDescription: "Nhấn bắt đầu ở phiếu chờ để chuyển sang khu đang nấu.",
+
+    icon: ChefHat,
+  },
+
+  ready: {
+    emptyTitle: "Chưa Có Món Sẵn Sàng",
+
+    emptyDescription: "Phiếu hoàn thành sẽ chờ nhân viên phục vụ tới nhận.",
+
+    icon: PackageCheck,
+  },
+};
+
 function KitchenColumn({
   type,
   title,
 
-  itemCount,
-  orders,
+  tickets,
 
-  timers,
+  getElapsed,
 
-  menuItems,
+  actionKey,
 
-  onToggleStock,
+  onStartTicket,
   onItemAction,
+
+  onCompleteTicket,
 }) {
-  const pending = type === "pending";
+  const config = COLUMN_CONFIG[type];
+
+  const EmptyIcon = config.icon;
+
+  const itemCount = tickets.reduce(
+    (total, ticket) => total + ticket.items.length,
+    0,
+  );
 
   return (
-    <section className={styles.column}>
+    <section className={`${styles.column} ${styles[type]}`}>
       <div className={styles.columnHeader}>
         <h2>
-          <span
-            className={`${styles.dot} ${
-              pending ? styles.pendingDot : styles.readyDot
-            }`}
-          />
+          <span className={`${styles.dot} ${styles[`${type}Dot`]}`} />
           {title} ({itemCount})
         </h2>
 
-        <span>
-          {orders.length} {pending ? "Đơn gọi" : "Đơn ready"}
-        </span>
+        <span>{tickets.length} phiếu</span>
       </div>
 
-      {orders.length === 0 ? (
+      {tickets.length === 0 ? (
         <div className={styles.emptyState}>
-          {pending ? (
-            <CheckCircle2 size={34} className={styles.emptySuccess} />
-          ) : (
-            <PackageCheck size={34} className={styles.emptyIcon} />
-          )}
+          <EmptyIcon
+            size={34}
+            className={
+              type === "ready" ? styles.emptySuccess : styles.emptyIcon
+            }
+          />
 
-          <h3>{pending ? "Bếp Trống" : "Chưa Có Món Chờ Lấy"}</h3>
+          <h3>{config.emptyTitle}</h3>
 
-          <p>
-            {pending
-              ? "Tất cả món ăn đã được chế biến hoàn tất!"
-              : "Món ăn chế biến xong sẽ xuất hiện tại đây để phục vụ mang tới bàn."}
-          </p>
+          <p>{config.emptyDescription}</p>
         </div>
       ) : (
         <div className={styles.tickets}>
-          {orders.map((order) => (
+          {tickets.map((ticket) => (
             <KitchenTicket
-              key={order.id}
+              key={ticket.id}
               type={type}
-              order={order}
-              elapsed={timers[order.id] || 0}
-              menuItems={menuItems}
-              onToggleStock={onToggleStock}
+              ticket={ticket}
+              elapsed={getElapsed(ticket)}
+              actionKey={actionKey}
+              onStartTicket={onStartTicket}
               onItemAction={onItemAction}
+              onCompleteTicket={onCompleteTicket}
             />
           ))}
         </div>

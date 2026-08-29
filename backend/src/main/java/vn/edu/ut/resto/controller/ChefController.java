@@ -182,4 +182,48 @@ public class ChefController {
                 )
         );
     }
+
+    // ==================================================
+// COMPLETE ENTIRE TICKET
+//
+// ALL ITEMS
+// -> READY
+//
+// TICKET
+// PROCESSING -> READY
+// ==================================================
+
+    @PatchMapping(
+            "/tickets/{ticketId}/ready"
+    )
+    public ResponseEntity<
+            ApiResponse<KitchenTicketResponse>
+            >
+    completeTicket(
+            @PathVariable
+            Long ticketId
+    ) {
+
+        KitchenTicket ticket =
+                chefService
+                        .completeTicket(
+                                ticketId
+                        );
+
+
+        KitchenTicketResponse response =
+                kitchenTicketMapper
+                        .toResponse(
+                                ticket
+                        );
+
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        200,
+                        "Đã hoàn tất toàn bộ món trong phiếu!",
+                        response
+                )
+        );
+    }
 }

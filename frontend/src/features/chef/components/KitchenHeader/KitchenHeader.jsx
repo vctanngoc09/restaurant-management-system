@@ -1,16 +1,18 @@
-import { AlertTriangle, ChefHat, Volume2, VolumeX } from "lucide-react";
+import { ChefHat, RefreshCw, Volume2, VolumeX } from "lucide-react";
 
 import styles from "./KitchenHeader.module.css";
 
 function KitchenHeader({
-  pendingCount,
+  waitingCount,
+  processingCount,
   readyCount,
-  outOfStockCount,
+
+  loading,
 
   soundEnabled,
 
   onToggleSound,
-  onOpenOutOfStock,
+  onRefresh,
 }) {
   return (
     <section className={styles.header}>
@@ -23,19 +25,23 @@ function KitchenHeader({
           <div className={styles.titleRow}>
             <h1>Màn hình Điều phối Bếp (KDS)</h1>
 
-            <span className={styles.liveBadge}>LIVE</span>
+            <span className={styles.liveBadge}>AUTO 5s</span>
           </div>
 
-          <p>
-            Hệ thống điều phối món ăn theo thời gian thực cho nhà hàng Hủ Tiếu
-          </p>
+          <p>Theo dõi phiếu bếp theo từng batch gọi món</p>
         </div>
       </div>
 
       <div className={styles.controls}>
         <div className={styles.metrics}>
           <span>
-            Chờ chế biến: <strong>{pendingCount}</strong>
+            Chờ: <strong>{waitingCount}</strong>
+          </span>
+
+          <i />
+
+          <span>
+            Đang nấu: <strong>{processingCount}</strong>
           </span>
 
           <i />
@@ -47,20 +53,19 @@ function KitchenHeader({
 
         <button
           type="button"
-          className={`${styles.stockButton} ${
-            outOfStockCount > 0 ? styles.stockButtonWarning : ""
-          }`}
-          onClick={onOpenOutOfStock}
+          className={styles.stockButton}
+          onClick={onRefresh}
+          disabled={loading}
         >
-          <AlertTriangle size={16} />
+          <RefreshCw size={16} />
 
-          <span>Báo Hết Món ({outOfStockCount})</span>
+          <span>Làm mới</span>
         </button>
 
         <button
           type="button"
           className={styles.soundButton}
-          title={soundEnabled ? "Chuông báo đang bật" : "Chuông báo đang tắt"}
+          title={soundEnabled ? "Tắt âm thanh" : "Bật âm thanh"}
           onClick={onToggleSound}
         >
           {soundEnabled ? <Volume2 size={17} /> : <VolumeX size={17} />}

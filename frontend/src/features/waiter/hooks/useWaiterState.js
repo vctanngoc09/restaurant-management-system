@@ -753,7 +753,7 @@ function useWaiterState() {
   };
 
   // ==================================================
-  // SERVE ITEM
+  // SERVE ORDER ITEM
   //
   // READY -> SERVED
   // ==================================================
@@ -768,20 +768,50 @@ function useWaiterState() {
 
       const updatedOrder = normalizeOrder(response.data);
 
-      syncOrderState(updatedOrder, updatedOrder.tableId);
+      // ==================================================
+      // UPDATE ORDER STATE
+      // ==================================================
 
-      toast.success("Đã xác nhận phục vụ món.");
+      setOrders((prev) =>
+        prev.map((order) =>
+          order.id === updatedOrder.id ? updatedOrder : order,
+        ),
+      );
+
+      // ==================================================
+      // UPDATE TABLE SUMMARY
+      // ==================================================
+
+      setTables((prev) =>
+        prev.map((table) => {
+          if (table.id !== updatedOrder.tableId) {
+            return table;
+          }
+
+          return {
+            ...table,
+
+            itemCount: updatedOrder.items.reduce(
+              (total, item) => total + item.quantity,
+              0,
+            ),
+
+            currentTotal: updatedOrder.totalAmount,
+
+            currentOrderId: updatedOrder.id,
+          };
+        }),
+      );
+
+      toast.success("Đã xác nhận món được phục vụ.");
 
       return updatedOrder;
     } catch (error) {
       console.error("SERVE ITEM ERROR:", error);
 
-      const message =
-        error.response?.data?.message ||
-        error.message ||
-        "Không thể xác nhận phục vụ món.";
-
-      toast.error(message);
+      toast.error(
+        error.response?.data?.message || "Không thể xác nhận phục vụ món.",
+      );
 
       return null;
     }

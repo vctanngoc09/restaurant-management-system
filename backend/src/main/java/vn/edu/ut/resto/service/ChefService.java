@@ -29,4 +29,8 @@ public interface ChefService {
 
             EOrderItemStatus targetStatus
     );
+
+    KitchenTicket completeTicket(
+            Long ticketId
+    );
 }

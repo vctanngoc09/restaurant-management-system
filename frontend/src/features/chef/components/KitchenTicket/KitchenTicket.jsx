@@ -3,12 +3,18 @@ import {
   Check,
   CheckCircle2,
   Clock,
+  Flame,
   Home,
+  LoaderCircle,
+  Play,
   ShoppingBag,
-  Trees,
 } from "lucide-react";
 
 import styles from "./KitchenTicket.module.css";
+
+// ==================================================
+// TIMER
+// ==================================================
 
 function formatElapsed(seconds = 0) {
   const minutes = Math.floor(seconds / 60);
@@ -21,62 +27,128 @@ function formatElapsed(seconds = 0) {
   )}`;
 }
 
+// ==================================================
+// ITEM STATUS
+// ==================================================
+
+const ITEM_STATUS = {
+  pending: {
+    label: "Chờ bắt đầu",
+
+    className: "pendingItemStatus",
+  },
+
+  cooking: {
+    label: "Đang nấu",
+
+    className: "cookingItemStatus",
+  },
+
+  ready: {
+    label: "Sẵn sàng",
+
+    className: "readyItemStatus",
+  },
+
+  served: {
+    label: "Đã phục vụ",
+
+    className: "servedItemStatus",
+  },
+};
+
+// ==================================================
+// COMPONENT
+// ==================================================
+
 function KitchenTicket({
   type,
 
-  order,
+  ticket,
+
   elapsed,
 
-  menuItems,
+  actionKey,
 
-  onToggleStock,
+  onStartTicket,
+
   onItemAction,
-}) {
-  const pending = type === "pending";
 
-  const overtime = elapsed > 300;
+  onCompleteTicket,
+}) {
+  const overtime = type !== "ready" && elapsed > 300;
+
+  // ==================================================
+  // ORDER ICON
+  // ==================================================
 
   const getOrderIcon = () => {
-    if (order.orderType === "take_away") {
+    if (ticket.orderType === "take_away") {
       return <ShoppingBag size={17} />;
     }
 
-    if (order.orderType === "delivery") {
+    if (ticket.orderType === "delivery") {
       return <Bike size={17} />;
-    }
-
-    if (order.tableName?.startsWith("N-")) {
-      return <Trees size={17} />;
     }
 
     return <Home size={17} />;
   };
 
+  // ==================================================
+  // ORDER NAME
+  // ==================================================
+
   const getOrderName = () => {
-    if (order.orderType === "take_away") {
+    if (ticket.orderType === "take_away") {
       return "Mang Về";
     }
 
-    if (order.orderType === "delivery") {
+    if (ticket.orderType === "delivery") {
       return "Giao Hàng";
     }
 
-    return `Bàn ${order.tableName || order.tableId}`;
+    return `Bàn ${ticket.tableNumber || ticket.tableId || "-"}`;
   };
+
+  // ==================================================
+  // START LOADING
+  // ==================================================
+
+  const starting = actionKey === `ticket:${ticket.id}`;
+  const completing = actionKey === `complete:${ticket.id}`;
 
   return (
     <article className={styles.ticket}>
+      {/* ==================================================
+          HEADER
+      ================================================== */}
+
       <div className={styles.ticketHeader}>
+        {/* ==================================================
+      ORDER INFO
+  ================================================== */}
+
         <div className={styles.orderIdentity}>
           <strong>
             {getOrderIcon()}
+
             {getOrderName()}
           </strong>
 
-          <span>#{order.id}</span>
+          <span>
+            Order #{ticket.orderId} • Lần {ticket.batchNumber}
+          </span>
         </div>
 
-        {pending ? (
+        {/* ==================================================
+      RIGHT ACTIONS
+  ================================================== */}
+
+        <div className={styles.headerActions}>
+          {/* =========================
+        TIMER
+    ========================= */}
+
           <div
             className={`${styles.timer} ${
               overtime ? styles.timerOvertime : ""
@@ -88,20 +160,69 @@ function KitchenTicket({
 
             {overtime && <strong>TRỄ</strong>}
           </div>
-        ) : (
-          <span className={styles.waiter}>
-            Phục vụ: <strong>{order.waiterName}</strong>
-          </span>
-        )}
+
+          {/* =========================
+        WAITING -> PROCESSING
+    ========================= */}
+
+          {type === "waiting" && (
+            <button
+              type="button"
+              className={styles.headerStartButton}
+              disabled={starting}
+              onClick={() => onStartTicket(ticket)}
+            >
+              {starting ? <LoaderCircle size={13} /> : <Play size={13} />}
+
+              <span>Bắt đầu</span>
+            </button>
+          )}
+
+          {type === "processing" && (
+            <button
+              type="button"
+              className={styles.completeTicketButton}
+              disabled={completing}
+              onClick={() => onCompleteTicket(ticket)}
+            >
+              {completing ? (
+                <LoaderCircle size={13} />
+              ) : (
+                <CheckCircle2 size={13} />
+              )}
+
+              <span>Xong tất cả</span>
+            </button>
+          )}
+        </div>
       </div>
 
-      <div className={styles.items}>
-        {order.visibleItems.map((item) => {
-          const menuItem = menuItems.find(
-            (menu) => menu.id === item.menuItemId || menu.name === item.name,
-          );
+      {/* ==================================================
+          STAFF
+      ================================================== */}
 
-          const outOfStock = menuItem?.status === "out_of_stock";
+      <div className={styles.ticketMeta}>
+        <span>Phiếu #{ticket.id}</span>
+
+        <span>
+          Phục vụ: <strong>{ticket.staffName || "Nhân viên"}</strong>
+        </span>
+      </div>
+
+      {/* ==================================================
+          ITEMS
+      ================================================== */}
+
+      <div className={styles.items}>
+        {ticket.items.map((item) => {
+          const status = ITEM_STATUS[item.status] || ITEM_STATUS.pending;
+
+          const cookingKey = `item:${item.id}:COOKING`;
+
+          const readyKey = `item:${item.id}:READY`;
+
+          const itemLoading =
+            actionKey === cookingKey || actionKey === readyKey;
 
           return (
             <div key={item.id} className={styles.item}>
@@ -113,53 +234,78 @@ function KitchenTicket({
 
                   {item.note && <p>Ghi chú: {item.note}</p>}
 
-                  {pending && outOfStock && (
-                    <span className={styles.outOfStockText}>
-                      Đã báo hết món với phục vụ
-                    </span>
-                  )}
+                  <span
+                    className={`${styles.itemStatus} ${
+                      styles[status.className]
+                    }`}
+                  >
+                    {status.label}
+                  </span>
                 </div>
               </div>
 
-              <div className={styles.itemActions}>
-                {pending && (
-                  <button
-                    type="button"
-                    className={`${styles.stockAction} ${
-                      outOfStock ? styles.stockActionDisabled : ""
-                    }`}
-                    onClick={() => {
-                      if (menuItem) {
-                        onToggleStock(menuItem.id);
-                      }
-                    }}
-                  >
-                    {outOfStock ? "Đã Hết" : "Báo Hết"}
-                  </button>
-                )}
+              {/* ==================================================
+                    PROCESSING ACTIONS
+                ================================================== */}
 
-                <button
-                  type="button"
-                  className={pending ? styles.doneButton : styles.servedButton}
-                  onClick={() => onItemAction(order, item)}
-                >
-                  {pending ? (
-                    <>
-                      <Check size={17} />
-                      Xong
-                    </>
-                  ) : (
-                    <>
-                      <CheckCircle2 size={16} />
-                      Đã giao cho phục vụ
-                    </>
+              {type === "processing" && (
+                <div className={styles.itemActions}>
+                  {item.status === "pending" && (
+                    <button
+                      type="button"
+                      className={styles.startItemButton}
+                      disabled={itemLoading}
+                      onClick={() => onItemAction(item, "COOKING")}
+                    >
+                      {itemLoading ? (
+                        <LoaderCircle size={16} />
+                      ) : (
+                        <Flame size={16} />
+                      )}
+                      Bắt đầu món
+                    </button>
                   )}
-                </button>
-              </div>
+
+                  {item.status === "cooking" && (
+                    <button
+                      type="button"
+                      className={styles.doneButton}
+                      disabled={itemLoading}
+                      onClick={() => onItemAction(item, "READY")}
+                    >
+                      {itemLoading ? (
+                        <LoaderCircle size={16} />
+                      ) : (
+                        <Check size={17} />
+                      )}
+                      Xong món
+                    </button>
+                  )}
+
+                  {item.status === "ready" && (
+                    <span className={styles.readyText}>
+                      <CheckCircle2 size={16} />
+                      Sẵn sàng
+                    </span>
+                  )}
+                </div>
+              )}
             </div>
           );
         })}
       </div>
+
+      {/* ==================================================
+          READY
+      ================================================== */}
+
+      {type === "ready" && (
+        <div className={styles.readyFooter}>
+          <CheckCircle2 size={17} />
+
+          <span>Món đã hoàn thành • Chờ nhân viên phục vụ lấy món</span>
+        </div>
+      )}
     </article>
   );
 }

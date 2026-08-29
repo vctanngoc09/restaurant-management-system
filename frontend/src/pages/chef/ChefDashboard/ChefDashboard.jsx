@@ -1,13 +1,18 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
+
+import KitchenHeader from "../../../features/chef/components/KitchenHeader/KitchenHeader";
+
+import KitchenFilters from "../../../features/chef/components/KitchenFilters/KitchenFilters";
+
+import KitchenColumn from "../../../features/chef/components/KitchenColumn/KitchenColumn";
 
 import useKitchenState from "../../../features/chef/hooks/useKitchenState";
 
-import KitchenHeader from "../../../features/chef/components/KitchenHeader/KitchenHeader";
-import KitchenFilters from "../../../features/chef/components/KitchenFilters/KitchenFilters";
-import KitchenColumn from "../../../features/chef/components/KitchenColumn/KitchenColumn";
-import OutOfStockModal from "../../../features/chef/components/OutOfStockModal/OutOfStockModal";
-
 import styles from "./ChefDashboard.module.css";
+
+const DEFAULT_WIDTHS = [33.33, 33.33, 33.34];
+
+const MIN_COLUMN_WIDTH = 20;
 
 function ChefDashboard() {
   const kitchen = useKitchenState();
@@ -16,132 +21,249 @@ function ChefDashboard() {
 
   const [searchQuery, setSearchQuery] = useState("");
 
-  const [showOutOfStockModal, setShowOutOfStockModal] = useState(false);
+  // ==================================================
+  // RESIZABLE COLUMNS
+  // ==================================================
 
-  const activeOrders = useMemo(() => {
-    return kitchen.orders.filter(
-      (order) => order.status !== "completed" && order.status !== "cancelled",
-    );
-  }, [kitchen.orders]);
+  const boardRef = useRef(null);
 
-  const filteredOrders = useMemo(() => {
-    const search = searchQuery.trim().toLowerCase();
+  const [columnWidths, setColumnWidths] = useState(DEFAULT_WIDTHS);
 
-    return activeOrders.filter((order) => {
-      const matchType =
-        orderTypeFilter === "all" || order.orderType === orderTypeFilter;
+  const startResize = (index, event) => {
+    event.preventDefault();
 
-      if (!matchType) {
+    const board = boardRef.current;
+
+    if (!board) {
+      return;
+    }
+
+    const rect = board.getBoundingClientRect();
+
+    /*
+     * 2 handles x 7px.
+     */
+    const usableWidth = rect.width - 14;
+
+    const startX = event.clientX;
+
+    const startWidths = [...columnWidths];
+
+    document.body.style.cursor = "col-resize";
+
+    document.body.style.userSelect = "none";
+
+    const handlePointerMove = (moveEvent) => {
+      const deltaPx = moveEvent.clientX - startX;
+
+      const deltaPercent = (deltaPx / usableWidth) * 100;
+
+      const leftStart = startWidths[index];
+
+      const rightStart = startWidths[index + 1];
+
+      /*
+       * Không cho một cột
+       * nhỏ hơn 20%.
+       */
+      const minDelta = MIN_COLUMN_WIDTH - leftStart;
+
+      const maxDelta = rightStart - MIN_COLUMN_WIDTH;
+
+      const safeDelta = Math.max(
+        minDelta,
+
+        Math.min(maxDelta, deltaPercent),
+      );
+
+      const next = [...startWidths];
+
+      next[index] = leftStart + safeDelta;
+
+      next[index + 1] = rightStart - safeDelta;
+
+      setColumnWidths(next);
+    };
+
+    const stopResize = () => {
+      document.body.style.cursor = "";
+
+      document.body.style.userSelect = "";
+
+      window.removeEventListener("pointermove", handlePointerMove);
+
+      window.removeEventListener("pointerup", stopResize);
+    };
+
+    window.addEventListener("pointermove", handlePointerMove);
+
+    window.addEventListener("pointerup", stopResize);
+  };
+
+  const resetColumns = () => {
+    setColumnWidths(DEFAULT_WIDTHS);
+  };
+
+  // ==================================================
+  // FILTER
+  // ==================================================
+
+  const filterTickets = (tickets) => {
+    const keyword = searchQuery.trim().toLowerCase();
+
+    return tickets.filter((ticket) => {
+      if (orderTypeFilter !== "all" && ticket.orderType !== orderTypeFilter) {
         return false;
       }
 
-      if (!search) {
+      if (!keyword) {
         return true;
       }
 
-      const matchTable = (order.tableName || "").toLowerCase().includes(search);
+      const orderMatch = String(ticket.orderId).includes(keyword);
 
-      const matchId = order.id.toLowerCase().includes(search);
+      const tableMatch = String(ticket.tableNumber || "")
+        .toLowerCase()
+        .includes(keyword);
 
-      const matchItem = order.items.some((item) =>
-        item.name.toLowerCase().includes(search),
+      const itemMatch = ticket.items.some(
+        (item) =>
+          item.name?.toLowerCase().includes(keyword) ||
+          item.note?.toLowerCase().includes(keyword),
       );
 
-      return matchTable || matchId || matchItem;
+      return orderMatch || tableMatch || itemMatch;
     });
-  }, [activeOrders, orderTypeFilter, searchQuery]);
+  };
 
-  const pendingOrders = useMemo(() => {
-    return filteredOrders
-      .map((order) => ({
-        ...order,
-
-        visibleItems: order.items.filter(
-          (item) =>
-            !item.kdsStatus ||
-            item.kdsStatus === "pending" ||
-            item.kdsStatus === "cooking",
-        ),
-      }))
-      .filter((order) => order.visibleItems.length > 0);
-  }, [filteredOrders]);
-
-  const readyOrders = useMemo(() => {
-    return filteredOrders
-      .map((order) => ({
-        ...order,
-
-        visibleItems: order.items.filter((item) => item.kdsStatus === "ready"),
-      }))
-      .filter((order) => order.visibleItems.length > 0);
-  }, [filteredOrders]);
-
-  const pendingCount = pendingOrders.reduce(
-    (total, order) =>
-      total + order.visibleItems.reduce((sum, item) => sum + item.quantity, 0),
-    0,
+  const waitingTickets = useMemo(
+    () => filterTickets(kitchen.board.waiting),
+    [kitchen.board.waiting, orderTypeFilter, searchQuery],
   );
 
-  const readyCount = readyOrders.reduce(
-    (total, order) =>
-      total + order.visibleItems.reduce((sum, item) => sum + item.quantity, 0),
-    0,
+  const processingTickets = useMemo(
+    () => filterTickets(kitchen.board.processing),
+    [kitchen.board.processing, orderTypeFilter, searchQuery],
   );
 
-  const outOfStockCount = kitchen.menuItems.filter(
-    (item) => item.status === "out_of_stock",
-  ).length;
+  const readyTickets = useMemo(
+    () => filterTickets(kitchen.board.ready),
+    [kitchen.board.ready, orderTypeFilter, searchQuery],
+  );
 
   return (
-    <div className={styles.chefPage}>
+    <main className={styles.page}>
       <KitchenHeader
-        pendingCount={pendingCount}
-        readyCount={readyCount}
-        outOfStockCount={outOfStockCount}
+        waitingCount={kitchen.board.waiting.length}
+        processingCount={kitchen.board.processing.length}
+        readyCount={kitchen.board.ready.length}
+        loading={kitchen.loading}
         soundEnabled={kitchen.soundEnabled}
         onToggleSound={kitchen.toggleSound}
-        onOpenOutOfStock={() => setShowOutOfStockModal(true)}
+        onRefresh={() => kitchen.reload()}
       />
 
       <KitchenFilters
-        activeOrders={activeOrders}
+        tickets={kitchen.tickets}
         orderTypeFilter={orderTypeFilter}
         onOrderTypeChange={setOrderTypeFilter}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
       />
 
-      <div className={styles.kitchenBoard}>
-        <KitchenColumn
-          type="pending"
-          title="CHỜ CHẾ BIẾN"
-          itemCount={pendingCount}
-          orders={pendingOrders}
-          timers={kitchen.timers}
-          menuItems={kitchen.menuItems}
-          onToggleStock={kitchen.toggleMenuItemStock}
-          onItemAction={kitchen.markItemReady}
-        />
+      {kitchen.error && <div className={styles.error}>{kitchen.error}</div>}
 
-        <KitchenColumn
-          type="ready"
-          title="ĐÃ XONG / CHỜ LẤY"
-          itemCount={readyCount}
-          orders={readyOrders}
-          timers={kitchen.timers}
-          menuItems={kitchen.menuItems}
-          onToggleStock={kitchen.toggleMenuItemStock}
-          onItemAction={kitchen.markItemServed}
-        />
-      </div>
+      {kitchen.loading ? (
+        <div className={styles.loading}>Đang tải dữ liệu bếp...</div>
+      ) : (
+        <div
+          ref={boardRef}
+          className={styles.board}
+          style={{
+            gridTemplateColumns: `${columnWidths[0]}fr 7px ${columnWidths[1]}fr 7px ${columnWidths[2]}fr`,
+          }}
+        >
+          {/* ==================================================
+              WAITING
+          ================================================== */}
 
-      <OutOfStockModal
-        open={showOutOfStockModal}
-        menuItems={kitchen.menuItems}
-        onToggleStock={kitchen.toggleMenuItemStock}
-        onClose={() => setShowOutOfStockModal(false)}
-      />
-    </div>
+          <div className={styles.columnWrapper}>
+            <KitchenColumn
+              type="waiting"
+              title="CHỜ NẤU"
+              tickets={waitingTickets}
+              getElapsed={kitchen.getElapsed}
+              actionKey={kitchen.actionKey}
+              onStartTicket={kitchen.startTicket}
+              onItemAction={kitchen.updateItem}
+              onCompleteTicket={kitchen.completeTicket}
+            />
+          </div>
+
+          {/* ==================================================
+              RESIZE 1
+          ================================================== */}
+
+          <button
+            type="button"
+            className={styles.resizeHandle}
+            title="Kéo để thay đổi độ rộng cột"
+            onPointerDown={(event) => startResize(0, event)}
+            onDoubleClick={resetColumns}
+          >
+            <span />
+          </button>
+
+          {/* ==================================================
+              PROCESSING
+          ================================================== */}
+
+          <div className={styles.columnWrapper}>
+            <KitchenColumn
+              type="processing"
+              title="ĐANG NẤU"
+              tickets={processingTickets}
+              getElapsed={kitchen.getElapsed}
+              actionKey={kitchen.actionKey}
+              onStartTicket={kitchen.startTicket}
+              onItemAction={kitchen.updateItem}
+              onCompleteTicket={kitchen.completeTicket}
+            />
+          </div>
+
+          {/* ==================================================
+              RESIZE 2
+          ================================================== */}
+
+          <button
+            type="button"
+            className={styles.resizeHandle}
+            title="Kéo để thay đổi độ rộng cột"
+            onPointerDown={(event) => startResize(1, event)}
+            onDoubleClick={resetColumns}
+          >
+            <span />
+          </button>
+
+          {/* ==================================================
+              READY
+          ================================================== */}
+
+          <div className={styles.columnWrapper}>
+            <KitchenColumn
+              type="ready"
+              title="MÓN SẴN SÀNG"
+              tickets={readyTickets}
+              getElapsed={kitchen.getElapsed}
+              actionKey={kitchen.actionKey}
+              onStartTicket={kitchen.startTicket}
+              onItemAction={kitchen.updateItem}
+              onCompleteTicket={kitchen.completeTicket}
+            />
+          </div>
+        </div>
+      )}
+    </main>
   );
 }
 

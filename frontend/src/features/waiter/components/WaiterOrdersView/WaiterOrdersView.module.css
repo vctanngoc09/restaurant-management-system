@@ -1,0 +1,1134 @@
+.container {
+  height: 100%;
+
+  padding: 16px 18px;
+
+  overflow-y: auto;
+
+  background: #f7f8fa;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  margin-bottom: 14px;
+}
+
+.header h1 {
+  margin: 0;
+
+  color: #172b4d;
+
+  font-size: 18px;
+}
+
+.header p {
+  margin: 3px 0 0;
+
+  color: #7a869a;
+
+  font-size: 10px;
+}
+
+.header > strong {
+  padding: 5px 9px;
+
+  color: #42526e;
+  background: #ffffff;
+
+  border: 1px solid #dfe1e6;
+  border-radius: 6px;
+
+  font-size: 10px;
+}
+
+/* ======================================================
+   GRID
+====================================================== */
+
+.grid {
+  display: grid;
+
+  grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+
+  gap: 12px;
+}
+
+/* ======================================================
+   CARD
+====================================================== */
+
+.card {
+  min-width: 0;
+
+  overflow: hidden;
+
+  background: #ffffff;
+
+  border: 1px solid #dfe1e6;
+  border-radius: 9px;
+
+  box-shadow: 0 1px 2px rgba(9, 30, 66, 0.08);
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 10px 11px;
+
+  border-bottom: 1px solid #ebecf0;
+}
+
+.orderNumber {
+  color: #7a869a;
+
+  font-size: 8px;
+}
+
+.cardHeader h2 {
+  margin: 2px 0 0;
+
+  color: #172b4d;
+
+  font-size: 14px;
+}
+
+.orderStatus {
+  padding: 4px 7px;
+
+  border-radius: 5px;
+
+  font-size: 8px;
+  font-weight: 700;
+}
+
+.pending {
+  color: #974f0c;
+  background: #fff7d6;
+}
+
+.cooking {
+  color: #0055cc;
+  background: #e9f2ff;
+}
+
+.payment {
+  color: #5e4db2;
+  background: #f3f0ff;
+}
+
+/* ======================================================
+   SUMMARY
+====================================================== */
+
+.summary {
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+
+  padding: 7px 11px;
+
+  color: #6b778c;
+  background: #fafbfc;
+
+  border-bottom: 1px solid #ebecf0;
+
+  font-size: 8px;
+}
+
+.summary span {
+  display: inline-flex;
+  align-items: center;
+
+  gap: 3px;
+}
+
+.readySummary {
+  color: #216e4e !important;
+
+  font-weight: 700;
+}
+
+/* ======================================================
+   ITEMS
+====================================================== */
+
+.items {
+  max-height: 210px;
+
+  overflow-y: auto;
+}
+
+.item {
+  min-height: 42px;
+
+  display: grid;
+
+  grid-template-columns: 25px minmax(0, 1fr) auto;
+
+  align-items: center;
+
+  gap: 7px;
+
+  padding: 6px 10px;
+
+  border-bottom: 1px solid #f1f2f4;
+}
+
+.readyItem {
+  background: #f3fff9;
+}
+
+.serveCheck {
+  width: 24px;
+  height: 24px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0;
+
+  color: #97a0af;
+  background: transparent;
+
+  border: none;
+}
+
+.readyItem .serveCheck {
+  color: #22a06b;
+
+  cursor: pointer;
+}
+
+.serveCheck:disabled {
+  cursor: default;
+}
+
+.itemInfo {
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 2px;
+}
+
+.itemInfo strong {
+  overflow: hidden;
+
+  color: #172b4d;
+
+  font-size: 10px;
+
+  white-space: nowrap;
+
+  text-overflow: ellipsis;
+}
+
+.itemInfo small {
+  overflow: hidden;
+
+  color: #7a869a;
+
+  font-size: 8px;
+
+  white-space: nowrap;
+
+  text-overflow: ellipsis;
+}
+
+.itemStatus {
+  padding: 3px 5px;
+
+  border-radius: 4px;
+
+  font-size: 7px;
+  font-weight: 700;
+
+  white-space: nowrap;
+}
+
+.itemStatus.pending {
+  color: #974f0c;
+  background: #fff7d6;
+}
+
+.itemStatus.cooking {
+  color: #0055cc;
+  background: #e9f2ff;
+}
+
+.itemStatus.ready {
+  color: #216e4e;
+  background: #dcfff1;
+}
+
+.itemStatus.served {
+  color: #216e4e;
+  background: #e9f2ec;
+}
+
+/* ======================================================
+   FOOTER
+====================================================== */
+
+.footer {
+  min-height: 43px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 7px 10px;
+
+  background: #fafbfc;
+
+  border-top: 1px solid #ebecf0;
+}
+
+.footer > strong {
+  color: #172b4d;
+
+  font-size: 11px;
+}
+
+.footer button {
+  min-height: 28px;
+
+  display: inline-flex;
+  align-items: center;
+
+  gap: 4px;
+
+  padding: 0 8px;
+
+  color: #0c66e4;
+  background: #ffffff;
+
+  border: 1px solid #b3b9c4;
+  border-radius: 5px;
+
+  font-size: 8px;
+  font-weight: 700;
+}
+
+/* ======================================================
+   EMPTY
+====================================================== */
+
+.empty {
+  min-height: 400px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  color: #97a0af;
+}
+
+.empty h3 {
+  margin: 10px 0 2px;
+
+  color: #42526e;
+
+  font-size: 14px;
+}
+
+.empty p {
+  margin: 0;
+
+  font-size: 10px;
+}
+/* ======================================================
+   PAGE
+====================================================== */
+
+.container {
+  height: 100%;
+
+  padding: 15px 17px 20px;
+
+  overflow-y: auto;
+
+  background: #f7f8fa;
+}
+
+/* ======================================================
+   PAGE HEADER
+====================================================== */
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 14px;
+
+  margin-bottom: 14px;
+}
+
+.header h1 {
+  margin: 0;
+
+  color: #172b4d;
+
+  font-size: 18px;
+  font-weight: 750;
+
+  letter-spacing: -0.02em;
+}
+
+.header p {
+  margin: 3px 0 0;
+
+  color: #7a869a;
+
+  font-size: 9px;
+}
+
+.header > strong {
+  padding: 5px 9px;
+
+  color: #42526e;
+
+  background: #ffffff;
+
+  border: 1px solid #dfe1e6;
+
+  border-radius: 6px;
+
+  font-size: 9px;
+}
+
+/* ======================================================
+   GRID
+====================================================== */
+
+.grid {
+  display: grid;
+
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+
+  align-items: start;
+
+  gap: 12px;
+}
+
+/* ======================================================
+   CARD
+====================================================== */
+
+.card {
+  min-width: 0;
+
+  padding: 11px;
+
+  overflow: hidden;
+
+  background: #ffffff;
+
+  border: 1px solid #dfe3e8;
+
+  border-radius: 11px;
+
+  box-shadow: 0 1px 3px rgba(9, 30, 66, 0.07);
+
+  transition:
+    transform 0.15s ease,
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.card:hover {
+  transform: translateY(-1px);
+
+  border-color: #c6ccd5;
+
+  box-shadow: 0 5px 14px rgba(9, 30, 66, 0.08);
+}
+
+/* ======================================================
+   TOP META
+====================================================== */
+
+.topMeta {
+  min-height: 22px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 8px;
+
+  padding: 0 2px;
+}
+
+.topMeta > div {
+  min-width: 0;
+
+  display: flex;
+  align-items: center;
+
+  gap: 4px;
+
+  color: #6b778c;
+
+  font-size: 7.5px;
+}
+
+.topMeta > div span:first-child {
+  color: #42526e;
+
+  font-weight: 700;
+}
+
+.topMeta > div strong {
+  color: #b3bac5;
+
+  font-weight: 500;
+}
+
+.topMeta time {
+  flex-shrink: 0;
+
+  color: #7a869a;
+
+  font-size: 7.5px;
+}
+
+/* ======================================================
+   TABLE IDENTITY
+====================================================== */
+
+.identity {
+  min-height: 48px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 8px;
+
+  padding: 6px 2px 8px;
+}
+
+.tableBadge {
+  width: 37px;
+  height: 37px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  flex-shrink: 0;
+
+  color: #ffffff;
+
+  background: linear-gradient(135deg, #6366f1, #3b82f6);
+
+  border-radius: 9px;
+
+  font-size: 10px;
+  font-weight: 800;
+
+  box-shadow: 0 3px 7px rgba(79, 70, 229, 0.18);
+}
+
+.identityInfo {
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+}
+
+.identityInfo > span {
+  color: #8993a4;
+
+  font-size: 7px;
+}
+
+.identityInfo > strong {
+  margin-top: 1px;
+
+  color: #172b4d;
+
+  font-size: 11px;
+  font-weight: 750;
+}
+
+.identityInfo > small {
+  margin-top: 1px;
+
+  color: #7a869a;
+
+  font-size: 7px;
+}
+
+/* ======================================================
+   PROGRESS
+====================================================== */
+
+.progressBox {
+  padding: 7px 8px 8px;
+
+  margin-bottom: 9px;
+
+  background: #fffdf6;
+
+  border: 1px solid #fff3c4;
+
+  border-radius: 8px;
+}
+
+.progressTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 8px;
+
+  margin-bottom: 6px;
+}
+
+.progressTop > div {
+  display: flex;
+  align-items: center;
+
+  gap: 6px;
+}
+
+.progressTop > div > strong {
+  color: #d97706;
+
+  font-size: 8px;
+  font-weight: 800;
+}
+
+.progressTop > span {
+  display: inline-flex;
+  align-items: center;
+
+  gap: 2px;
+
+  color: #d97706;
+
+  font-size: 7.5px;
+  font-weight: 650;
+}
+
+/* ======================================================
+   ORDER STATUS
+====================================================== */
+
+.orderStatus {
+  font-size: 7.5px;
+  font-weight: 700;
+}
+
+.pending {
+  color: #b45309;
+}
+
+.cooking {
+  color: #d97706;
+}
+
+.payment {
+  color: #7c3aed;
+}
+
+/* ======================================================
+   PROGRESS BAR
+====================================================== */
+
+.progressTrack {
+  width: 100%;
+  height: 3px;
+
+  overflow: hidden;
+
+  background: #fef3c7;
+
+  border-radius: 999px;
+}
+
+.progressValue,
+.progressComplete {
+  height: 100%;
+
+  border-radius: inherit;
+
+  transition: width 0.25s ease;
+}
+
+.progressValue {
+  background: #f59e0b;
+}
+
+.progressComplete {
+  background: #10b981;
+}
+
+/* ======================================================
+   ORDER ITEMS BOX
+====================================================== */
+
+.orderItemsBox {
+  overflow: hidden;
+
+  background: #ffffff;
+
+  border: 1px solid #dfe3e8;
+
+  border-radius: 9px;
+}
+
+/* ======================================================
+   ITEM HEADER
+====================================================== */
+
+.itemsHeader {
+  min-height: 26px;
+
+  display: grid;
+
+  grid-template-columns:
+    minmax(0, 1fr)
+    35px
+    76px;
+
+  align-items: center;
+
+  gap: 6px;
+
+  padding: 0 9px;
+
+  color: #97a0af;
+
+  background: #fafbfc;
+
+  border-bottom: 1px solid #ebecf0;
+
+  font-size: 7px;
+}
+
+.itemsHeader span:nth-child(2),
+.itemsHeader span:nth-child(3) {
+  text-align: right;
+}
+
+/* ======================================================
+   ITEMS SCROLL
+====================================================== */
+
+.items {
+  max-height: 146px;
+
+  overflow-y: auto;
+
+  scrollbar-width: thin;
+
+  scrollbar-color: #aeb6c2 transparent;
+}
+
+.items::-webkit-scrollbar {
+  width: 4px;
+}
+
+.items::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.items::-webkit-scrollbar-thumb {
+  background: #aeb6c2;
+
+  border-radius: 999px;
+}
+
+/* ======================================================
+   ITEM
+====================================================== */
+
+.item {
+  min-height: 31px;
+
+  display: grid;
+
+  grid-template-columns:
+    20px
+    minmax(0, 1fr)
+    35px
+    76px;
+
+  align-items: center;
+
+  gap: 5px;
+
+  padding: 4px 8px;
+
+  border-bottom: 1px solid #f1f2f4;
+}
+
+.item:last-child {
+  border-bottom: none;
+}
+
+.readyItem {
+  background: #f5fffa;
+}
+
+.servedItem {
+  background: #fbfffd;
+}
+
+/* ======================================================
+   CHECK
+====================================================== */
+
+.serveCheck {
+  width: 18px;
+  height: 18px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0;
+
+  flex-shrink: 0;
+
+  color: #b3bac5;
+
+  background: #ffffff;
+
+  border: 1px solid #dfe1e6;
+
+  border-radius: 5px;
+}
+
+.readyItem .serveCheck {
+  color: #ffffff;
+
+  background: #3b82f6;
+
+  border-color: #3b82f6;
+
+  cursor: pointer;
+}
+
+.servedItem .serveCheck {
+  color: #ffffff;
+
+  background: #10b981;
+
+  border-color: #10b981;
+}
+
+.serveCheck:disabled {
+  cursor: default;
+}
+
+/* ======================================================
+   ITEM INFO
+====================================================== */
+
+.itemInfo {
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 1px;
+}
+
+.itemInfo strong {
+  overflow: hidden;
+
+  color: #42526e;
+
+  font-size: 8.5px;
+  font-weight: 600;
+
+  white-space: nowrap;
+
+  text-overflow: ellipsis;
+}
+
+.itemInfo small {
+  overflow: hidden;
+
+  color: #97a0af;
+
+  font-size: 6.5px;
+
+  white-space: nowrap;
+
+  text-overflow: ellipsis;
+}
+
+/* ======================================================
+   QUANTITY
+====================================================== */
+
+.quantity {
+  color: #6b778c;
+
+  text-align: right;
+
+  font-size: 8px;
+}
+
+/* ======================================================
+   ITEM PRICE
+====================================================== */
+
+.itemPrice {
+  color: #505f79;
+
+  text-align: right;
+
+  font-family: monospace;
+
+  font-size: 7.5px;
+}
+
+/* ======================================================
+   TOTAL
+====================================================== */
+
+.total {
+  min-height: 32px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  padding: 0 9px;
+
+  background: #ffffff;
+
+  border-top: 1px solid #dfe3e8;
+}
+
+.total span {
+  color: #172b4d;
+
+  font-size: 9px;
+
+  font-weight: 750;
+}
+
+.total strong {
+  color: #172b4d;
+
+  font-family: monospace;
+
+  font-size: 10px;
+
+  font-weight: 800;
+}
+
+/* ======================================================
+   ACTIONS
+====================================================== */
+
+.actions {
+  display: grid;
+
+  grid-template-columns:
+    1fr
+    1.15fr;
+
+  gap: 7px;
+
+  margin-top: 9px;
+}
+
+/* ======================================================
+   COMMON BUTTON
+====================================================== */
+
+.actions button {
+  min-width: 0;
+
+  min-height: 34px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  gap: 5px;
+
+  padding: 0 8px;
+
+  border-radius: 7px;
+
+  font-size: 8.5px;
+
+  font-weight: 700;
+
+  white-space: nowrap;
+}
+
+/* ======================================================
+   DETAIL
+====================================================== */
+
+.detailButton {
+  color: #172b4d;
+
+  background: #ffffff;
+
+  border: 1px solid #c8ced8;
+}
+
+.detailButton:hover {
+  background: #f7f8fa;
+
+  border-color: #97a0af;
+}
+
+/* ======================================================
+   PAYMENT DISABLED
+====================================================== */
+
+.paymentButton {
+  color: #9aa4b2;
+
+  background: #e9edf2;
+
+  border: 1px solid #e0e5eb;
+
+  cursor: not-allowed;
+
+  opacity: 0.82;
+}
+
+/* ======================================================
+   PAYMENT AVAILABLE
+====================================================== */
+
+.paymentButton.paymentAvailable {
+  color: #ffffff;
+
+  background: #3b82f6;
+
+  border-color: #3b82f6;
+
+  cursor: pointer;
+
+  opacity: 1;
+
+  box-shadow: 0 3px 8px rgba(59, 130, 246, 0.17);
+}
+
+.paymentButton.paymentAvailable:hover {
+  background: #2563eb;
+
+  border-color: #2563eb;
+}
+
+/* ======================================================
+   PAYMENT HINT
+====================================================== */
+
+.paymentHint,
+.readyPaymentHint {
+  min-height: 24px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  gap: 4px;
+
+  margin-top: 6px;
+
+  border-radius: 6px;
+
+  font-size: 7px;
+}
+
+.paymentHint {
+  color: #7a869a;
+
+  background: #f7f8fa;
+}
+
+.readyPaymentHint {
+  color: #216e4e;
+
+  background: #ecfdf5;
+}
+
+/* ======================================================
+   EMPTY
+====================================================== */
+
+.empty {
+  min-height: 400px;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  justify-content: center;
+
+  color: #97a0af;
+}
+
+.empty h3 {
+  margin: 10px 0 2px;
+
+  color: #42526e;
+
+  font-size: 14px;
+}
+
+.empty p {
+  margin: 0;
+
+  font-size: 10px;
+}
+
+/* ======================================================
+   TABLET
+====================================================== */
+
+@media (max-width: 950px) {
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* ======================================================
+   MOBILE
+====================================================== */
+
+@media (max-width: 650px) {
+  .container {
+    padding: 12px;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .actions {
+    grid-template-columns: 1fr;
+  }
+}

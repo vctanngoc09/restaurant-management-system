@@ -1,126 +1,479 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+
 import { toast } from "react-toastify";
 
-import {
-  KITCHEN_MENU_ITEMS,
-  KITCHEN_ORDERS,
-} from "../../../data/kitchenMockData";
+import chefService from "../services/chefService";
+
+// ==================================================
+// ORDER TYPE
+// ==================================================
+
+function normalizeOrderType(type) {
+  switch (type) {
+    case "DINE_IN":
+      return "dine_in";
+
+    case "TAKE_AWAY":
+      return "take_away";
+
+    case "DELIVERY":
+      return "delivery";
+
+    default:
+      return type?.toLowerCase() || "dine_in";
+  }
+}
+
+// ==================================================
+// ITEM STATUS
+// ==================================================
+
+function normalizeItemStatus(status) {
+  return status?.toLowerCase() || "pending";
+}
+
+// ==================================================
+// ITEM
+// ==================================================
+
+function normalizeItem(item) {
+  return {
+    id: item.id,
+
+    productId: item.productId,
+
+    menuItemId: item.productId,
+
+    name: item.productName,
+
+    price: Number(item.price) || 0,
+
+    quantity: Number(item.quantity) || 0,
+
+    note: item.note || "",
+
+    status: normalizeItemStatus(item.status),
+
+    lineTotal: Number(item.lineTotal) || 0,
+  };
+}
+
+// ==================================================
+// KITCHEN TICKET
+// ==================================================
+
+function normalizeTicket(ticket) {
+  return {
+    // =========================
+    // TICKET
+    // =========================
+
+    id: ticket.id,
+
+    batchNumber: ticket.batchNumber,
+
+    status: ticket.status?.toLowerCase(),
+
+    firedAt: ticket.firedAt,
+
+    startedAt: ticket.startedAt,
+
+    readyAt: ticket.readyAt,
+
+    doneAt: ticket.doneAt,
+
+    // =========================
+    // ORDER
+    // =========================
+
+    orderId: ticket.orderId,
+
+    orderType: normalizeOrderType(ticket.orderType),
+
+    // =========================
+    // TABLE
+    // =========================
+
+    tableId: ticket.tableId,
+
+    tableNumber: ticket.tableNumber,
+
+    // =========================
+    // STAFF
+    // =========================
+
+    staffId: ticket.staffId,
+
+    staffName: ticket.staffName,
+
+    waiterName: ticket.staffName || "Phục vụ",
+
+    // =========================
+    // ITEMS
+    // =========================
+
+    items: Array.isArray(ticket.items) ? ticket.items.map(normalizeItem) : [],
+  };
+}
+
+// ==================================================
+// EMPTY BOARD
+// ==================================================
+
+const EMPTY_BOARD = {
+  waiting: [],
+  processing: [],
+  ready: [],
+};
+
+// ==================================================
+// KITCHEN STATE
+// ==================================================
 
 function useKitchenState() {
-  const [orders, setOrders] = useState(KITCHEN_ORDERS);
+  // ==================================================
+  // BOARD
+  // ==================================================
 
-  const [menuItems, setMenuItems] = useState(KITCHEN_MENU_ITEMS);
+  const [board, setBoard] = useState(EMPTY_BOARD);
+
+  const [loading, setLoading] = useState(true);
+
+  const [error, setError] = useState(null);
+
+  // ==================================================
+  // ACTION
+  //
+  // Ví dụ:
+  //
+  // ticket:5
+  // item:12:COOKING
+  // ==================================================
+
+  const [actionKey, setActionKey] = useState(null);
+
+  // ==================================================
+  // SOUND
+  // ==================================================
 
   const [soundEnabled, setSoundEnabled] = useState(true);
 
-  const [timers, setTimers] = useState(() => {
-    return KITCHEN_ORDERS.reduce((result, order) => {
-      result[order.id] = order.elapsedSeconds || 0;
+  // ==================================================
+  // CLOCK
+  //
+  // Dùng để timer trên card chạy.
+  // ==================================================
 
-      return result;
-    }, {});
-  });
+  const [now, setNow] = useState(Date.now());
 
-  const activeOrderIds = useMemo(() => {
-    return orders
-      .filter(
-        (order) => order.status !== "completed" && order.status !== "cancelled",
-      )
-      .map((order) => order.id);
-  }, [orders]);
+  // ==================================================
+  // PREVIOUS WAITING IDS
+  //
+  // Dành cho notification sau này.
+  // ==================================================
 
-  const activeOrderKey = activeOrderIds.join("|");
+  const previousWaitingIds = useRef(new Set());
+
+  const initializedRef = useRef(false);
+
+  // ==================================================
+  // LOAD BOARD
+  // ==================================================
+
+  const loadBoard = useCallback(
+    async (silent = false) => {
+      try {
+        if (!silent) {
+          setLoading(true);
+        }
+
+        setError(null);
+
+        // =========================
+        // API
+        // =========================
+
+        const response = await chefService.getBoard();
+
+        /*
+         * chefService trả:
+         *
+         * {
+         *   status,
+         *   message,
+         *   data: {
+         *     waiting,
+         *     processing,
+         *     ready
+         *   }
+         * }
+         */
+        const data = response?.data || EMPTY_BOARD;
+
+        // =========================
+        // NORMALIZE
+        // =========================
+
+        const nextBoard = {
+          waiting: Array.isArray(data.waiting)
+            ? data.waiting.map(normalizeTicket)
+            : [],
+
+          processing: Array.isArray(data.processing)
+            ? data.processing.map(normalizeTicket)
+            : [],
+
+          ready: Array.isArray(data.ready)
+            ? data.ready.map(normalizeTicket)
+            : [],
+        };
+
+        // =========================
+        // NEW TICKET DETECTION
+        // =========================
+
+        if (initializedRef.current) {
+          const hasNewTicket = nextBoard.waiting.some(
+            (ticket) => !previousWaitingIds.current.has(ticket.id),
+          );
+
+          if (hasNewTicket && soundEnabled) {
+            /*
+             * Tạm dùng browser speech.
+             *
+             * Sau này WebSocket
+             * có thể thay phần này.
+             */
+            try {
+              const speech = new SpeechSynthesisUtterance(
+                "Có đơn mới gửi xuống bếp",
+              );
+
+              speech.lang = "vi-VN";
+
+              window.speechSynthesis?.speak(speech);
+            } catch {
+              // Browser không hỗ trợ
+            }
+          }
+        }
+
+        previousWaitingIds.current = new Set(
+          nextBoard.waiting.map((ticket) => ticket.id),
+        );
+
+        initializedRef.current = true;
+
+        setBoard(nextBoard);
+      } catch (apiError) {
+        console.error("LOAD CHEF BOARD ERROR:", apiError);
+
+        const message =
+          apiError.response?.data?.message ||
+          apiError.message ||
+          "Không thể tải dữ liệu bếp.";
+
+        setError(message);
+
+        if (!silent) {
+          toast.error(message);
+        }
+      } finally {
+        if (!silent) {
+          setLoading(false);
+        }
+      }
+    },
+    [soundEnabled],
+  );
+
+  // ==================================================
+  // INITIAL LOAD
+  // +
+  // POLLING 5 SECONDS
+  //
+  // Sau này WebSocket
+  // thì bỏ interval này.
+  // ==================================================
+
+  useEffect(() => {
+    loadBoard();
+
+    const interval = setInterval(() => {
+      loadBoard(true);
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [loadBoard]);
+
+  // ==================================================
+  // TIMER
+  // ==================================================
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setTimers((prev) => {
-        const next = { ...prev };
-
-        activeOrderIds.forEach((id) => {
-          next[id] = (next[id] || 0) + 1;
-        });
-
-        return next;
-      });
+      setNow(Date.now());
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [activeOrderKey]);
+  }, []);
 
-  const updateItemStatus = (orderId, itemId, nextStatus) => {
-    setOrders((prev) =>
-      prev.map((order) => {
-        if (order.id !== orderId) {
-          return order;
-        }
+  // ==================================================
+  // GET ELAPSED
+  // ==================================================
 
-        const nextItems = order.items.map((item) =>
-          item.id === itemId
-            ? {
-                ...item,
-                kdsStatus: nextStatus,
-              }
-            : item,
-        );
+  const getElapsed = (ticket) => {
+    let time = null;
 
-        const allServed = nextItems.every(
-          (item) => item.kdsStatus === "served",
-        );
+    if (ticket.status === "waiting") {
+      time = ticket.firedAt;
+    }
 
-        const hasReady = nextItems.some((item) => item.kdsStatus === "ready");
+    if (ticket.status === "processing") {
+      time = ticket.startedAt || ticket.firedAt;
+    }
 
-        return {
-          ...order,
+    if (ticket.status === "ready") {
+      time = ticket.readyAt || ticket.startedAt || ticket.firedAt;
+    }
 
-          items: nextItems,
+    if (!time) {
+      return 0;
+    }
 
-          status: allServed ? "completed" : hasReady ? "ready" : "cooking",
-        };
-      }),
+    const timestamp = new Date(time).getTime();
+
+    if (Number.isNaN(timestamp)) {
+      return 0;
+    }
+
+    return Math.max(
+      0,
+
+      Math.floor((now - timestamp) / 1000),
     );
   };
 
-  const markItemReady = (order, item) => {
-    updateItemStatus(order.id, item.id, "ready");
+  // ==================================================
+  // START TICKET
+  //
+  // WAITING -> PROCESSING
+  // ==================================================
 
-    toast.success(`Đã xong ${item.quantity}x ${item.name}`);
-  };
+  const startTicket = async (ticket) => {
+    if (!ticket?.id) {
+      return null;
+    }
 
-  const markItemServed = (order, item) => {
-    updateItemStatus(order.id, item.id, "served");
+    const key = `ticket:${ticket.id}`;
 
-    toast.success(`Đã giao ${item.quantity}x ${item.name} cho phục vụ`);
-  };
+    if (actionKey === key) {
+      return null;
+    }
 
-  const toggleMenuItemStock = (menuItemId) => {
-    let changedItem = null;
+    try {
+      setActionKey(key);
 
-    setMenuItems((prev) =>
-      prev.map((item) => {
-        if (item.id !== menuItemId) {
-          return item;
-        }
+      const response = await chefService.startTicket(ticket.id);
 
-        const nextStatus =
-          item.status === "out_of_stock" ? "in_stock" : "out_of_stock";
-
-        changedItem = {
-          ...item,
-          status: nextStatus,
-        };
-
-        return changedItem;
-      }),
-    );
-
-    if (changedItem) {
-      toast.info(
-        changedItem.status === "out_of_stock"
-          ? `Đã báo hết món: ${changedItem.name}`
-          : `Đã mở bán lại: ${changedItem.name}`,
+      toast.success(
+        `Đã bắt đầu ${
+          ticket.orderType === "dine_in"
+            ? `Bàn ${ticket.tableNumber}`
+            : `Order #${ticket.orderId}`
+        }`,
       );
+
+      /*
+       * Refresh toàn board
+       * để ticket tự chuyển
+       * WAITING -> PROCESSING.
+       */
+      await loadBoard(true);
+
+      return response?.data;
+    } catch (apiError) {
+      console.error("START TICKET ERROR:", apiError);
+
+      toast.error(
+        apiError.response?.data?.message || "Không thể bắt đầu phiếu bếp.",
+      );
+
+      return null;
+    } finally {
+      setActionKey(null);
     }
   };
+
+  // ==================================================
+  // UPDATE ITEM
+  // ==================================================
+
+  const updateItem = async (item, targetStatus) => {
+    if (!item?.id) {
+      return null;
+    }
+
+    const key = `item:${item.id}:${targetStatus}`;
+
+    if (actionKey === key) {
+      return null;
+    }
+
+    try {
+      setActionKey(key);
+
+      const response = await chefService.updateItemStatus(
+        item.id,
+        targetStatus,
+      );
+
+      if (targetStatus === "COOKING") {
+        toast.info(`Bắt đầu nấu ${item.quantity}x ${item.name}`);
+      }
+
+      if (targetStatus === "READY") {
+        toast.success(`Đã xong ${item.quantity}x ${item.name}`);
+      }
+
+      /*
+       * Backend có thể tự chuyển
+       * KitchenTicket -> READY
+       * khi toàn bộ món đã xong.
+       *
+       * Vì vậy reload board.
+       */
+      await loadBoard(true);
+
+      return response?.data;
+    } catch (apiError) {
+      console.error("UPDATE CHEF ITEM ERROR:", apiError);
+
+      toast.error(
+        apiError.response?.data?.message ||
+          "Không thể cập nhật trạng thái món.",
+      );
+
+      return null;
+    } finally {
+      setActionKey(null);
+    }
+  };
+
+  // ==================================================
+  // ALL ACTIVE TICKETS
+  //
+  // Dùng cho filter.
+  // ==================================================
+
+  const tickets = useMemo(
+    () => [...board.waiting, ...board.processing, ...board.ready],
+    [board],
+  );
+
+  // ==================================================
+  // SOUND
+  // ==================================================
 
   const toggleSound = () => {
     setSoundEnabled((prev) => {
@@ -132,19 +485,85 @@ function useKitchenState() {
     });
   };
 
-  return {
-    orders,
-    menuItems,
+  // ==================================================
+  // COMPLETE ENTIRE TICKET
+  // ==================================================
 
-    timers,
+  const completeTicket = async (ticket) => {
+    if (!ticket?.id) {
+      return null;
+    }
+
+    const key = `complete:${ticket.id}`;
+
+    if (actionKey === key) {
+      return null;
+    }
+
+    try {
+      setActionKey(key);
+
+      const response = await chefService.completeTicket(ticket.id);
+
+      toast.success(
+        `Đã hoàn tất toàn bộ món của ${
+          ticket.orderType === "dine_in"
+            ? `Bàn ${ticket.tableNumber}`
+            : `Order #${ticket.orderId}`
+        }`,
+      );
+
+      /*
+       * Ticket tự:
+       *
+       * PROCESSING
+       * ->
+       * READY
+       */
+      await loadBoard(true);
+
+      return response?.data;
+    } catch (apiError) {
+      console.error("COMPLETE TICKET ERROR:", apiError);
+
+      toast.error(
+        apiError.response?.data?.message || "Không thể hoàn tất phiếu bếp.",
+      );
+
+      return null;
+    } finally {
+      setActionKey(null);
+    }
+  };
+
+  // ==================================================
+  // RETURN
+  // ==================================================
+
+  return {
+    board,
+
+    tickets,
+
+    loading,
+
+    error,
+
+    actionKey,
 
     soundEnabled,
 
-    markItemReady,
-    markItemServed,
+    getElapsed,
 
-    toggleMenuItemStock,
+    startTicket,
+
+    updateItem,
+
+    completeTicket,
+
     toggleSound,
+
+    reload: loadBoard,
   };
 }
 
