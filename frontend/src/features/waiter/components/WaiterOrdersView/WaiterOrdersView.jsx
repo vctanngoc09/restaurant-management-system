@@ -1,40 +1,21 @@
 import {
   Check,
-  CheckCircle2,
   ChevronRight,
-  Circle,
-  Clock3,
   CreditCard,
+  Search,
+  Square,
   UtensilsCrossed,
 } from "lucide-react";
 
+import { useMemo, useState } from "react";
+
 import styles from "./WaiterOrdersView.module.css";
 
-const STATUS = {
-  pending: {
-    label: "Chờ bếp",
+/* ======================================================
+   FORMAT DATE
+====================================================== */
 
-    className: "pending",
-  },
-
-  cooking: {
-    label: "Đang phục vụ",
-
-    className: "cooking",
-  },
-
-  pending_payment: {
-    label: "Chờ thanh toán",
-
-    className: "payment",
-  },
-};
-
-// ==================================================
-// FORMAT DATE
-// ==================================================
-
-function formatOrderDate(value) {
+function formatDate(value) {
   if (!value) {
     return "--";
   }
@@ -46,6 +27,8 @@ function formatOrderDate(value) {
   }
 
   return date.toLocaleString("vi-VN", {
+    weekday: "short",
+
     day: "2-digit",
 
     month: "2-digit",
@@ -56,9 +39,17 @@ function formatOrderDate(value) {
   });
 }
 
-// ==================================================
-// COMPONENT
-// ==================================================
+/* ======================================================
+   ORDER CODE
+====================================================== */
+
+function getOrderCode(orderId) {
+  return `DI${String(orderId).padStart(3, "0")}`;
+}
+
+/* ======================================================
+   COMPONENT
+====================================================== */
 
 function WaiterOrdersView({
   orders,
@@ -72,15 +63,98 @@ function WaiterOrdersView({
   onRequestPayment,
 }) {
   // ==================================================
+  // FILTER STATE
+  // ==================================================
+
+  const [search, setSearch] = useState("");
+
+  const [statusFilter, setStatusFilter] = useState("all");
+
+  // ==================================================
   // ACTIVE DINE IN ONLY
   // ==================================================
 
-  const activeOrders = orders.filter(
-    (order) =>
-      order.orderType === "dine_in" &&
-      order.status !== "completed" &&
-      order.status !== "cancelled",
+  const activeOrders = useMemo(
+    () =>
+      orders.filter(
+        (order) =>
+          order.orderType === "dine_in" &&
+          order.status !== "completed" &&
+          order.status !== "cancelled",
+      ),
+    [orders],
   );
+
+  // ==================================================
+  // FILTER
+  // ==================================================
+
+  const filteredOrders = useMemo(() => {
+    const keyword = search.trim().toLowerCase();
+
+    return activeOrders.filter((order) => {
+      // =========================
+      // SEARCH
+      // =========================
+
+      const matchSearch =
+        !keyword ||
+        String(order.id).includes(keyword) ||
+        String(order.tableNumber || "")
+          .toLowerCase()
+          .includes(keyword) ||
+        order.items.some((item) => item.name?.toLowerCase().includes(keyword));
+
+      if (!matchSearch) {
+        return false;
+      }
+
+      // =========================
+      // ALL
+      // =========================
+
+      if (statusFilter === "all") {
+        return true;
+      }
+
+      // =========================
+      // PROCESSING
+      // =========================
+
+      if (statusFilter === "processing") {
+        return order.status === "pending" || order.status === "cooking";
+      }
+
+      // =========================
+      // READY
+      // =========================
+
+      if (statusFilter === "ready") {
+        return order.items.some((item) => item.status === "ready");
+      }
+
+      // =========================
+      // SERVED
+      // =========================
+
+      if (statusFilter === "served") {
+        return (
+          order.items.length > 0 &&
+          order.items.every((item) => item.status === "served")
+        );
+      }
+
+      // =========================
+      // PAYMENT
+      // =========================
+
+      if (statusFilter === "pending_payment") {
+        return order.status === "pending_payment";
+      }
+
+      return true;
+    });
+  }, [activeOrders, search, statusFilter]);
 
   // ==================================================
   // EMPTY
@@ -89,321 +163,368 @@ function WaiterOrdersView({
   if (activeOrders.length === 0) {
     return (
       <div className={styles.empty}>
-        <UtensilsCrossed size={34} />
+        <UtensilsCrossed size={38} />
 
         <h3>Chưa có đơn đang phục vụ</h3>
 
-        <p>Các đơn tại bàn đang hoạt động sẽ xuất hiện tại đây.</p>
+        <p>Các đơn tại bàn sẽ xuất hiện tại đây.</p>
       </div>
     );
   }
 
+  // ==================================================
+  // RENDER
+  // ==================================================
+
   return (
-    <section className={styles.container}>
+    <div className={styles.orderView}>
       {/* ==================================================
-          PAGE HEADER
+          FILTER CARD
       ================================================== */}
 
-      <div className={styles.header}>
-        <div>
-          <h1>Đơn hàng đang phục vụ</h1>
+      {/* ==================================================
+    COMPACT FILTER BAR
+================================================== */}
 
-          <p>Theo dõi món ăn, xác nhận phục vụ và yêu cầu thanh toán</p>
+      <section className={styles.filterCard}>
+        {/* ==================================================
+      SEARCH
+  ================================================== */}
+
+        <div className={styles.searchBox}>
+          <Search size={16} />
+
+          <input
+            value={search}
+            type="text"
+            placeholder="Tìm mã đơn, bàn, món ăn..."
+            onChange={(event) => setSearch(event.target.value)}
+          />
         </div>
 
-        <strong>{activeOrders.length} đơn</strong>
-      </div>
+        {/* ==================================================
+      STATUS FILTER
+  ================================================== */}
+
+        <div className={styles.filterGroup}>
+          <button
+            type="button"
+            className={statusFilter === "all" ? styles.active : ""}
+            onClick={() => setStatusFilter("all")}
+          >
+            Tất cả
+          </button>
+
+          <button
+            type="button"
+            className={statusFilter === "processing" ? styles.active : ""}
+            onClick={() => setStatusFilter("processing")}
+          >
+            Đang xử lý
+          </button>
+
+          <button
+            type="button"
+            className={statusFilter === "ready" ? styles.readyActive : ""}
+            onClick={() => setStatusFilter("ready")}
+          >
+            Có món sẵn sàng
+          </button>
+
+          <button
+            type="button"
+            className={statusFilter === "served" ? styles.active : ""}
+            onClick={() => setStatusFilter("served")}
+          >
+            Đã phục vụ
+          </button>
+
+          <button
+            type="button"
+            className={statusFilter === "pending_payment" ? styles.active : ""}
+            onClick={() => setStatusFilter("pending_payment")}
+          >
+            Chờ thanh toán
+          </button>
+        </div>
+      </section>
 
       {/* ==================================================
           ORDER GRID
       ================================================== */}
 
-      <div className={styles.grid}>
-        {activeOrders.map((order) => {
-          // ==================================================
-          // COUNTS
-          // ==================================================
+      {filteredOrders.length > 0 ? (
+        <div className={styles.orderGrid}>
+          {filteredOrders.map((order) => {
+            // ==================================================
+            // QUANTITY
+            // ==================================================
 
-          const totalItemLines = order.items.length;
+            const totalQuantity = order.items.reduce(
+              (total, item) => total + item.quantity,
+              0,
+            );
 
-          const totalQuantity = order.items.reduce(
-            (total, item) => total + item.quantity,
-            0,
-          );
+            const servedQuantity = order.items.reduce(
+              (total, item) =>
+                item.status === "served" ? total + item.quantity : total,
+              0,
+            );
 
-          const readyCount = order.items.filter(
-            (item) => item.status === "ready",
-          ).length;
+            const readyCount = order.items.filter(
+              (item) => item.status === "ready",
+            ).length;
 
-          const servedCount = order.items.filter(
-            (item) => item.status === "served",
-          ).length;
+            // ==================================================
+            // PAYMENT
+            // ==================================================
 
-          // ==================================================
-          // PAYMENT CONDITION
-          //
-          // Chỉ được thanh toán khi
-          // TẤT CẢ OrderItem = SERVED.
-          // ==================================================
+            const allServed =
+              order.items.length > 0 &&
+              order.items.every((item) => item.status === "served");
 
-          const allServed =
-            totalItemLines > 0 &&
-            order.items.every((item) => item.status === "served");
+            const waitingPayment = order.status === "pending_payment";
 
-          const waitingPayment = order.status === "pending_payment";
+            // ==================================================
+            // PROGRESS
+            // ==================================================
 
-          const paymentDisabled = !allServed || waitingPayment;
+            const progress =
+              totalQuantity > 0
+                ? Math.round((servedQuantity / totalQuantity) * 100)
+                : 0;
 
-          // ==================================================
-          // PROGRESS
-          // ==================================================
+            // ==================================================
+            // LABEL
+            // ==================================================
 
-          const progress =
-            totalItemLines === 0
-              ? 0
-              : Math.round((servedCount / totalItemLines) * 100);
+            let progressLabel = "Đang phục vụ";
 
-          // ==================================================
-          // STATUS
-          // ==================================================
+            if (readyCount > 0) {
+              progressLabel = `${readyCount} món sẵn sàng`;
+            }
 
-          const orderStatus = STATUS[order.status] || STATUS.cooking;
+            if (allServed) {
+              progressLabel = "Đã phục vụ xong";
+            }
 
-          const progressLabel = waitingPayment
-            ? "Chờ thanh toán"
-            : allServed
-              ? "Đã phục vụ xong"
-              : readyCount > 0
-                ? `${readyCount} món sẵn sàng`
-                : "Đang phục vụ";
+            if (waitingPayment) {
+              progressLabel = "Chờ thanh toán";
+            }
 
-          return (
-            <article key={order.id} className={styles.card}>
-              {/* ==================================================
-                    TOP META
-                ================================================== */}
+            // ==================================================
+            // PROGRESS CLASS
+            // ==================================================
 
-              <div className={styles.topMeta}>
-                <div>
-                  <span>Order #{order.id}</span>
+            const progressClass = waitingPayment
+              ? styles.paymentProgress
+              : allServed
+                ? styles.servedProgress
+                : styles.processingProgress;
 
-                  <strong>/</strong>
+            return (
+              <article key={order.id} className={styles.orderCard}>
+                {/* ==================================================
+                      TOP META
+                  ================================================== */}
 
-                  <span>Tại bàn</span>
-                </div>
+                <div className={styles.cardTop}>
+                  <div className={styles.orderCode}>
+                    <span>Order#</span>
 
-                <time>{formatOrderDate(order.createdAt)}</time>
-              </div>
+                    <strong>{getOrderCode(order.id)}</strong>
 
-              {/* ==================================================
-                    TABLE / STAFF
-                ================================================== */}
+                    <i>/</i>
 
-              <div className={styles.identity}>
-                <div className={styles.tableBadge}>
-                  {order.tableNumber || "?"}
-                </div>
-
-                <div className={styles.identityInfo}>
-                  <span>Bàn phục vụ</span>
-
-                  <strong>Bàn {order.tableNumber}</strong>
-
-                  <small>
-                    NV: {order.staffName || order.waiterName || "Phục vụ"}
-                  </small>
-                </div>
-              </div>
-
-              {/* ==================================================
-                    PROGRESS
-                ================================================== */}
-
-              <div className={styles.progressBox}>
-                <div className={styles.progressTop}>
-                  <div>
-                    <strong>{progress}%</strong>
-
-                    <span
-                      className={`${styles.orderStatus} ${
-                        styles[orderStatus.className]
-                      }`}
-                    >
-                      {progressLabel}
-                    </span>
+                    <strong>Tại chỗ</strong>
                   </div>
 
-                  <span>
-                    {totalQuantity} món
-                    <ChevronRight size={13} />
-                  </span>
+                  <time>{formatDate(order.createdAt)}</time>
                 </div>
 
-                <div className={styles.progressTrack}>
-                  <div
-                    className={
-                      allServed ? styles.progressComplete : styles.progressValue
-                    }
-                    style={{
-                      width: `${progress}%`,
-                    }}
-                  />
-                </div>
-              </div>
+                <div className={styles.tableInfo}>
+                  <div className={styles.tableAvatar}>
+                    {String(order.tableNumber || "?")
+                      .replace("-", "")
+                      .slice(0, 3)}
+                  </div>
 
-              {/* ==================================================
-                    ITEMS BOX
-                ================================================== */}
+                  <div className={styles.tableContent}>
+                    <span>Bàn phục vụ</span>
 
-              <div className={styles.orderItemsBox}>
-                {/* =========================
-                      ITEM HEADER
-                  ========================= */}
+                    <strong>Bàn {order.tableNumber}</strong>
 
-                <div className={styles.itemsHeader}>
-                  <span>Món</span>
+                    <small>
+                      Phục vụ:{" "}
+                      {order.staffName || order.waiterName || "Nhân viên"}
+                    </small>
+                  </div>
 
-                  <span>SL</span>
-
-                  <span>Giá</span>
-                </div>
-
-                {/* =========================
-                      ITEMS
-                  ========================= */}
-
-                <div className={styles.items}>
-                  {order.items.map((item) => {
-                    const ready = item.status === "ready";
-
-                    const served = item.status === "served";
-
-                    const loading = servingItemId === item.id;
-
-                    return (
-                      <div
-                        key={item.id}
-                        className={`${styles.item} ${
-                          ready ? styles.readyItem : ""
-                        } ${served ? styles.servedItem : ""}`}
-                      >
-                        {/* =========================
-                                CHECK
-                            ========================= */}
-
-                        <button
-                          type="button"
-                          className={styles.serveCheck}
-                          disabled={!ready || loading}
-                          title={
-                            ready
-                              ? "Xác nhận đã phục vụ món"
-                              : served
-                                ? "Món đã phục vụ"
-                                : "Món chưa sẵn sàng"
-                          }
-                          onClick={() => onServeItem(item.id)}
-                        >
-                          {served ? <Check size={12} /> : <Circle size={13} />}
-                        </button>
-
-                        {/* =========================
-                                NAME
-                            ========================= */}
-
-                        <div className={styles.itemInfo}>
-                          <strong>{item.name}</strong>
-
-                          {item.note && <small>{item.note}</small>}
-                        </div>
-
-                        {/* =========================
-                                QUANTITY
-                            ========================= */}
-
-                        <span className={styles.quantity}>{item.quantity}</span>
-
-                        {/* =========================
-                                PRICE
-                            ========================= */}
-
-                        <span className={styles.itemPrice}>
-                          {(item.price * item.quantity).toLocaleString("vi-VN")}
-                          đ
-                        </span>
+                  <div className={`${styles.compactProgress} ${progressClass}`}>
+                    <div
+                      className={styles.miniProgressCircle}
+                      style={{
+                        "--progress": `${progress}%`,
+                      }}
+                    >
+                      <div>
+                        <strong>{progress}%</strong>
                       </div>
-                    );
-                  })}
+                    </div>
+
+                    <div className={styles.compactProgressInfo}>
+                      <strong>{progressLabel}</strong>
+
+                      <span>{totalQuantity} món</span>
+                    </div>
+                  </div>
                 </div>
 
                 {/* ==================================================
-                      TOTAL
+                      ITEMS PANEL
                   ================================================== */}
 
-                <div className={styles.total}>
-                  <span>Tổng</span>
+                <div className={styles.itemsPanel}>
+                  {/* =========================
+                        HEADER
+                    ========================= */}
 
-                  <strong>{order.totalAmount.toLocaleString("vi-VN")}đ</strong>
+                  <div className={styles.itemHeader}>
+                    <span>Món ăn</span>
+
+                    <span>SL</span>
+
+                    <span>Giá</span>
+                  </div>
+
+                  {/* =========================
+                        SCROLL
+                    ========================= */}
+
+                  <div className={styles.itemScroll}>
+                    {order.items.map((item) => {
+                      const ready = item.status === "ready";
+
+                      const served = item.status === "served";
+
+                      const loading = servingItemId === item.id;
+
+                      const lineTotal = item.price * item.quantity;
+
+                      return (
+                        <div
+                          key={item.id}
+                          className={`${styles.item} ${
+                            ready ? styles.readyItem : ""
+                          } ${served ? styles.servedItem : ""}`}
+                        >
+                          {/* =========================
+                                  CHECKBOX
+                              ========================= */}
+
+                          <button
+                            type="button"
+                            className={styles.check}
+                            disabled={!ready || loading}
+                            title={
+                              ready
+                                ? "Xác nhận đã phục vụ"
+                                : served
+                                  ? "Đã phục vụ"
+                                  : "Món chưa sẵn sàng"
+                            }
+                            onClick={() => onServeItem(item.id)}
+                          >
+                            {served ? (
+                              <Check size={13} />
+                            ) : (
+                              <Square size={15} />
+                            )}
+                          </button>
+
+                          {/* =========================
+                                  NAME
+                              ========================= */}
+
+                          <div className={styles.itemName}>
+                            <span>{item.name}</span>
+
+                            {item.note && <small>{item.note}</small>}
+                          </div>
+
+                          {/* =========================
+                                  QUANTITY
+                              ========================= */}
+
+                          <strong className={styles.itemQuantity}>
+                            {item.quantity}
+                          </strong>
+
+                          {/* =========================
+                                  PRICE
+                              ========================= */}
+
+                          <span className={styles.itemPrice}>
+                            {lineTotal.toLocaleString("vi-VN")}đ
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* ==================================================
+                        TOTAL INSIDE PANEL
+                    ================================================== */}
+
+                  <div className={styles.total}>
+                    <span>Tổng cộng</span>
+
+                    <strong>
+                      {order.totalAmount.toLocaleString("vi-VN")}đ
+                    </strong>
+                  </div>
                 </div>
-              </div>
 
-              {/* ==================================================
-                    ACTIONS
-                ================================================== */}
+                {/* ==================================================
+                      ACTIONS
+                  ================================================== */}
 
-              <div className={styles.actions}>
-                {/* =========================
-                      SEE DETAIL
-                  ========================= */}
+                <div className={styles.actions}>
+                  {/* =========================
+                        DETAIL
+                    ========================= */}
 
-                <button
-                  type="button"
-                  className={styles.detailButton}
-                  onClick={() => onViewDetail(order.id)}
-                >
-                  Xem chi tiết
-                </button>
+                  <button
+                    type="button"
+                    className={styles.detailButton}
+                    onClick={() => onViewDetail(order.id)}
+                  >
+                    Chi tiết
+                  </button>
 
-                {/* =========================
-                      REQUEST PAYMENT
-                  ========================= */}
+                  {/* =========================
+                        PAYMENT
+                    ========================= */}
 
-                <button
-                  type="button"
-                  className={`${styles.paymentButton} ${
-                    allServed && !waitingPayment ? styles.paymentAvailable : ""
-                  }`}
-                  disabled={paymentDisabled}
-                  onClick={() => onRequestPayment(order.id)}
-                >
-                  <CreditCard size={14} />
+                  <button
+                    type="button"
+                    className={styles.paymentButton}
+                    disabled={!allServed || waitingPayment}
+                    onClick={() => onRequestPayment(order.id)}
+                  >
+                    <CreditCard size={16} />
 
-                  {waitingPayment ? "Chờ thanh toán" : "Yêu cầu thanh toán"}
-                </button>
-              </div>
-
-              {/* ==================================================
-                    PAYMENT HINT
-                ================================================== */}
-
-              {!allServed && !waitingPayment && (
-                <div className={styles.paymentHint}>
-                  <Clock3 size={11} />
-                  Phục vụ tất cả món để yêu cầu thanh toán
+                    {waitingPayment ? "Đã yêu cầu" : "Yêu cầu thanh toán"}
+                  </button>
                 </div>
-              )}
-
-              {allServed && !waitingPayment && (
-                <div className={styles.readyPaymentHint}>
-                  <CheckCircle2 size={11} />
-                  Đơn đã phục vụ xong • Có thể yêu cầu thanh toán
-                </div>
-              )}
-            </article>
-          );
-        })}
-      </div>
-    </section>
+              </article>
+            );
+          })}
+        </div>
+      ) : (
+        <div className={styles.noData}>Không tìm thấy đơn hàng phù hợp.</div>
+      )}
+    </div>
   );
 }
 

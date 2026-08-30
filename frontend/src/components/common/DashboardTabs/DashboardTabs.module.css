@@ -1,0 +1,194 @@
+/* ======================================================
+   TABS BAR
+====================================================== */
+
+.tabsBar {
+  position: sticky;
+
+  top: var(--header-height);
+
+  z-index: var(--z-sticky);
+
+  width: 100%;
+  min-height: 54px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 0 24px;
+
+  background: var(--color-surface);
+
+  border-bottom: 1px solid var(--color-border);
+
+  box-shadow: var(--shadow-xs);
+}
+
+/* ======================================================
+   LEFT
+====================================================== */
+
+.tabsLeft {
+  height: 54px;
+
+  display: flex;
+  align-items: stretch;
+
+  gap: 20px;
+}
+
+/* ======================================================
+   TAB
+====================================================== */
+
+.tab {
+  position: relative;
+
+  display: flex;
+  align-items: center;
+
+  gap: 8px;
+
+  padding: 0 4px;
+
+  color: var(--color-text-secondary);
+
+  background: transparent;
+
+  border: none;
+
+  font-size: var(--font-size-sm);
+
+  font-weight: var(--font-weight-semibold);
+
+  white-space: nowrap;
+
+  cursor: pointer;
+
+  transition: color var(--transition-fast);
+}
+
+.tab:hover {
+  color: var(--color-primary);
+}
+
+/* ======================================================
+   ACTIVE
+====================================================== */
+
+.tabActive {
+  color: var(--color-primary);
+}
+
+.tabActive::after {
+  content: "";
+
+  position: absolute;
+
+  left: 0;
+  right: 0;
+  bottom: 0;
+
+  height: 2px;
+
+  background: var(--color-primary);
+
+  border-radius: var(--radius-full);
+}
+
+/* ======================================================
+   COUNT
+====================================================== */
+
+.tabCount {
+  min-width: 22px;
+  height: 20px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0 6px;
+
+  color: var(--color-primary);
+
+  background: var(--color-primary-light);
+
+  border: 1px solid #dfe3ff;
+
+  border-radius: var(--radius-full);
+
+  font-size: 10px;
+
+  font-weight: var(--font-weight-bold);
+}
+
+/* ======================================================
+   NOTIFICATION
+====================================================== */
+
+.notificationDot {
+  position: absolute;
+
+  top: 12px;
+  right: -5px;
+
+  width: 7px;
+  height: 7px;
+
+  background: #10b981;
+
+  border: 2px solid var(--color-surface);
+
+  border-radius: var(--radius-full);
+
+  box-sizing: content-box;
+}
+
+/* ======================================================
+   RIGHT
+====================================================== */
+
+.rightContent {
+  display: flex;
+  align-items: center;
+
+  margin-left: auto;
+}
+
+/* ======================================================
+   MOBILE
+====================================================== */
+
+@media (max-width: 650px) {
+  .tabsBar {
+    padding: 0 12px;
+  }
+
+  .tabsLeft {
+    gap: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .tabsLeft {
+    gap: 10px;
+  }
+
+  .tab {
+    gap: 5px;
+
+    font-size: var(--font-size-xs);
+  }
+
+  .tabCount {
+    min-width: 19px;
+
+    height: 18px;
+
+    padding: 0 5px;
+
+    font-size: 9px;
+  }
+}

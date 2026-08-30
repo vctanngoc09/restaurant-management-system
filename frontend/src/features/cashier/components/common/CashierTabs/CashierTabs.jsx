@@ -1,51 +1,53 @@
 import { Plus } from "lucide-react";
 
+import DashboardTabs from "../../../../../components/common/DashboardTabs/DashboardTabs";
+
 import styles from "./CashierTabs.module.css";
 
 function CashierTabs({
   activeTab,
+
   onTabChange,
+
   tableCount,
+
   orderCount,
+
   onNewOrder,
 }) {
   return (
-    <div className={styles.cashierTabs}>
-      <div className={styles.cashierTabsLeft}>
+    <DashboardTabs
+      activeTab={activeTab}
+      onTabChange={onTabChange}
+      tabs={[
+        {
+          id: "tables",
+
+          label: "Phòng Bàn",
+
+          count: tableCount,
+        },
+
+        {
+          id: "orders",
+
+          label: "Đơn Hàng",
+
+          count: orderCount,
+        },
+      ]}
+      rightContent={
         <button
           type="button"
-          className={`${styles.cashierTab} ${
-            activeTab === "tables" ? styles.cashierTabActive : ""
-          }`}
-          onClick={() => onTabChange("tables")}
+          className={styles.primaryButton}
+          onClick={onNewOrder}
         >
-          <span>Phòng Bàn</span>
+          <Plus size={17} />
 
-          <span className={styles.tabCount}>{tableCount}</span>
+          <span>Tạo đơn hàng mới</span>
         </button>
-
-        <button
-          type="button"
-          className={`${styles.cashierTab} ${
-            activeTab === "orders" ? styles.cashierTabActive : ""
-          }`}
-          onClick={() => onTabChange("orders")}
-        >
-          <span>Đơn Hàng</span>
-
-          <span className={styles.tabCount}>{orderCount}</span>
-        </button>
-      </div>
-
-      <button
-        type="button"
-        className={styles.primaryButton}
-        onClick={onNewOrder}
-      >
-        <Plus size={17} />
-        <span>Tạo đơn hàng mới</span>
-      </button>
-    </div>
+      }
+    />
   );
 }
 

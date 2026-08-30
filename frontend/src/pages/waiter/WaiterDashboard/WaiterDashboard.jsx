@@ -1,7 +1,5 @@
 import { useEffect, useState } from "react";
 
-import { ClipboardList, LayoutGrid } from "lucide-react";
-
 import useAuth from "../../../hooks/useAuth";
 
 import useWaiterState from "../../../features/waiter/hooks/useWaiterState";
@@ -11,6 +9,8 @@ import WaiterTableMap from "../../../features/waiter/components/WaiterTableMap/W
 import WaiterOrderView from "../../../features/waiter/components/WaiterOrderView/WaiterOrderView";
 
 import WaiterOrdersView from "../../../features/waiter/components/WaiterOrdersView/WaiterOrdersView";
+
+import DashboardTabs from "../../../components/common/DashboardTabs/DashboardTabs";
 
 import WaiterOrderDetailModal from "../../../features/waiter/components/WaiterOrderDetailModal/WaiterOrderDetailModal";
 
@@ -30,40 +30,35 @@ function WaiterDashboard() {
   const waiter = useWaiterState();
 
   // ==================================================
-  // VIEW MODE
+  // VIEW
   //
-  // table_map
+  // tables
   // orders
   // order
   // ==================================================
 
-  const [viewMode, setViewMode] = useState("table_map");
+  const [viewMode, setViewMode] = useState("tables");
 
   // ==================================================
   // SELECTED TABLE
-  //
-  // Lưu table.id.
   // ==================================================
 
   const [selectedTableId, setSelectedTableId] = useState(null);
 
   // ==================================================
-  // DETAIL MODAL
+  // DETAIL ORDER
   // ==================================================
 
   const [selectedDetailOrderId, setSelectedDetailOrderId] = useState(null);
 
   // ==================================================
-  // SERVING
-  //
-  // Chặn click nhiều lần
-  // trên cùng item.
+  // SERVING ITEM
   // ==================================================
 
   const [servingItemId, setServingItemId] = useState(null);
 
   // ==================================================
-  // CURRENT USER
+  // USER
   // ==================================================
 
   const currentUserName =
@@ -77,7 +72,7 @@ function WaiterDashboard() {
     waiter.tables.find((table) => table.id === selectedTableId) || null;
 
   // ==================================================
-  // ACTIVE ORDER OF SELECTED TABLE
+  // ACTIVE ORDER OF TABLE
   // ==================================================
 
   const existingOrder = selectedTableId
@@ -86,37 +81,43 @@ function WaiterDashboard() {
 
   // ==================================================
   // DETAIL ORDER
-  //
-  // Không lưu nguyên object.
-  //
-  // Chỉ lưu ID để sau khi READY -> SERVED
-  // waiter.orders update thì modal
-  // tự nhận Order mới.
   // ==================================================
 
   const detailOrder =
     waiter.orders.find((order) => order.id === selectedDetailOrderId) || null;
 
   // ==================================================
-  // READY ITEM COUNT
-  //
-  // Badge trên tab Đơn hàng.
+  // ACTIVE ORDERS
   // ==================================================
 
-  const readyItemCount = waiter.orders.reduce((total, order) => {
-    const readyItems = order.items.filter((item) => item.status === "ready");
+  const activeOrders = waiter.orders.filter(
+    (order) =>
+      order.orderType === "dine_in" &&
+      order.status !== "completed" &&
+      order.status !== "cancelled",
+  );
 
-    return total + readyItems.length;
+  // ==================================================
+  // TABLE COUNT
+  // ==================================================
+
+  const tableCount = waiter.tables.filter(
+    (table) => table.status !== "inactive",
+  ).length;
+
+  // ==================================================
+  // READY ITEMS
+  // ==================================================
+
+  const readyItemCount = activeOrders.reduce((total, order) => {
+    return total + order.items.filter((item) => item.status === "ready").length;
   }, 0);
 
   // ==================================================
-  // REFRESH ORDER LIST
+  // POLLING
   //
-  // Vì hiện tại chưa dùng WebSocket,
-  // khi đang mở tab Đơn hàng:
-  //
-  // refresh mỗi 5 giây để nhận
-  // trạng thái READY từ Chef.
+  // Khi ở màn quản lý Order,
+  // refresh 5 giây/lần để nhận READY.
   // ==================================================
 
   useEffect(() => {
@@ -124,22 +125,17 @@ function WaiterDashboard() {
       return undefined;
     }
 
-    // Load ngay khi mở tab.
     waiter.reloadTables();
 
     const interval = setInterval(() => {
       waiter.reloadTables();
     }, 5000);
 
-    return () => {
-      clearInterval(interval);
-    };
+    return () => clearInterval(interval);
   }, [viewMode, waiter.reloadTables]);
 
   // ==================================================
   // SELECT TABLE
-  //
-  // TABLE MAP -> ORDER VIEW
   // ==================================================
 
   const handleSelectTable = (table) => {
@@ -149,19 +145,17 @@ function WaiterDashboard() {
   };
 
   // ==================================================
-  // BACK FROM ORDER
+  // BACK
   // ==================================================
 
   const handleBackFromOrder = () => {
     setSelectedTableId(null);
 
-    setViewMode("table_map");
+    setViewMode("tables");
   };
 
   // ==================================================
   // SEND TO KITCHEN
-  //
-  // WAITER chỉ DINE_IN.
   // ==================================================
 
   const handleSendToKitchen = async (data) => {
@@ -169,30 +163,20 @@ function WaiterDashboard() {
       return null;
     }
 
-    const result = await waiter.sendToKitchen({
+    return waiter.sendToKitchen({
       ...data,
 
       orderType: "dine_in",
 
       /*
-       * Hook hiện tại sử dụng
-       * property tableNumber
-       * nhưng thực chất value
-       * đang là table.id.
+       * Hook hiện tại đang dùng
+       * tableNumber để chứa table.id.
        */
       tableNumber: selectedTableId,
     });
-
-    if (!result) {
-      return null;
-    }
-
-    return result;
   };
 
   // ==================================================
-  // SERVE ITEM
-  //
   // READY -> SERVED
   // ==================================================
 
@@ -211,19 +195,11 @@ function WaiterDashboard() {
   };
 
   // ==================================================
-  // VIEW DETAIL
+  // DETAIL
   // ==================================================
 
   const handleViewDetail = (orderId) => {
     setSelectedDetailOrderId(orderId);
-  };
-
-  // ==================================================
-  // CLOSE DETAIL
-  // ==================================================
-
-  const handleCloseDetail = () => {
-    setSelectedDetailOrderId(null);
   };
 
   // ==================================================
@@ -232,59 +208,40 @@ function WaiterDashboard() {
 
   return (
     <div className={styles.waiterPage}>
-      {/* ==================================================
-          TOP NAVIGATION
-
-          Không hiện khi đang ở màn
-          gọi món cho một bàn.
-      ================================================== */}
-
       {viewMode !== "order" && (
-        <nav className={styles.viewTabs}>
-          {/* =========================
-              TABLE MAP
-          ========================= */}
+        <DashboardTabs
+          activeTab={viewMode}
+          onTabChange={setViewMode}
+          tabs={[
+            {
+              id: "tables",
 
-          <button
-            type="button"
-            className={viewMode === "table_map" ? styles.activeTab : ""}
-            onClick={() => setViewMode("table_map")}
-          >
-            <LayoutGrid size={16} />
+              label: "Phòng Bàn",
 
-            <span>Sơ đồ bàn</span>
-          </button>
+              count: tableCount,
+            },
 
-          {/* =========================
-              ORDER LIST
-          ========================= */}
+            {
+              id: "orders",
 
-          <button
-            type="button"
-            className={viewMode === "orders" ? styles.activeTab : ""}
-            onClick={() => setViewMode("orders")}
-          >
-            <ClipboardList size={16} />
+              label: "Đơn Hàng",
 
-            <span>Đơn hàng</span>
-
-            {readyItemCount > 0 && (
-              <strong className={styles.readyBadge}>{readyItemCount}</strong>
-            )}
-          </button>
-        </nav>
+              count: activeOrders.length,
+              notification: readyItemCount > 0,
+            },
+          ]}
+        />
       )}
 
       {/* ==================================================
-          TABLE MAP
+          TABLE VIEW
       ================================================== */}
 
-      {viewMode === "table_map" && (
-        <div className={styles.mapView}>
+      {viewMode === "tables" && (
+        <div className={styles.dashboardContent}>
           <WaiterTableMap
             tables={waiter.tables}
             orders={waiter.orders}
-            currentUserName={currentUserName}
             onSelectTable={handleSelectTable}
           />
         </div>
@@ -295,42 +252,45 @@ function WaiterDashboard() {
       ================================================== */}
 
       {viewMode === "orders" && (
-        <div className={styles.ordersView}>
+        <div className={styles.dashboardContent}>
           <WaiterOrdersView
             orders={waiter.orders}
             servingItemId={servingItemId}
             onServeItem={handleServeItem}
             onViewDetail={handleViewDetail}
+            onRequestPayment={(orderId) => waiter.requestPayment(orderId)}
           />
         </div>
       )}
 
       {/* ==================================================
-          ORDER CREATE / ADD ITEMS
+          ORDERING
       ================================================== */}
 
       {viewMode === "order" && (
-        <WaiterOrderView
-          table={activeTable}
-          existingOrder={existingOrder}
-          orderType="dine_in"
-          menuItems={waiter.menuItems}
-          currentUserName={currentUserName}
-          onBack={handleBackFromOrder}
-          onSendToKitchen={handleSendToKitchen}
-          onRequestPayment={() => waiter.requestPayment(existingOrder?.id)}
-        />
+        <div className={styles.orderingPage}>
+          <WaiterOrderView
+            table={activeTable}
+            existingOrder={existingOrder}
+            orderType="dine_in"
+            menuItems={waiter.menuItems}
+            currentUserName={currentUserName}
+            onBack={handleBackFromOrder}
+            onSendToKitchen={handleSendToKitchen}
+            onRequestPayment={() => waiter.requestPayment(existingOrder?.id)}
+          />
+        </div>
       )}
 
       {/* ==================================================
-          ORDER DETAIL MODAL
+          DETAIL MODAL
       ================================================== */}
 
       <WaiterOrderDetailModal
         order={detailOrder}
         servingItemId={servingItemId}
         onServeItem={handleServeItem}
-        onClose={handleCloseDetail}
+        onClose={() => setSelectedDetailOrderId(null)}
       />
     </div>
   );

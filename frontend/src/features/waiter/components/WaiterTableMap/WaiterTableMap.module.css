@@ -1,42 +1,485 @@
-.container {
-  width: min(1400px, 100%);
+/* ======================================================
+   LAYOUT
+====================================================== */
 
-  margin: 0 auto;
+.layout {
+  width: 100%;
+
+  display: grid;
+
+  grid-template-columns:
+    minmax(0, 1fr)
+    300px;
+
+  align-items: start;
+
+  gap: 24px;
 }
+
+/* ======================================================
+   MAIN
+====================================================== */
+
+.main {
+  min-width: 0;
+}
+
+/* ======================================================
+   TABLE FILTER CARD
+====================================================== */
+
+.tableFilterCard {
+  padding: 17px 16px;
+
+  margin-bottom: 16px;
+
+  background: var(--color-surface);
+
+  border: 1px solid var(--color-border);
+
+  border-radius: var(--radius-lg);
+
+  box-shadow: var(--shadow-xs);
+}
+
+/* ======================================================
+   FILTER HEADER
+====================================================== */
+
+.tableFilterHeader {
+  display: flex;
+  align-items: center;
+
+  gap: 14px;
+
+  padding-bottom: 14px;
+
+  margin-bottom: 12px;
+
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.tableFilterHeader h2 {
+  margin: 0;
+
+  color: var(--color-text-primary);
+
+  font-size: var(--font-size-sm);
+
+  font-weight: var(--font-weight-bold);
+}
+
+/* ======================================================
+   LEGEND
+====================================================== */
+
+.tableLegend {
+  display: flex;
+  align-items: center;
+
+  gap: 12px;
+}
+
+.tableLegend span {
+  display: inline-flex;
+  align-items: center;
+
+  gap: 5px;
+
+  font-size: 10px;
+
+  font-weight: var(--font-weight-semibold);
+}
+
+.tableLegend i {
+  width: 8px;
+  height: 8px;
+
+  border-radius: var(--radius-full);
+}
+
+.occupiedLegend {
+  color: var(--color-primary);
+}
+
+.occupiedLegend i {
+  background: var(--color-primary);
+}
+
+.emptyLegend {
+  color: var(--color-text-muted);
+}
+
+.emptyLegend i {
+  background: var(--color-border-dark);
+}
+
+/* ======================================================
+   FILTER ROWS
+====================================================== */
+
+.filterRows {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 14px;
+
+  flex-wrap: wrap;
+}
+
+/* ======================================================
+   FILTER GROUP
+====================================================== */
+
+.filterGroup {
+  display: inline-flex;
+  align-items: center;
+
+  gap: 3px;
+
+  padding: 4px;
+
+  background: var(--color-background);
+
+  border-radius: var(--radius-md);
+}
+
+/* ======================================================
+   FILTER BUTTON
+====================================================== */
+
+.filterGroup button {
+  min-height: 32px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 5px;
+
+  padding: 5px 11px;
+
+  color: var(--color-text-secondary);
+
+  background: transparent;
+
+  border: none;
+
+  border-radius: 8px;
+
+  font-size: var(--font-size-xs);
+
+  font-weight: var(--font-weight-medium);
+
+  white-space: nowrap;
+
+  cursor: pointer;
+
+  transition: all var(--transition-fast);
+}
+
+.filterGroup button:hover {
+  color: var(--color-text-primary);
+}
+
+/* ======================================================
+   NORMAL ACTIVE
+====================================================== */
+
+.filterGroup .filterActive {
+  color: var(--color-text-primary);
+
+  background: var(--color-surface);
+
+  box-shadow: var(--shadow-xs);
+
+  font-weight: var(--font-weight-semibold);
+}
+
+/* ======================================================
+   PRIMARY ACTIVE
+====================================================== */
+
+.filterGroup .filterPrimaryActive {
+  color: var(--color-text-inverse);
+
+  background: var(--color-primary);
+
+  box-shadow: var(--shadow-xs);
+
+  font-weight: var(--font-weight-semibold);
+}
+
+/* ======================================================
+   TABLE GRID
+====================================================== */
 
 .grid {
   display: grid;
 
-  grid-template-columns:
-    repeat(
-      5,
-      minmax(0, 1fr)
-    );
+  grid-template-columns: repeat(4, minmax(0, 1fr));
 
   gap: 14px;
 }
 
-@media (max-width: 1200px) {
+/* ======================================================
+   RESTAURANT SUMMARY
+
+   GIỐNG CASHIER
+====================================================== */
+
+.restaurantSummary {
+  position: sticky;
+
+  top: calc(var(--header-height) + 78px);
+
+  padding: 20px;
+
+  background: var(--color-surface);
+
+  border: 1px solid var(--color-border);
+
+  border-radius: var(--radius-lg);
+
+  box-shadow: var(--shadow-xs);
+}
+
+/* ======================================================
+   SUMMARY TITLE
+====================================================== */
+
+.restaurantSummary > h3 {
+  margin: 0 0 16px;
+
+  color: var(--color-text-primary);
+
+  font-size: var(--font-size-sm);
+
+  font-weight: var(--font-weight-bold);
+}
+
+/* ======================================================
+   TABLE BOX
+====================================================== */
+
+.summaryTableBox {
+  padding: 13px;
+
+  background: var(--color-background-soft);
+
+  border: 1px solid var(--color-border);
+
+  border-radius: var(--radius-md);
+}
+
+/* ======================================================
+   TOTAL
+====================================================== */
+
+.summaryTotal {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding-bottom: 11px;
+
+  color: var(--color-text-secondary);
+
+  font-size: var(--font-size-xs);
+}
+
+.summaryTotal strong {
+  color: var(--color-text-primary);
+
+  font-size: var(--font-size-sm);
+}
+
+/* ======================================================
+   AVAILABLE / OCCUPIED
+====================================================== */
+
+.summaryNumbers {
+  display: grid;
+
+  grid-template-columns: repeat(2, 1fr);
+
+  gap: 8px;
+
+  padding-top: 10px;
+
+  border-top: 1px solid var(--color-border);
+}
+
+.summaryNumbers div {
+  padding: 8px;
+
+  text-align: center;
+
+  background: var(--color-surface);
+
+  border: 1px solid var(--color-border-light);
+
+  border-radius: var(--radius-sm);
+}
+
+.summaryNumbers span {
+  display: block;
+
+  color: var(--color-text-muted);
+
+  font-size: 9px;
+
+  font-weight: var(--font-weight-bold);
+}
+
+.summaryNumbers strong {
+  display: block;
+
+  margin-top: 2px;
+
+  color: var(--color-primary);
+
+  font-size: var(--font-size-lg);
+}
+
+/* ======================================================
+   SUMMARY CHANNEL
+====================================================== */
+
+.summaryChannel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  margin-top: 12px;
+
+  padding: 11px 12px;
+
+  color: var(--color-text-primary);
+
+  background: var(--color-background-soft);
+
+  border: 1px solid var(--color-border);
+
+  border-radius: var(--radius-md);
+
+  font-size: var(--font-size-xs);
+}
+
+.summaryChannel > div {
+  display: flex;
+  align-items: center;
+
+  gap: 8px;
+}
+
+.summaryChannel svg {
+  color: var(--color-primary);
+}
+
+.summaryChannel > strong {
+  min-width: 24px;
+
+  padding: 2px 6px;
+
+  text-align: center;
+
+  background: var(--color-surface);
+
+  border: 1px solid var(--color-border);
+
+  border-radius: var(--radius-xs);
+}
+
+/* ======================================================
+   READY COUNT
+====================================================== */
+
+.summaryChannel .readyCount {
+  color: var(--color-success-hover);
+
+  background: var(--color-success-light);
+
+  border-color: #a7f3d0;
+}
+
+/* ======================================================
+   RESPONSIVE
+====================================================== */
+
+@media (max-width: 1300px) {
   .grid {
-    grid-template-columns:
-      repeat(
-        4,
-        minmax(0, 1fr)
-      );
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
-@media (max-width: 800px) {
+@media (max-width: 1050px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  .restaurantSummary {
+    position: static;
+
+    display: grid;
+
+    grid-template-columns: repeat(2, 1fr);
+
+    gap: 10px;
+
+    order: -1;
+  }
+
+  .restaurantSummary > h3,
+  .summaryTableBox {
+    grid-column: 1 / -1;
+  }
+
+  .summaryChannel {
+    margin-top: 0;
+  }
+
   .grid {
-    grid-template-columns:
-      repeat(
-        2,
-        minmax(0, 1fr)
-      );
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
-@media (max-width: 430px) {
+@media (max-width: 750px) {
+  .filterRows {
+    align-items: stretch;
+
+    flex-direction: column;
+  }
+
+  .filterGroup {
+    max-width: 100%;
+
+    overflow-x: auto;
+  }
+
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 650px) {
+  .restaurantSummary {
+    display: block;
+  }
+
+  .summaryChannel {
+    margin-top: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .tableFilterHeader {
+    align-items: flex-start;
+
+    flex-direction: column;
+  }
+
   .grid {
     grid-template-columns: 1fr;
   }
