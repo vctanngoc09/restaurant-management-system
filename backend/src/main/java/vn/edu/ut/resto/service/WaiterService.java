@@ -28,4 +28,8 @@ public interface WaiterService {
     Order serveItem(
             Long orderItemId
     );
+
+    Order requestPayment(
+            Long orderId
+    );
 }

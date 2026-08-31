@@ -860,6 +860,157 @@ public class OrderServiceImpl
     // PAYMENT dùng sau này.
     // ==================================================
 
+    // ==================================================
+// REQUEST PAYMENT
+//
+// DINE_IN ONLY
+//
+// PROCESSING
+// ->
+// AWAITING_PAYMENT
+//
+// Điều kiện:
+// 1. Order phải là DINE_IN
+// 2. Order phải đang PROCESSING
+// 3. Tất cả món phải SERVED
+// ==================================================
+
+    @Override
+    @Transactional
+    public Order requestPayment(
+            Long orderId
+    ) {
+
+        // ==================================================
+        // FIND ORDER + LOCK
+        //
+        // Lock để tránh trường hợp:
+        //
+        // request-payment
+        // và
+        // add-items
+        //
+        // chạy đồng thời.
+        // ==================================================
+
+        Order order =
+                orderRepository
+                        .findByIdForUpdate(
+                                orderId
+                        )
+                        .orElseThrow(() ->
+                                new ResourceNotFoundException(
+                                        "Không tìm thấy đơn hàng có ID: "
+                                                + orderId
+                                )
+                        );
+
+
+        // ==================================================
+        // DINE IN ONLY
+        // ==================================================
+
+        if (
+                order.getOrderType()
+                        != EOrderType.DINE_IN
+        ) {
+
+            throw new InvalidOperationException(
+                    "Chỉ đơn tại bàn mới sử dụng chức năng yêu cầu thanh toán."
+            );
+        }
+
+
+        // ==================================================
+        // STATUS
+        //
+        // Chỉ:
+        // PROCESSING -> AWAITING_PAYMENT
+        // ==================================================
+
+        if (
+                order.getStatus()
+                        != EOrderStatus.PROCESSING
+        ) {
+
+            if (
+                    order.getStatus()
+                            == EOrderStatus.AWAITING_PAYMENT
+            ) {
+
+                throw new InvalidOperationException(
+                        "Đơn hàng đã ở trạng thái chờ thanh toán."
+                );
+            }
+
+
+            throw new InvalidOperationException(
+                    "Chỉ đơn đang PROCESSING mới có thể chuyển sang chờ thanh toán."
+            );
+        }
+
+
+        // ==================================================
+        // CHECK ALL ITEMS SERVED
+        // ==================================================
+
+        boolean hasUnservedItem =
+                orderItemRepository
+                        .existsByOrder_IdAndStatusNot(
+                                order.getId(),
+                                EOrderItemStatus.SERVED
+                        );
+
+
+        if (hasUnservedItem) {
+
+            throw new InvalidOperationException(
+                    "Vẫn còn món chưa được phục vụ, chưa thể yêu cầu thanh toán."
+            );
+        }
+
+
+        // ==================================================
+        // UPDATE STATUS
+        //
+        // PROCESSING
+        // ->
+        // AWAITING_PAYMENT
+        // ==================================================
+
+        order.setStatus(
+                EOrderStatus.AWAITING_PAYMENT
+        );
+
+
+        /*
+         * order đang là Managed Entity.
+         *
+         * Không bắt buộc:
+         *
+         * orderRepository.save(order);
+         *
+         * Hibernate Dirty Checking
+         * sẽ tự UPDATE.
+         */
+
+
+        // ==================================================
+        // FLUSH
+        // ==================================================
+
+        orderRepository.flush();
+
+
+        // ==================================================
+        // RETURN FRESH ORDER
+        // ==================================================
+
+        return getOrderDetails(
+                order.getId()
+        );
+    }
+
     @Override
     @Transactional
     public KitchenTicket fireUnfiredItemsToKitchen(

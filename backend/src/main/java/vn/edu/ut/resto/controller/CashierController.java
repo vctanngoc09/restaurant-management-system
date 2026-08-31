@@ -255,4 +255,38 @@ public class CashierController {
                 )
         );
     }
+
+    @PatchMapping(
+            "/{orderId}/request-payment"
+    )
+    public ResponseEntity<
+            ApiResponse<OrderResponse>
+            >
+    requestPayment(
+            @PathVariable
+            Long orderId
+    ) {
+
+        Order order =
+                cashierService
+                        .requestPayment(
+                                orderId
+                        );
+
+
+        OrderResponse response =
+                orderMapper
+                        .toResponse(
+                                order
+                        );
+
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        200,
+                        "Đơn hàng đã chuyển sang chờ thanh toán!",
+                        response
+                )
+        );
+    }
 }

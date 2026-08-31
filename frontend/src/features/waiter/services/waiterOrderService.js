@@ -13,7 +13,6 @@ const waiterOrderService = {
     return response.data;
   },
 
-
   async getActiveByTable(tableId) {
     const response = await api.get(
       `${WAITER_ORDER_URL}/table/${tableId}/active`,
@@ -21,7 +20,6 @@ const waiterOrderService = {
 
     return response.data;
   },
-
 
   async addItemsToOrder(orderId, items) {
     const response = await api.post(`${WAITER_ORDER_URL}/${orderId}/items`, {
@@ -31,10 +29,17 @@ const waiterOrderService = {
     return response.data;
   },
 
-
   async serveItem(orderItemId) {
     const response = await api.patch(
       `${WAITER_ORDER_URL}/items/${orderItemId}/serve`,
+    );
+
+    return response.data;
+  },
+
+  async requestPayment(orderId) {
+    const response = await api.patch(
+      `${WAITER_ORDER_URL}/${orderId}/request-payment`,
     );
 
     return response.data;

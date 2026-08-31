@@ -826,16 +826,131 @@ function useWaiterState() {
   // vì refresh trang sẽ bị sai dữ liệu.
   // ==================================================
 
-  const requestPayment = (orderId) => {
+  const requestPayment = async (orderId) => {
+    // ==================================================
+    // VALIDATE ID
+    // ==================================================
+
     if (!orderId) {
       toast.warning("Chưa có đơn hàng để yêu cầu thanh toán.");
+      return null;
+    }
+
+    // ==================================================
+    // FIND CURRENT ORDER
+    // ==================================================
+
+    const currentOrder = orders.find(
+      (order) => String(order.id) === String(orderId),
+    );
+
+    if (!currentOrder) {
+      toast.error("Không tìm thấy đơn hàng.");
+      return null;
+    }
+
+    // ==================================================
+    // DINE IN ONLY
+    // ==================================================
+
+    if (currentOrder.orderType !== "dine_in") {
+      toast.warning("Chỉ đơn tại bàn mới có thể yêu cầu thanh toán.");
+      return null;
+    }
+
+    // ==================================================
+    // ALREADY WAITING PAYMENT
+    // ==================================================
+
+    if (currentOrder.status === "pending_payment") {
+      toast.info("Đơn hàng đã ở trạng thái chờ thanh toán.");
+      return currentOrder;
+    }
+
+    // ==================================================
+    // PROCESSING ONLY
+    //
+    // Backend PROCESSING
+    // ->
+    // frontend cooking
+    // ==================================================
+
+    if (currentOrder.status !== "cooking") {
+      toast.warning(
+        "Đơn hàng phải đang trong trạng thái xử lý mới có thể yêu cầu thanh toán.",
+      );
 
       return null;
     }
 
-    toast.info("Chức năng yêu cầu thanh toán sẽ được nối API ở bước Payment.");
+    // ==================================================
+    // ALL ITEMS MUST BE SERVED
+    // ==================================================
 
-    return null;
+    const allServed =
+      currentOrder.items.length > 0 &&
+      currentOrder.items.every((item) => item.status === "served");
+
+    if (!allServed) {
+      toast.warning(
+        "Vui lòng phục vụ tất cả món trước khi yêu cầu thanh toán.",
+      );
+
+      return null;
+    }
+
+    // ==================================================
+    // CALL API
+    // ==================================================
+
+    try {
+      const response = await waiterOrderService.requestPayment(orderId);
+
+      // response:
+      //
+      // {
+      //   status: 200,
+      //   message: "...",
+      //   data: OrderResponse
+      // }
+
+      const updatedOrder = normalizeOrder(response?.data);
+
+      if (!updatedOrder) {
+        throw new Error(
+          "Backend không trả về thông tin đơn hàng sau khi yêu cầu thanh toán.",
+        );
+      }
+
+      // ==================================================
+      // UPDATE ORDER + TABLE
+      //
+      // Dùng helper đang có sẵn trong hook.
+      // ==================================================
+
+      syncOrderState(updatedOrder, updatedOrder.tableId);
+
+      // ==================================================
+      // SUCCESS
+      // ==================================================
+
+      toast.success(
+        response?.message || "Đã gửi yêu cầu thanh toán tới thu ngân.",
+      );
+
+      return updatedOrder;
+    } catch (error) {
+      console.error("REQUEST PAYMENT ERROR:", error);
+
+      const message =
+        error.response?.data?.message ||
+        error.message ||
+        "Không thể gửi yêu cầu thanh toán.";
+
+      toast.error(message);
+
+      return null;
+    }
   };
 
   // ==================================================

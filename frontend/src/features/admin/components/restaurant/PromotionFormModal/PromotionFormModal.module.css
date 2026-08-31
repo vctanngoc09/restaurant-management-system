@@ -1,0 +1,279 @@
+.backdrop {
+  position: fixed;
+
+  inset: 0;
+
+  z-index: var(--z-modal-backdrop);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 20px;
+
+  background: var(--color-overlay);
+}
+
+.modal {
+  width: min(720px, 100%);
+
+  max-height: calc(100dvh - 40px);
+
+  overflow-y: auto;
+
+  background: var(--color-surface);
+
+  border-radius: var(--radius-xl);
+
+  box-shadow: var(--shadow-xl);
+}
+
+.header {
+  position: sticky;
+
+  top: 0;
+
+  z-index: 2;
+
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+
+  padding: 18px 20px;
+
+  background: var(--color-surface);
+
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.eyebrow {
+  color: var(--color-primary);
+
+  font-size: 9px;
+  font-weight: var(--font-weight-bold);
+
+  letter-spacing: 0.7px;
+}
+
+.header h2 {
+  margin-top: 3px;
+
+  font-size: 16px;
+}
+
+.close {
+  width: 34px;
+  height: 34px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: var(--color-text-secondary);
+
+  background: var(--color-background-soft);
+
+  border-radius: 9px;
+}
+
+.body {
+  padding: 20px;
+}
+
+.grid {
+  display: grid;
+
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+
+  gap: 15px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+
+  gap: 7px;
+}
+
+.field > span {
+  color: var(--color-text-secondary);
+
+  font-size: 10px;
+  font-weight: var(--font-weight-semibold);
+}
+
+.field b {
+  margin-left: 3px;
+
+  color: var(--color-danger);
+}
+
+.field input,
+.field textarea,
+.field select {
+  width: 100%;
+
+  color: var(--color-text-primary);
+
+  background: var(--color-background-soft);
+
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.field input,
+.field select {
+  height: 40px;
+
+  padding: 0 12px;
+}
+
+.field textarea {
+  min-height: 80px;
+
+  padding: 10px 12px;
+
+  resize: vertical;
+}
+
+.field input:focus,
+.field textarea:focus,
+.field select:focus {
+  background: var(--color-surface);
+
+  border-color: var(--color-border-focus);
+
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.08);
+}
+
+.full {
+  grid-column: 1 / -1;
+}
+
+.suffix {
+  position: relative;
+}
+
+.suffix input {
+  padding-right: 46px;
+}
+
+.suffix > span {
+  position: absolute;
+
+  top: 50%;
+  right: 12px;
+
+  color: var(--color-text-muted);
+
+  transform: translateY(-50%);
+
+  font-size: 10px;
+  font-weight: var(--font-weight-bold);
+}
+
+.switchField {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 16px;
+
+  padding: 11px 12px;
+
+  background: var(--color-background-soft);
+
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.switchField > div {
+  display: flex;
+  flex-direction: column;
+
+  gap: 2px;
+}
+
+.switchField strong {
+  font-size: 10px;
+}
+
+.switchField span {
+  color: var(--color-text-muted);
+
+  font-size: 8px;
+}
+
+.switchField input {
+  width: 16px;
+  height: 16px;
+
+  accent-color: var(--color-primary);
+}
+
+.footer {
+  position: sticky;
+
+  bottom: 0;
+
+  display: flex;
+  justify-content: flex-end;
+
+  gap: 8px;
+
+  padding: 14px 20px;
+
+  background: var(--color-surface);
+
+  border-top: 1px solid var(--color-border-light);
+}
+
+.cancelButton,
+.saveButton {
+  min-height: 38px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 7px;
+
+  padding: 0 14px;
+
+  border-radius: var(--radius-md);
+
+  font-size: 10px;
+  font-weight: var(--font-weight-bold);
+}
+
+.cancelButton {
+  color: var(--color-text-secondary);
+
+  background: var(--color-surface);
+
+  border: 1px solid var(--color-border);
+}
+
+.saveButton {
+  color: #ffffff;
+
+  background: var(--color-primary);
+}
+
+.saveButton:hover:not(:disabled) {
+  background: var(--color-primary-hover);
+}
+
+@media (max-width: 700px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .full {
+    grid-column: auto;
+  }
+
+  .body {
+    padding: 14px;
+  }
+}

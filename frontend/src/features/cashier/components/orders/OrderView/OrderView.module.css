@@ -1,6 +1,190 @@
+/* ======================================================
+   ORDER VIEW
+====================================================== */
+
 .orderView {
-  padding: 24px;
+  width: 100%;
+  min-height: 100%;
+
+  padding: 22px 24px 30px;
+
+  background: var(--color-background);
+
+  box-sizing: border-box;
 }
+
+
+/* ======================================================
+   FILTER CARD
+====================================================== */
+
+.filterCard {
+  width: 100%;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 18px;
+
+  padding: 10px 14px;
+
+  background: var(--color-surface);
+
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+
+  box-shadow: var(--shadow-xs);
+}
+
+
+/* ======================================================
+   SEARCH
+====================================================== */
+
+.searchBox {
+  position: relative;
+
+  width: min(390px, 100%);
+  flex-shrink: 0;
+}
+
+.searchBox svg {
+  position: absolute;
+
+  top: 50%;
+  left: 13px;
+
+  color: var(--color-text-muted);
+
+  transform: translateY(-50%);
+
+  pointer-events: none;
+}
+
+.searchBox input {
+  width: 100%;
+  height: 38px;
+
+  padding: 0 14px 0 39px;
+
+  color: var(--color-text-primary);
+
+  background: var(--color-background-soft);
+
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+
+  outline: none;
+
+  font-family: inherit;
+  font-size: 11px;
+
+  transition:
+          border-color var(--transition-fast),
+          background var(--transition-fast),
+          box-shadow var(--transition-fast);
+}
+
+.searchBox input::placeholder {
+  color: var(--color-text-muted);
+}
+
+.searchBox input:focus {
+  background: var(--color-surface);
+
+  border-color: #a5b4fc;
+
+  box-shadow:
+          0 0 0 3px
+          rgba(99, 102, 241, 0.08);
+}
+
+
+/* ======================================================
+   FILTER GROUP
+====================================================== */
+
+.filterGroup {
+  display: flex;
+  align-items: center;
+
+  gap: 3px;
+
+  padding: 4px;
+
+  overflow-x: auto;
+
+  background: var(--color-background-soft);
+
+  border-radius: 11px;
+
+  scrollbar-width: none;
+}
+
+.filterGroup::-webkit-scrollbar {
+  display: none;
+}
+
+.filterGroup button {
+  min-height: 31px;
+
+  padding: 5px 12px;
+
+  flex-shrink: 0;
+
+  color: var(--color-text-secondary);
+
+  background: transparent;
+
+  border: none;
+  border-radius: 8px;
+
+  font-family: inherit;
+  font-size: 10px;
+  font-weight: var(--font-weight-medium);
+
+  white-space: nowrap;
+
+  cursor: pointer;
+
+  transition:
+          color var(--transition-fast),
+          background var(--transition-fast),
+          box-shadow var(--transition-fast);
+}
+
+.filterGroup button:hover {
+  color: var(--color-text-primary);
+
+  background: rgba(255, 255, 255, 0.75);
+}
+
+.filterGroup .active {
+  color: var(--color-text-primary);
+
+  background: var(--color-surface);
+
+  box-shadow: var(--shadow-xs);
+
+  font-weight: var(--font-weight-bold);
+}
+
+.filterGroup .readyActive {
+  color: #b45309;
+
+  background: #fffbeb;
+
+  box-shadow:
+          inset 0 0 0 1px #fde68a;
+
+  font-weight: var(--font-weight-bold);
+}
+
+
+/* ======================================================
+   ORDER GRID
+====================================================== */
 
 .orderGrid {
   display: grid;
@@ -8,14 +192,742 @@
   grid-template-columns:
     repeat(4, minmax(0, 1fr));
 
+  align-items: start;
+
   gap: 16px;
 
   margin-top: 16px;
 }
 
+
+/* ======================================================
+   ORDER CARD
+====================================================== */
+
+.orderCard {
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+
+  padding: 16px;
+
+  overflow: hidden;
+
+  color: var(--color-text-primary);
+
+  background: var(--color-surface);
+
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+
+  box-shadow: var(--shadow-sm);
+
+  transition:
+          transform var(--transition-fast),
+          border-color var(--transition-fast),
+          box-shadow var(--transition-fast);
+}
+
+.orderCard:hover {
+  transform: translateY(-2px);
+
+  border-color: #cbd5e1;
+
+  box-shadow: var(--shadow-md);
+}
+
+
+/* ======================================================
+   CARD TOP
+====================================================== */
+
+.cardTop {
+  min-height: 28px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 10px;
+
+  margin-bottom: 14px;
+}
+
+.cardTop time {
+  flex-shrink: 0;
+
+  color: var(--color-text-secondary);
+
+  font-size: 9px;
+
+  white-space: nowrap;
+}
+
+
+/* ======================================================
+   ORDER CODE
+====================================================== */
+
+.orderCode {
+  min-width: 0;
+
+  display: flex;
+  align-items: center;
+
+  gap: 4px;
+
+  overflow: hidden;
+
+  white-space: nowrap;
+}
+
+.orderCode span {
+  color: var(--color-text-secondary);
+
+  font-size: 10px;
+}
+
+.orderCode strong {
+  color: var(--color-text-primary);
+
+  font-size: 11px;
+  font-weight: var(--font-weight-bold);
+}
+
+.orderCode i {
+  color: var(--color-text-muted);
+
+  font-size: 10px;
+  font-style: normal;
+}
+
+
+/* ======================================================
+   TABLE INFO
+====================================================== */
+
+.tableInfo {
+  min-height: 64px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+
+  margin-bottom: 14px;
+}
+
+
+/* ======================================================
+   TABLE AVATAR
+====================================================== */
+
+.tableAvatar {
+  width: 45px;
+  height: 45px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  flex-shrink: 0;
+
+  color: #ffffff;
+
+  background: var(--color-primary);
+
+  border-radius: 11px;
+
+  box-shadow:
+          0 4px 10px
+          rgba(79, 70, 229, 0.17);
+
+  font-size: 12px;
+  font-weight: var(--font-weight-bold);
+}
+
+
+/* ======================================================
+   TABLE CONTENT
+====================================================== */
+
+.tableContent {
+  min-width: 0;
+
+  flex: 1;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 2px;
+}
+
+.tableContent > span {
+  color: var(--color-text-muted);
+
+  font-size: 9px;
+}
+
+.tableContent > strong {
+  overflow: hidden;
+
+  color: var(--color-text-primary);
+
+  font-size: 12px;
+  font-weight: var(--font-weight-bold);
+
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.tableContent small {
+  overflow: hidden;
+
+  color: var(--color-text-secondary);
+
+  font-size: 9px;
+
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+
+/* ======================================================
+   COMPACT PROGRESS
+====================================================== */
+
+.compactProgress {
+  min-width: 115px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 8px;
+
+  flex-shrink: 0;
+
+  padding: 6px 8px;
+
+  border: 1px solid transparent;
+  border-radius: 11px;
+}
+
+
+/* ======================================================
+   PROCESSING
+====================================================== */
+
+.processingProgress {
+  color: #b45309;
+
+  background: #fffaf0;
+
+  border-color: #fde7b1;
+}
+
+
+/* ======================================================
+   SERVED
+====================================================== */
+
+.servedProgress {
+  color: #047857;
+
+  background: #ecfdf5;
+
+  border-color: #a7f3d0;
+}
+
+
+/* ======================================================
+   PAYMENT
+====================================================== */
+
+.paymentProgress {
+  color: #4f46e5;
+
+  background: #eef2ff;
+
+  border-color: #c7d2fe;
+}
+
+
+/* ======================================================
+   MINI PROGRESS CIRCLE
+====================================================== */
+
+.miniProgressCircle {
+  width: 37px;
+  height: 37px;
+
+  display: grid;
+  place-items: center;
+
+  flex-shrink: 0;
+
+  padding: 4px;
+
+  background:
+          conic-gradient(
+                  currentColor var(--progress),
+                  #e5e7eb 0
+          );
+
+  border-radius: 50%;
+}
+
+.miniProgressCircle > div {
+  width: 100%;
+  height: 100%;
+
+  display: grid;
+  place-items: center;
+
+  background: var(--color-surface);
+
+  border-radius: 50%;
+}
+
+.miniProgressCircle strong {
+  color: currentColor;
+
+  font-size: 8px;
+  font-weight: var(--font-weight-extrabold);
+}
+
+
+/* ======================================================
+   PROGRESS INFO
+====================================================== */
+
+.compactProgressInfo {
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 2px;
+}
+
+.compactProgressInfo strong {
+  overflow: hidden;
+
+  color: currentColor;
+
+  font-size: 9px;
+  font-weight: var(--font-weight-bold);
+
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.compactProgressInfo span {
+  color: var(--color-text-secondary);
+
+  font-size: 8px;
+}
+
+
+/* ======================================================
+   ITEMS PANEL
+====================================================== */
+
+.itemsPanel {
+  overflow: hidden;
+
+  background: #ffffff;
+
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+}
+
+
+/* ======================================================
+   ITEM HEADER
+====================================================== */
+
+.itemHeader {
+  display: grid;
+
+  grid-template-columns:
+    minmax(0, 1fr)
+    40px
+    74px;
+
+  align-items: center;
+
+  gap: 7px;
+
+  min-height: 35px;
+
+  padding: 0 12px;
+
+  color: var(--color-text-muted);
+
+  background: var(--color-background-soft);
+
+  border-bottom: 1px solid var(--color-border-light);
+
+  font-size: 9px;
+}
+
+.itemHeader span:nth-child(2) {
+  text-align: center;
+}
+
+.itemHeader span:last-child {
+  text-align: right;
+}
+
+
+/* ======================================================
+   ITEM SCROLL
+====================================================== */
+
+.itemScroll {
+  height: 138px;
+  min-height: 138px;
+
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  scrollbar-width: thin;
+  scrollbar-color: #64748b transparent;
+}
+
+.itemScroll::-webkit-scrollbar {
+  width: 4px;
+}
+
+.itemScroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.itemScroll::-webkit-scrollbar-thumb {
+  background: #64748b;
+  border-radius: 999px;
+}
+
+
+/* ======================================================
+   ITEM
+====================================================== */
+
+.item {
+  min-height: 43px;
+
+  display: grid;
+
+  grid-template-columns:
+    22px
+    minmax(0, 1fr)
+    40px
+    74px;
+
+  align-items: center;
+
+  gap: 6px;
+
+  padding: 7px 10px;
+
+  border-bottom: 1px solid var(--color-border-light);
+
+  transition:
+          background var(--transition-fast);
+}
+
+.item:last-child {
+  border-bottom: none;
+}
+
+
+/* ======================================================
+   READY ITEM
+====================================================== */
+
+.readyItem {
+  background: #fffdf5;
+}
+
+.readyItem:hover {
+  background: #fff9e6;
+}
+
+
+/* ======================================================
+   SERVED ITEM
+====================================================== */
+
+.servedItem {
+  background: #ffffff;
+}
+
+.servedItem .itemName > span {
+  color: var(--color-text-primary);
+}
+
+
+/* ======================================================
+   CHECK BUTTON
+====================================================== */
+
+.check {
+  width: 22px;
+  height: 22px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0;
+
+  color: #10b981;
+
+  background: transparent;
+
+  border: none;
+  border-radius: 6px;
+
+  cursor: pointer;
+
+  transition:
+          color var(--transition-fast),
+          background var(--transition-fast),
+          transform var(--transition-fast);
+}
+
+.check:not(:disabled):hover {
+  color: #059669;
+
+  background: #ecfdf5;
+
+  transform: scale(1.06);
+}
+
+.check:disabled {
+  color: #cbd5e1;
+
+  cursor: default;
+}
+
+.servedItem .check {
+  color: #34d399;
+}
+
+
+/* ======================================================
+   ITEM NAME
+====================================================== */
+
+.itemName {
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 2px;
+}
+
+.itemName > span {
+  overflow: hidden;
+
+  color: var(--color-text-primary);
+
+  font-size: 10px;
+  font-weight: var(--font-weight-semibold);
+
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.itemName small {
+  overflow: hidden;
+
+  color: var(--color-text-muted);
+
+  font-size: 8px;
+
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+
+/* ======================================================
+   ITEM QUANTITY
+====================================================== */
+
+.itemQuantity {
+  color: var(--color-text-primary);
+
+  font-size: 10px;
+  font-weight: var(--font-weight-bold);
+
+  text-align: center;
+}
+
+
+/* ======================================================
+   ITEM PRICE
+====================================================== */
+
+.itemPrice {
+  color: var(--color-text-primary);
+
+  font-size: 10px;
+  font-weight: var(--font-weight-medium);
+
+  text-align: right;
+
+  white-space: nowrap;
+}
+
+
+/* ======================================================
+   TOTAL
+====================================================== */
+
+.total {
+  min-height: 45px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 10px;
+
+  padding: 9px 12px;
+
+  background: var(--color-surface);
+
+  border-top: 1px solid var(--color-border);
+}
+
+.total span {
+  color: var(--color-text-primary);
+
+  font-size: 11px;
+  font-weight: var(--font-weight-bold);
+}
+
+.total strong {
+  color: var(--color-text-primary);
+
+  font-size: 14px;
+  font-weight: var(--font-weight-extrabold);
+
+  white-space: nowrap;
+}
+
+
+/* ======================================================
+   ACTIONS
+====================================================== */
+
+.actions {
+  display: grid;
+
+  grid-template-columns:
+    minmax(0, 1fr)
+    minmax(0, 1.15fr);
+
+  gap: 9px;
+
+  margin-top: 14px;
+}
+
+.actions button {
+  min-height: 38px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 6px;
+
+  padding: 0 10px;
+
+  border-radius: 10px;
+
+  font-family: inherit;
+  font-size: 10px;
+  font-weight: var(--font-weight-bold);
+
+  cursor: pointer;
+
+  transition:
+          background var(--transition-fast),
+          color var(--transition-fast),
+          border-color var(--transition-fast),
+          transform var(--transition-fast),
+          box-shadow var(--transition-fast);
+}
+
+
+/* ======================================================
+   DETAIL BUTTON
+====================================================== */
+
+.detailButton {
+  color: var(--color-primary);
+
+  background: var(--color-surface);
+
+  border: 1px solid var(--color-primary);
+}
+
+.detailButton:hover {
+  color: #ffffff;
+
+  background: var(--color-primary);
+
+  transform: translateY(-1px);
+}
+
+
+/* ======================================================
+   PAYMENT BUTTON
+====================================================== */
+
+.paymentButton {
+  color: #ffffff;
+
+  background: var(--color-primary);
+
+  border: 1px solid var(--color-primary);
+
+  box-shadow:
+          0 3px 8px
+          rgba(79, 70, 229, 0.14);
+}
+
+.paymentButton:hover {
+  background: var(--color-primary-hover);
+
+  border-color: var(--color-primary-hover);
+
+  transform: translateY(-1px);
+
+  box-shadow:
+          0 5px 12px
+          rgba(79, 70, 229, 0.2);
+}
+
+
+/* ======================================================
+   EMPTY
+====================================================== */
+
+.empty,
 .noData {
-  margin-top: 16px;
-  padding: 50px 20px;
+  min-height: 300px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  padding: 30px;
 
   color: var(--color-text-muted);
 
@@ -27,28 +939,131 @@
   border-radius: var(--radius-lg);
 }
 
-@media (max-width: 1280px) {
+.empty {
+  margin-top: 16px;
+}
+
+.empty svg {
+  color: var(--color-text-muted);
+}
+
+.empty h3 {
+  margin: 10px 0 3px;
+
+  color: var(--color-text-primary);
+
+  font-size: 14px;
+}
+
+.empty p {
+  margin: 0;
+
+  font-size: 9px;
+}
+
+.noData {
+  margin-top: 16px;
+
+  font-size: 10px;
+}
+
+
+/* ======================================================
+   RESPONSIVE - LARGE
+====================================================== */
+
+@media (max-width: 1400px) {
   .orderGrid {
     grid-template-columns:
       repeat(3, minmax(0, 1fr));
   }
 }
 
-@media (max-width: 850px) {
+
+/* ======================================================
+   RESPONSIVE - TABLET
+====================================================== */
+
+@media (max-width: 1050px) {
+  .filterCard {
+    align-items: stretch;
+
+    flex-direction: column;
+  }
+
+  .searchBox {
+    width: 100%;
+  }
+
+  .filterGroup {
+    width: 100%;
+  }
+
   .orderGrid {
     grid-template-columns:
       repeat(2, minmax(0, 1fr));
   }
 }
 
-@media (max-width: 650px) {
+
+/* ======================================================
+   RESPONSIVE - MOBILE
+====================================================== */
+
+@media (max-width: 700px) {
   .orderView {
     padding: 14px;
   }
-}
 
-@media (max-width: 480px) {
   .orderGrid {
     grid-template-columns: 1fr;
+  }
+
+  .tableInfo {
+    flex-wrap: wrap;
+  }
+
+  .compactProgress {
+    width: 100%;
+
+    margin-top: 4px;
+  }
+}
+
+
+/* ======================================================
+   VERY SMALL
+====================================================== */
+
+@media (max-width: 480px) {
+  .filterCard {
+    padding: 9px;
+  }
+
+  .filterGroup {
+    justify-content: flex-start;
+  }
+
+  .orderCard {
+    padding: 12px;
+  }
+
+  .actions {
+    grid-template-columns: 1fr;
+  }
+
+  .itemHeader {
+    grid-template-columns:
+      minmax(0, 1fr)
+      34px
+      65px;
+  }
+
+  .item {
+    grid-template-columns:
+      22px
+      minmax(0, 1fr)
+      34px
+      65px;
   }
 }

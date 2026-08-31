@@ -18,22 +18,22 @@ function RestaurantSummary({
 
   return (
     <aside className={styles.restaurantSummary}>
-      <h3>Restaurant Summary</h3>
+      <h3>Tổng quan về nhà hàng</h3>
 
       <div className={styles.summaryTableBox}>
         <div className={styles.summaryTotal}>
-          <span>Total Tables</span>
+          <span>Tổng số bàn</span>
           <strong>{tables.length}</strong>
         </div>
 
         <div className={styles.summaryNumbers}>
           <div>
-            <span>AVAILABLE</span>
+            <span>Bàn trống</span>
             <strong>{availableCount}</strong>
           </div>
 
           <div>
-            <span>OCCUPIED</span>
+            <span>Đang có khách</span>
             <strong>{occupiedCount}</strong>
           </div>
         </div>
@@ -42,7 +42,7 @@ function RestaurantSummary({
       <div className={styles.summaryChannel}>
         <div>
           <ShoppingBag size={17} />
-          <span>Take Away</span>
+          <span>Mang về</span>
         </div>
 
         <strong>{takeawayCount}</strong>
@@ -51,7 +51,7 @@ function RestaurantSummary({
       <div className={styles.summaryChannel}>
         <div>
           <Bike size={17} />
-          <span>Delivery</span>
+          <span>Giao hàng</span>
         </div>
 
         <strong>{deliveryCount}</strong>

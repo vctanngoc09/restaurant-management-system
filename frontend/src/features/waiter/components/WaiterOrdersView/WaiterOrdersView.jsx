@@ -285,6 +285,11 @@ function WaiterOrdersView({
 
             const waitingPayment = order.status === "pending_payment";
 
+            const processing = order.status === "cooking";
+
+            const canRequestPayment =
+              processing && allServed && !waitingPayment;
+
             // ==================================================
             // PROGRESS
             // ==================================================
@@ -509,7 +514,7 @@ function WaiterOrdersView({
                   <button
                     type="button"
                     className={styles.paymentButton}
-                    disabled={!allServed || waitingPayment}
+                    disabled={!canRequestPayment}
                     onClick={() => onRequestPayment(order.id)}
                   >
                     <CreditCard size={16} />

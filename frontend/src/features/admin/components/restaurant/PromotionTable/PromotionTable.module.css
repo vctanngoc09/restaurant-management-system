@@ -1,0 +1,445 @@
+/* ==================================================
+   TABLE WRAPPER
+================================================== */
+
+.wrapper {
+  width: 100%;
+  
+
+  overflow-x: auto;
+
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+/* ==================================================
+   TABLE
+================================================== */
+
+.table {
+  width: 100%;
+
+  min-width: 1080px;
+
+  border-collapse: collapse;
+
+  font-size: 11px;
+}
+
+/* ==================================================
+   HEADER
+================================================== */
+
+.table thead {
+  color: var(--color-text-secondary);
+
+  background: var(--color-background-soft);
+
+  border-bottom: 1px solid var(--color-border);
+}
+
+.table th {
+  padding: 13px;
+
+  color: var(--color-text-secondary);
+
+  font-size: 10px;
+  font-weight: var(--font-weight-bold);
+
+  text-align: left;
+  text-transform: uppercase;
+
+  white-space: nowrap;
+}
+
+/* ==================================================
+   BODY
+================================================== */
+
+.table td {
+  padding: 11px 13px;
+
+  color: var(--color-text-secondary);
+
+  border-bottom: 1px solid var(--color-border-light);
+
+  vertical-align: middle;
+}
+
+.table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.table tbody tr {
+  transition: background var(--transition-fast);
+}
+
+.table tbody tr:hover {
+  background: #f8fafc;
+}
+
+/* ==================================================
+   CODE
+================================================== */
+
+.code {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-width: 78px;
+  height: 29px;
+
+  padding: 0 9px;
+
+  color: var(--color-primary);
+
+  background: var(--color-primary-light);
+
+  border: 1px solid rgba(79, 70, 229, 0.12);
+
+  border-radius: var(--radius-md);
+
+  font-size: 10px;
+  font-weight: var(--font-weight-extrabold);
+
+  letter-spacing: 0.3px;
+
+  white-space: nowrap;
+}
+
+/* ==================================================
+   PROMOTION INFO
+================================================== */
+
+.promotionInfo {
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 3px;
+}
+
+.promotionInfo strong {
+  max-width: 220px;
+
+  overflow: hidden;
+
+  color: var(--color-text-primary);
+
+  font-size: 11px;
+  font-weight: var(--font-weight-bold);
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.promotionInfo span {
+  max-width: 240px;
+
+  overflow: hidden;
+
+  color: var(--color-text-muted);
+
+  font-size: 9px;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ==================================================
+   DISCOUNT
+================================================== */
+
+.discountInfo {
+  display: flex;
+  flex-direction: column;
+
+  gap: 2px;
+}
+
+.discountInfo strong {
+  color: var(--color-success);
+
+  font-size: 12px;
+  font-weight: var(--font-weight-extrabold);
+
+  white-space: nowrap;
+}
+
+.discountInfo span {
+  color: var(--color-text-muted);
+
+  font-size: 9px;
+
+  white-space: nowrap;
+}
+
+/* ==================================================
+   CONDITION
+================================================== */
+
+.conditionInfo {
+  display: flex;
+  flex-direction: column;
+
+  gap: 3px;
+}
+
+.conditionInfo span {
+  color: var(--color-text-secondary);
+
+  font-size: 10px;
+
+  white-space: nowrap;
+}
+
+.conditionInfo span strong {
+  color: var(--color-text-primary);
+
+  font-weight: var(--font-weight-bold);
+}
+
+.conditionInfo small {
+  color: var(--color-text-muted);
+
+  font-size: 9px;
+
+  white-space: nowrap;
+}
+
+/* ==================================================
+   DATE
+================================================== */
+
+.dateInfo {
+  display: flex;
+  align-items: center;
+
+  gap: 8px;
+}
+
+.dateInfo > svg {
+  flex-shrink: 0;
+
+  color: var(--color-text-muted);
+}
+
+.dateInfo > div {
+  display: flex;
+  flex-direction: column;
+
+  gap: 2px;
+}
+
+.dateInfo span {
+  color: var(--color-text-primary);
+
+  font-size: 10px;
+  font-weight: var(--font-weight-semibold);
+
+  white-space: nowrap;
+}
+
+.dateInfo small {
+  color: var(--color-text-muted);
+
+  font-size: 9px;
+
+  white-space: nowrap;
+}
+
+/* ==================================================
+   USAGE
+================================================== */
+
+.usageInfo {
+  display: flex;
+  align-items: baseline;
+
+  gap: 3px;
+
+  white-space: nowrap;
+}
+
+.usageInfo strong {
+  color: var(--color-text-primary);
+
+  font-size: 12px;
+  font-weight: var(--font-weight-extrabold);
+}
+
+.usageInfo span {
+  color: var(--color-text-muted);
+
+  font-size: 9px;
+}
+
+/* ==================================================
+   STATUS
+================================================== */
+
+.activeStatus,
+.inactiveStatus {
+  width: 90px;
+  height: 29px;
+
+  box-sizing: border-box;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0 8px;
+
+  border-radius: var(--radius-md);
+
+  font-size: 10px;
+  font-weight: var(--font-weight-semibold);
+
+  white-space: nowrap;
+}
+
+.activeStatus {
+  color: #047857;
+
+  background: #ecfdf3;
+
+  border: 1px solid #a7f3d0;
+}
+
+.inactiveStatus {
+  color: #667085;
+
+  background: #f2f4f7;
+
+  border: 1px solid #d0d5dd;
+}
+
+/* ==================================================
+   ACTION
+================================================== */
+
+.actionsHeader {
+  text-align: right !important;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+
+  gap: 6px;
+}
+
+.editButton,
+.disableButton,
+.enableButton {
+  width: 32px;
+  height: 32px;
+
+  display: grid;
+  place-items: center;
+
+  flex-shrink: 0;
+
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+
+  cursor: pointer;
+
+  transition:
+    background var(--transition-fast),
+    color var(--transition-fast),
+    border-color var(--transition-fast),
+    transform var(--transition-fast);
+}
+
+/* ==================================================
+   EDIT
+================================================== */
+
+.editButton {
+  color: var(--color-primary);
+
+  background: var(--color-primary-light);
+
+  border-color: rgba(79, 70, 229, 0.12);
+}
+
+.editButton:hover {
+  background: rgba(79, 70, 229, 0.15);
+
+  transform: translateY(-1px);
+}
+
+/* ==================================================
+   DISABLE
+================================================== */
+
+.disableButton {
+  color: var(--color-danger);
+
+  background: var(--color-danger-light);
+
+  border-color: rgba(220, 38, 38, 0.12);
+}
+
+.disableButton:hover {
+  background: rgba(220, 38, 38, 0.13);
+
+  transform: translateY(-1px);
+}
+
+/* ==================================================
+   ENABLE
+================================================== */
+
+.enableButton {
+  color: var(--color-success);
+
+  background: var(--color-success-light);
+
+  border-color: rgba(5, 150, 105, 0.12);
+}
+
+.enableButton:hover {
+  background: rgba(5, 150, 105, 0.13);
+
+  transform: translateY(-1px);
+}
+
+/* ==================================================
+   EMPTY
+================================================== */
+
+.empty {
+  padding: 40px !important;
+
+  color: var(--color-text-muted);
+
+  text-align: center;
+}
+
+/* ==================================================
+   SCROLLBAR
+================================================== */
+
+.wrapper::-webkit-scrollbar {
+  height: 6px;
+}
+
+.wrapper::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.wrapper::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+
+  border-radius: 999px;
+}
+
+.wrapper::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}

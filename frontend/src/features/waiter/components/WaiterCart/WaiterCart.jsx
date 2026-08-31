@@ -231,7 +231,7 @@ function WaiterCart({
                       >
                         <MessageSquare size={13} />
 
-                        {item.note ? `Ghi chú: ${item.note}` : "+ Thêm ghi chú"}
+                        {item.note ? `Ghi chú: ${item.note}` : "Thêm ghi chú"}
                       </button>
                     )}
                   </article>

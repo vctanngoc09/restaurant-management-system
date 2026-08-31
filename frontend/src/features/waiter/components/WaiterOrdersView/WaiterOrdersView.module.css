@@ -590,6 +590,8 @@
 ====================================================== */
 
 .itemScroll {
+  min-height: calc(42px * 3);
+
   max-height: calc(42px * 3);
 
   overflow-y: auto;

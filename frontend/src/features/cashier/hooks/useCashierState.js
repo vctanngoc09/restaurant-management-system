@@ -1,94 +1,890 @@
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
-import {
-  CASHIER_MENU_ITEMS,
-  CASHIER_ORDERS,
-  CASHIER_TABLES,
-} from "../../../data/cashierMockData";
+import cashierMenuService from "../services/cashierMenuService";
+import cashierTableService from "../services/cashierTableService";
+import cashierOrderService from "../services/cashierOrderService";
+
+// ==================================================
+// NORMALIZE PRODUCT STATUS
+// ==================================================
+
+function normalizeProductStatus(status) {
+  switch (status) {
+    case "AVAILABLE":
+      return "in_stock";
+
+    case "OUT_OF_STOCK":
+      return "out_of_stock";
+
+    case "INACTIVE":
+      return "inactive";
+
+    default:
+      return "out_of_stock";
+  }
+}
+
+// ==================================================
+// NORMALIZE MENU ITEM
+// ==================================================
+
+function normalizeMenuItem(product) {
+  return {
+    id: product.id,
+
+    name: product.name,
+
+    price: Number(product.price) || 0,
+
+    urlImg: product.urlImg || null,
+
+    categoryId: product.categoryId,
+
+    categoryName: product.categoryName || "Chưa phân loại",
+
+    status: normalizeProductStatus(product.status),
+
+    productStatus: product.status,
+  };
+}
+
+// ==================================================
+// NORMALIZE TABLE STATUS
+// ==================================================
+
+function normalizeTableStatus(status) {
+  switch (status) {
+    case "AVAILABLE":
+      return "empty";
+
+    case "OCCUPIED":
+      return "occupied";
+
+    case "MAINTENANCE":
+      return "maintenance";
+
+    case "INACTIVE":
+      return "inactive";
+
+    default:
+      return status?.toLowerCase() || "empty";
+  }
+}
+
+// ==================================================
+// NORMALIZE AREA
+// ==================================================
+
+function normalizeArea(areaName) {
+  const value = areaName?.trim().toLowerCase() || "";
+
+  if (value.includes("ngoài")) {
+    return "outdoor";
+  }
+
+  return "indoor";
+}
+
+// ==================================================
+// NORMALIZE TABLE
+// ==================================================
+
+function normalizeTable(table) {
+  return {
+    id: table.id,
+
+    number: table.tableNumber,
+
+    status: normalizeTableStatus(table.status),
+
+    areaId: table.areaId,
+
+    areaName: table.areaName || "Chưa phân khu",
+
+    area: normalizeArea(table.areaName),
+
+    qrToken: table.qrToken,
+
+    // Backend chưa có guestCount.
+    guestCount: table.guestCount || 0,
+
+    itemCount: 0,
+
+    currentTotal: 0,
+
+    currentOrderId: null,
+
+    activeOrder: null,
+  };
+}
+
+// ==================================================
+// NORMALIZE ORDER STATUS
+// ==================================================
+
+function normalizeOrderStatus(status) {
+  switch (status) {
+    case "PENDING":
+      return "new";
+
+    case "PROCESSING":
+      return "cooking";
+
+    case "AWAITING_PAYMENT":
+      return "pending_payment";
+
+    case "COMPLETED":
+      return "completed";
+
+    case "CANCELLED":
+      return "cancelled";
+
+    default:
+      return status?.toLowerCase() || "new";
+  }
+}
+
+// ==================================================
+// NORMALIZE ORDER TYPE
+// ==================================================
+
+function normalizeOrderType(type) {
+  switch (type) {
+    case "DINE_IN":
+      return "dine_in";
+
+    case "TAKE_AWAY":
+      return "take_away";
+
+    case "DELIVERY":
+      return "delivery";
+
+    default:
+      return type?.toLowerCase() || "dine_in";
+  }
+}
+
+// ==================================================
+// NORMALIZE ORDER ITEM
+// ==================================================
+
+function normalizeOrderItem(item) {
+  const price = Number(item?.price) || 0;
+
+  const quantity = Number(item?.quantity) || 0;
+
+  return {
+    id: item?.id,
+
+    productId: item?.productId,
+
+    menuItemId: item?.productId,
+
+    name: item?.productName || "Món ăn",
+
+    price,
+
+    quantity,
+
+    note: item?.note || "",
+
+    status: item?.status?.toLowerCase() || "pending",
+
+    lineTotal: Number(item?.lineTotal) || price * quantity,
+  };
+}
+
+// ==================================================
+// BUILD ORDER PROGRESS
+// ==================================================
+
+function getOrderProgress(status) {
+  switch (status) {
+    case "new":
+      return {
+        progressPercentage: 20,
+        progressLabel: "20% Mới tạo",
+      };
+
+    case "cooking":
+      return {
+        progressPercentage: 60,
+        progressLabel: "60% Đang xử lý",
+      };
+
+    case "pending_payment":
+      return {
+        progressPercentage: 90,
+        progressLabel: "90% Chờ thanh toán",
+      };
+
+    case "completed":
+      return {
+        progressPercentage: 100,
+        progressLabel: "100% Hoàn thành",
+      };
+
+    case "cancelled":
+      return {
+        progressPercentage: 0,
+        progressLabel: "Đã hủy",
+      };
+
+    default:
+      return {
+        progressPercentage: 10,
+        progressLabel: "10% Mới tạo",
+      };
+  }
+}
+
+// ==================================================
+// NORMALIZE ORDER
+// ==================================================
+
+function normalizeOrder(order) {
+  if (!order) {
+    return null;
+  }
+
+  const items = Array.isArray(order.items)
+    ? order.items.map(normalizeOrderItem)
+    : [];
+
+  const totalPrice = Number(order.totalPrice) || 0;
+
+  const orderType = normalizeOrderType(order.orderType);
+
+  const status = normalizeOrderStatus(order.status);
+
+  const { progressPercentage, progressLabel } = getOrderProgress(status);
+
+  let orderPrefix = "DI";
+
+  if (orderType === "take_away") {
+    orderPrefix = "TA";
+  }
+
+  if (orderType === "delivery") {
+    orderPrefix = "DL";
+  }
+
+  return {
+    // ==================================================
+    // IDS
+    // ==================================================
+
+    id: `#${orderPrefix}${String(order.id).padStart(3, "0")}`,
+
+    backendId: order.id,
+
+    // ==================================================
+    // GENERAL
+    // ==================================================
+
+    createdAt: order.createdAt,
+
+    orderType,
+
+    status,
+
+    progressPercentage,
+
+    progressLabel,
+
+    note: order.note || "",
+
+    // ==================================================
+    // TABLE
+    // ==================================================
+
+    tableId: order.tableId,
+
+    tableNumber: order.tableNumber,
+
+    tableName: order.tableNumber
+      ? `Bàn ${order.tableNumber}`
+      : orderType === "take_away"
+        ? "Mang về"
+        : orderType === "delivery"
+          ? "Giao hàng"
+          : "Tại chỗ",
+
+    // ==================================================
+    // STAFF
+    // ==================================================
+
+    waiterName: order.staffName || "Chưa xác định",
+
+    staffName: order.staffName || "Chưa xác định",
+
+    staffId: order.staffId,
+
+    // ==================================================
+    // CUSTOMER
+    // ==================================================
+
+    customerName: order.shippingDetail?.customerName || "",
+
+    shippingDetail: order.shippingDetail || null,
+
+    // Backend hiện chưa có.
+    guestCount: order.guestCount || 0,
+
+    // ==================================================
+    // MONEY
+    //
+    // Backend totalPrice hiện là
+    // tổng tiền items.
+    // ==================================================
+
+    subtotal: totalPrice,
+
+    vatAmount: 0,
+
+    totalAmount: totalPrice,
+
+    // ==================================================
+    // ITEMS
+    // ==================================================
+
+    items,
+  };
+}
+
+// ==================================================
+// BUILD ORDER ITEM REQUEST
+//
+// ĐẶT NGOÀI normalizeOrder()
+// ==================================================
+
+function buildOrderItemsRequest(cartItems) {
+  return cartItems.map((item) => ({
+    productId: item.menuItem.id,
+
+    quantity: item.quantity,
+
+    note: item.note?.trim() || null,
+  }));
+}
+
+// ==================================================
+// FRONTEND TYPE -> BACKEND TYPE
+//
+// ĐẶT NGOÀI normalizeOrder()
+// ==================================================
+
+function toBackendOrderType(orderType) {
+  switch (orderType) {
+    case "dine_in":
+      return "DINE_IN";
+
+    case "take_away":
+      return "TAKE_AWAY";
+
+    case "delivery":
+      return "DELIVERY";
+
+    default:
+      return null;
+  }
+}
+
+// ==================================================
+// CASHIER STATE
+// ==================================================
 
 const useCashierState = () => {
+  // ==================================================
+  // TAB
+  // ==================================================
+
   const [activeTab, setActiveTab] = useState("tables");
 
-  const [tables, setTables] = useState(CASHIER_TABLES);
-  const [orders, setOrders] = useState(CASHIER_ORDERS);
-  const [menuItems] = useState(CASHIER_MENU_ITEMS);
+  // ==================================================
+  // TABLE
+  // ==================================================
+
+  const [tables, setTables] = useState([]);
+
+  const [tablesLoading, setTablesLoading] = useState(true);
+
+  const [tablesError, setTablesError] = useState(null);
+
+  // ==================================================
+  // ORDERS
+  // ==================================================
+
+  const [orders, setOrders] = useState([]);
+
+  // ==================================================
+  // MENU
+  // ==================================================
+
+  const [menuItems, setMenuItems] = useState([]);
+
+  const [menuLoading, setMenuLoading] = useState(true);
+
+  const [menuError, setMenuError] = useState(null);
+
+  // ==================================================
+  // MODAL
+  // ==================================================
 
   const [activeModal, setActiveModal] = useState("none");
 
   const [selectedTable, setSelectedTable] = useState(null);
+
   const [selectedOrder, setSelectedOrder] = useState(null);
 
+  // ==================================================
+  // DRAFT
+  // ==================================================
+
   const [draftOrderType, setDraftOrderType] = useState("dine_in");
+
   const [draftGuestCount, setDraftGuestCount] = useState(2);
+
+  // ==================================================
+  // LOAD ACTIVE DINE-IN ORDERS
+  // ==================================================
+
+  const loadActiveOrders = useCallback(async (currentTables) => {
+    const occupiedTables = currentTables.filter(
+      (table) => table.status === "occupied",
+    );
+
+    // ==================================================
+    // NO OCCUPIED TABLE
+    // ==================================================
+
+    if (occupiedTables.length === 0) {
+      /*
+       * Chỉ xóa dine-in.
+       *
+       * Không xóa TAKE_AWAY
+       * đã load từ API.
+       */
+      setOrders((prev) =>
+        prev.filter((order) => order.orderType !== "dine_in"),
+      );
+
+      setTables(currentTables);
+
+      return;
+    }
+
+    // ==================================================
+    // LOAD ACTIVE ORDER FOR EACH TABLE
+    // ==================================================
+
+    const results = await Promise.allSettled(
+      occupiedTables.map(async (table) => {
+        const response = await cashierOrderService.getActiveByTable(table.id);
+
+        const order = normalizeOrder(response?.data);
+
+        return {
+          tableId: table.id,
+
+          order,
+        };
+      }),
+    );
+
+    // ==================================================
+    // BUILD ORDERS
+    // ==================================================
+
+    const activeOrders = [];
+
+    results.forEach((result, index) => {
+      if (result.status === "fulfilled" && result.value.order) {
+        activeOrders.push(result.value.order);
+
+        return;
+      }
+
+      const table = occupiedTables[index];
+
+      console.warn(
+        `Không lấy được active order của bàn ${table.number}:`,
+        result.status === "rejected" ? result.reason : "Order rỗng",
+      );
+    });
+
+    // ==================================================
+    // REPLACE ONLY DINE-IN
+    // ==================================================
+
+    setOrders((prev) => [
+      ...activeOrders,
+
+      ...prev.filter((order) => order.orderType !== "dine_in"),
+    ]);
+
+    // ==================================================
+    // ENRICH TABLE
+    // ==================================================
+
+    const updatedTables = currentTables.map((table) => {
+      const activeOrder = activeOrders.find(
+        (order) => String(order.tableId) === String(table.id),
+      );
+
+      if (!activeOrder) {
+        return {
+          ...table,
+
+          itemCount: 0,
+
+          currentTotal: 0,
+
+          currentOrderId: null,
+
+          activeOrder: null,
+        };
+      }
+
+      const itemCount = activeOrder.items.reduce(
+        (total, item) => total + item.quantity,
+        0,
+      );
+
+      return {
+        ...table,
+
+        status: "occupied",
+
+        itemCount,
+
+        currentTotal: activeOrder.totalAmount,
+
+        currentOrderId: activeOrder.id,
+
+        activeOrder,
+      };
+    });
+
+    setTables(updatedTables);
+  }, []);
+
+  // ==================================================
+  // LOAD ACTIVE TAKE AWAY
+  //
+  // GET
+  // /api/cashier/orders/type/TAKE_AWAY/active
+  // ==================================================
+
+  const loadTakeAwayOrders = useCallback(async () => {
+    try {
+      const response = await cashierOrderService.getActiveByType("TAKE_AWAY");
+
+      const orderList = Array.isArray(response?.data) ? response.data : [];
+
+      const normalizedOrders = orderList.map(normalizeOrder).filter(Boolean);
+
+      setOrders((prev) => [
+        ...prev.filter((order) => order.orderType !== "take_away"),
+
+        ...normalizedOrders,
+      ]);
+    } catch (error) {
+      console.error("LOAD TAKE AWAY ORDERS ERROR:", error);
+    }
+  }, []);
+
+  // ==================================================
+  // LOAD MENU
+  // ==================================================
+
+  const loadMenu = useCallback(async () => {
+    try {
+      setMenuLoading(true);
+
+      setMenuError(null);
+
+      const response = await cashierMenuService.getAll();
+
+      const productList = Array.isArray(response?.data) ? response.data : [];
+
+      const normalizedMenu = productList
+        .map(normalizeMenuItem)
+        .filter((item) => item.productStatus !== "INACTIVE");
+
+      setMenuItems(normalizedMenu);
+    } catch (error) {
+      console.error("LOAD CASHIER MENU ERROR:", error);
+
+      const message =
+        error.response?.data?.message ||
+        error.message ||
+        "Không thể tải thực đơn.";
+
+      setMenuError(message);
+
+      setMenuItems([]);
+
+      toast.error(message);
+    } finally {
+      setMenuLoading(false);
+    }
+  }, []);
+
+  // ==================================================
+  // LOAD TABLES
+  // ==================================================
+
+  const loadTables = useCallback(async () => {
+    try {
+      setTablesLoading(true);
+
+      setTablesError(null);
+
+      const response = await cashierTableService.getAll({
+        page: 0,
+        size: 50,
+      });
+
+      const pageData = response?.data;
+
+      const tableList = Array.isArray(pageData)
+        ? pageData
+        : pageData?.content || pageData?.items || [];
+
+      const normalizedTables = tableList
+        .map(normalizeTable)
+        .filter((table) => table.status !== "inactive");
+
+      setTables(normalizedTables);
+
+      await loadActiveOrders(normalizedTables);
+    } catch (error) {
+      console.error("LOAD CASHIER TABLES ERROR:", error);
+
+      const message =
+        error.response?.data?.message ||
+        error.message ||
+        "Không thể tải sơ đồ bàn.";
+
+      setTablesError(message);
+
+      toast.error(message);
+    } finally {
+      setTablesLoading(false);
+    }
+  }, [loadActiveOrders]);
+
+  // ==================================================
+  // INITIAL LOAD
+  // ==================================================
+
+  useEffect(() => {
+    loadTables();
+
+    loadMenu();
+
+    loadTakeAwayOrders();
+  }, [loadTables, loadMenu, loadTakeAwayOrders]);
+
+  // ==================================================
+  // CLOSE MODAL
+  // ==================================================
 
   const closeModal = () => {
     setActiveModal("none");
   };
 
+  // ==================================================
+  // OPEN NEW ORDER
+  // ==================================================
+
   const openNewOrder = () => {
     setSelectedTable(null);
+
     setSelectedOrder(null);
 
     setDraftOrderType("dine_in");
+
     setDraftGuestCount(2);
 
     setActiveModal("newOrder");
   };
 
-  const startNewOrder = ({ orderType, tableId = null, guestCount = 1 }) => {
+  // ==================================================
+  // START NEW ORDER
+  //
+  // NewOrderModal
+  // ->
+  // OrderingModal
+  // ==================================================
+
+  const startNewOrder = ({
+    orderType,
+
+    tableId = null,
+
+    guestCount = 1,
+  }) => {
     setDraftOrderType(orderType);
+
     setDraftGuestCount(guestCount);
 
     setSelectedOrder(null);
 
-    if (orderType === "dine_in") {
-      const table = tables.find((item) => item.id === tableId);
+    // ==================================================
+    // DINE IN
+    // ==================================================
 
-      setSelectedTable(table || null);
+    if (orderType === "dine_in") {
+      const table = tables.find((item) => String(item.id) === String(tableId));
+
+      if (!table) {
+        toast.error("Không tìm thấy bàn đã chọn.");
+
+        return;
+      }
+
+      if (table.status !== "empty") {
+        toast.warning(`Bàn ${table.number} hiện không còn trống.`);
+
+        return;
+      }
+
+      setSelectedTable(table);
     } else {
+      // TAKE_AWAY
       setSelectedTable(null);
     }
 
     setActiveModal("ordering");
   };
 
+  // ==================================================
+  // OPEN TABLE
+  // ==================================================
+
   const openTable = (table) => {
-    setSelectedTable(table);
+    // Không mở bàn maintenance/inactive.
+    if (table.status === "maintenance" || table.status === "inactive") {
+      toast.warning(`Bàn ${table.number} hiện không khả dụng.`);
 
-    if (table.status === "occupied") {
-      const order = orders.find(
-        (item) =>
-          item.status !== "completed" &&
-          (item.id === table.currentOrderId || item.tableId === table.id),
-      );
-
-      if (order) {
-        setSelectedOrder(order);
-        setActiveModal("billing");
-        return;
-      }
+      return;
     }
 
-    setSelectedOrder(null);
+    setSelectedTable(table);
+
+    // ==================================================
+    // EMPTY TABLE
+    // ==================================================
+
+    if (table.status !== "occupied") {
+      setSelectedOrder(null);
+
+      setDraftOrderType("dine_in");
+
+      setDraftGuestCount(table.guestCount || 2);
+
+      setActiveModal("ordering");
+
+      return;
+    }
+
+    // ==================================================
+    // FIND ACTIVE ORDER
+    // ==================================================
+
+    const order =
+      table.activeOrder ||
+      orders.find(
+        (item) =>
+          item.status !== "completed" &&
+          String(item.tableId) === String(table.id),
+      );
+
+    if (!order) {
+      toast.error(`Không tìm thấy đơn đang hoạt động của bàn ${table.number}.`);
+
+      return;
+    }
+
+    setSelectedOrder(order);
 
     setDraftOrderType("dine_in");
-    setDraftGuestCount(table.guestCount || 2);
 
-    setActiveModal("ordering");
+    setDraftGuestCount(order.guestCount || table.guestCount || 2);
+
+    // ==================================================
+    // WAITING PAYMENT
+    // ==================================================
+
+    if (order.status === "pending_payment") {
+      setActiveModal("billing");
+
+      return;
+    }
+
+    // ==================================================
+    // PENDING / PROCESSING
+    // ==================================================
+
+    if (order.status === "new" || order.status === "cooking") {
+      setActiveModal("ordering");
+
+      return;
+    }
+
+    toast.warning("Trạng thái đơn hiện tại không cho phép gọi thêm món.");
   };
 
-  const openQuickChannel = (orderType) => {
-    const order = orders.find(
-      (item) => item.orderType === orderType && item.status !== "completed",
-    );
+  // ==================================================
+  // OPEN QUICK CHANNEL
+  //
+  // TAKE AWAY / DELIVERY
+  // ==================================================
 
+  const openQuickChannel = (orderType) => {
     setSelectedTable(null);
+
     setDraftOrderType(orderType);
+
     setDraftGuestCount(1);
 
-    if (order) {
-      setSelectedOrder(order);
+    // ==================================================
+    // DELIVERY
+    // ==================================================
+
+    if (orderType === "delivery") {
+      setSelectedOrder(null);
+
+      setActiveModal("newOrder");
+
+      return;
+    }
+
+    // ==================================================
+    // TAKE AWAY
+    //
+    // Nếu đã có order chờ thanh toán,
+    // mở order đó.
+    // ==================================================
+
+    const existingOrder = orders.find(
+      (order) =>
+        order.orderType === orderType &&
+        order.status !== "completed" &&
+        order.status !== "cancelled",
+    );
+
+    if (existingOrder) {
+      setSelectedOrder(existingOrder);
+
+      if (existingOrder.status === "pending_payment") {
+        setActiveModal("billing");
+
+        return;
+      }
     } else {
       setSelectedOrder(null);
     }
@@ -96,11 +892,17 @@ const useCashierState = () => {
     setActiveModal("ordering");
   };
 
+  // ==================================================
+  // OPEN ORDER DETAILS
+  // ==================================================
+
   const openOrderDetails = (order) => {
     setSelectedOrder(order);
 
     if (order.tableId) {
-      const table = tables.find((item) => item.id === order.tableId);
+      const table = tables.find(
+        (item) => String(item.id) === String(order.tableId),
+      );
 
       setSelectedTable(table || null);
     } else {
@@ -108,16 +910,39 @@ const useCashierState = () => {
     }
 
     setDraftOrderType(order.orderType);
+
     setDraftGuestCount(order.guestCount || 1);
+
+    // ==================================================
+    // WAITING PAYMENT
+    // ==================================================
+
+    if (order.status === "pending_payment") {
+      setActiveModal("billing");
+
+      return;
+    }
 
     setActiveModal("ordering");
   };
 
+  // ==================================================
+  // OPEN BILLING
+  // ==================================================
+
   const openBilling = (order) => {
+    if (!order) {
+      toast.warning("Không tìm thấy đơn hàng.");
+
+      return;
+    }
+
     setSelectedOrder(order);
 
     if (order.tableId) {
-      const table = tables.find((item) => item.id === order.tableId);
+      const table = tables.find(
+        (item) => String(item.id) === String(order.tableId),
+      );
 
       setSelectedTable(table || null);
     } else {
@@ -127,146 +952,445 @@ const useCashierState = () => {
     setActiveModal("billing");
   };
 
-  const saveOrderItems = (cartItems) => {
-    if (!cartItems.length) {
-      toast.warning("Vui lòng chọn ít nhất một món.");
+  // ==================================================
+  // SAVE ORDER ITEMS
+  //
+  // EXISTING DINE-IN
+  // -> ADD ITEMS
+  //
+  // NEW ORDER
+  // -> CREATE ORDER
+  // ==================================================
+
+  const saveOrderItems = async (cartItems, orderNote = "") => {
+    // ==================================================
+    // VALIDATE
+    // ==================================================
+
+    if (!Array.isArray(cartItems) || cartItems.length === 0) {
+      toast.warning(
+        selectedOrder
+          ? "Vui lòng chọn ít nhất một món muốn gọi thêm."
+          : "Vui lòng chọn ít nhất một món.",
+      );
+
       return;
     }
 
-    const items = cartItems.map((item, index) => ({
-      id: item.id || `OI-${Date.now()}-${index}`,
-      menuItemId: item.menuItem.id,
-      name: item.menuItem.name,
-      price: item.menuItem.price,
-      quantity: item.quantity,
-      note: item.note || "",
-    }));
+    // ==================================================
+    // EXISTING ORDER
+    //
+    // ADD ITEMS - DINE IN ONLY
+    // ==================================================
 
-    const subtotal = items.reduce(
-      (total, item) => total + item.price * item.quantity,
-      0,
-    );
-
-    const vatAmount = Math.round(subtotal * 0.08);
-    const totalAmount = subtotal + vatAmount;
-
-    // ==============================
-    // UPDATE ORDER
-    // ==============================
     if (selectedOrder) {
-      const updatedOrder = {
-        ...selectedOrder,
-        items,
-        subtotal,
-        vatAmount,
-        totalAmount,
-      };
+      if (selectedOrder.orderType !== "dine_in") {
+        toast.error("Chức năng gọi thêm món chỉ áp dụng cho đơn tại bàn.");
+
+        return;
+      }
+
+      // ==================================================
+      // WAITING PAYMENT
+      // ==================================================
+
+      if (selectedOrder.status === "pending_payment") {
+        toast.warning("Đơn đang chờ thanh toán, không thể gọi thêm món.");
+
+        setActiveModal("billing");
+
+        return;
+      }
+
+      // ==================================================
+      // STATUS VALIDATION
+      // ==================================================
+
+      if (
+        selectedOrder.status !== "new" &&
+        selectedOrder.status !== "cooking"
+      ) {
+        toast.warning("Trạng thái đơn hiện tại không cho phép gọi thêm món.");
+
+        return;
+      }
+
+      const orderId = selectedOrder.backendId;
+
+      if (!orderId) {
+        toast.error("Không tìm thấy ID thật của đơn hàng.");
+
+        return;
+      }
+
+      const requestItems = buildOrderItemsRequest(cartItems);
+
+      try {
+        const response = await cashierOrderService.addItems(
+          orderId,
+          requestItems,
+        );
+
+        const updatedOrder = normalizeOrder(response?.data);
+
+        if (!updatedOrder) {
+          throw new Error("Backend không trả về thông tin đơn hàng.");
+        }
+
+        // ==================================================
+        // UPDATE ORDER LIST
+        // ==================================================
+
+        setOrders((prev) =>
+          prev.map((order) =>
+            String(order.backendId) === String(updatedOrder.backendId)
+              ? updatedOrder
+              : order,
+          ),
+        );
+
+        // ==================================================
+        // SELECTED ORDER
+        // ==================================================
+
+        setSelectedOrder(updatedOrder);
+
+        // ==================================================
+        // UPDATE TABLE
+        // ==================================================
+
+        if (updatedOrder.tableId) {
+          const itemCount = updatedOrder.items.reduce(
+            (total, item) => total + item.quantity,
+            0,
+          );
+
+          setTables((prev) =>
+            prev.map((table) =>
+              String(table.id) === String(updatedOrder.tableId)
+                ? {
+                    ...table,
+
+                    status: "occupied",
+
+                    itemCount,
+
+                    currentTotal: updatedOrder.totalAmount,
+
+                    currentOrderId: updatedOrder.id,
+
+                    activeOrder: updatedOrder,
+                  }
+                : table,
+            ),
+          );
+        }
+
+        toast.success("Gọi thêm món thành công.");
+
+        closeModal();
+
+        return;
+      } catch (error) {
+        console.error("ADD CASHIER ORDER ITEMS ERROR:", error);
+
+        const message =
+          error.response?.data?.message ||
+          error.message ||
+          "Không thể gọi thêm món.";
+
+        toast.error(message);
+
+        return;
+      }
+    }
+
+    // ==================================================
+    // NEW ORDER
+    // ==================================================
+
+    const backendOrderType = toBackendOrderType(draftOrderType);
+
+    if (!backendOrderType) {
+      toast.error("Loại đơn hàng không hợp lệ.");
+
+      return;
+    }
+
+    // ==================================================
+    // DELIVERY
+    //
+    // Chưa làm trong bước này.
+    // ==================================================
+
+    if (draftOrderType === "delivery") {
+      toast.info("Đơn giao hàng sẽ được tích hợp ở bước tiếp theo.");
+
+      return;
+    }
+
+    // ==================================================
+    // DINE IN VALIDATION
+    // ==================================================
+
+    if (draftOrderType === "dine_in" && !selectedTable?.id) {
+      toast.warning("Vui lòng chọn bàn trước khi tạo đơn.");
+
+      return;
+    }
+
+    // ==================================================
+    // REQUEST ITEMS
+    // ==================================================
+
+    const requestItems = buildOrderItemsRequest(cartItems);
+
+    // ==================================================
+    // CREATE REQUEST
+    // ==================================================
+
+    const createRequest = {
+      orderType: backendOrderType,
+
+      tableId: draftOrderType === "dine_in" ? Number(selectedTable.id) : null,
+
+      note: orderNote?.trim() || null,
+
+      items: requestItems,
+
+      shippingDetail: null,
+    };
+
+    console.log("CREATE CASHIER ORDER REQUEST:", createRequest);
+
+    // ==================================================
+    // CREATE
+    // ==================================================
+
+    try {
+      const response = await cashierOrderService.createOrder(createRequest);
+
+      console.log("CREATE CASHIER ORDER RESPONSE:", response);
+
+      const createdOrder = normalizeOrder(response?.data);
+
+      if (!createdOrder) {
+        throw new Error("Backend không trả về đơn hàng vừa tạo.");
+      }
+
+      // ==================================================
+      // ADD INTO ORDER LIST
+      // ==================================================
+
+      setOrders((prev) => [
+        createdOrder,
+
+        ...prev.filter(
+          (order) => String(order.backendId) !== String(createdOrder.backendId),
+        ),
+      ]);
+
+      // ==================================================
+      // DINE IN
+      //
+      // Backend đã:
+      // AVAILABLE -> OCCUPIED
+      // Order -> PENDING
+      // KitchenTicket -> created
+      // ==================================================
+
+      if (createdOrder.orderType === "dine_in") {
+        const itemCount = createdOrder.items.reduce(
+          (total, item) => total + item.quantity,
+          0,
+        );
+
+        setTables((prev) =>
+          prev.map((table) =>
+            String(table.id) === String(createdOrder.tableId)
+              ? {
+                  ...table,
+
+                  status: "occupied",
+
+                  itemCount,
+
+                  currentTotal: createdOrder.totalAmount,
+
+                  currentOrderId: createdOrder.id,
+
+                  activeOrder: createdOrder,
+                }
+              : table,
+          ),
+        );
+
+        setSelectedOrder(createdOrder);
+
+        toast.success(
+          `Đã tạo đơn ${createdOrder.id} cho ${createdOrder.tableName}.`,
+        );
+
+        closeModal();
+
+        return;
+      }
+
+      // ==================================================
+      // TAKE AWAY
+      //
+      // Backend:
+      // AWAITING_PAYMENT
+      // ==================================================
+
+      if (createdOrder.orderType === "take_away") {
+        setSelectedOrder(createdOrder);
+
+        toast.success(`Đã tạo đơn mang về ${createdOrder.id}.`);
+
+        /*
+         * Chuyển qua màn đơn hàng.
+         *
+         * Payment API làm sau.
+         */
+        setActiveTab("orders");
+
+        closeModal();
+
+        return;
+      }
+
+      closeModal();
+    } catch (error) {
+      console.error("CREATE CASHIER ORDER ERROR:", error);
+
+      const message =
+        error.response?.data?.message ||
+        error.message ||
+        "Không thể tạo đơn hàng.";
+
+      toast.error(message);
+    }
+  };
+
+  // ==================================================
+  // SERVE ITEM
+  //
+  // READY
+  // ->
+  // SERVED
+  // ==================================================
+
+  const serveItem = async (orderItemId) => {
+    if (!orderItemId) {
+      return null;
+    }
+
+    try {
+      // ==================================================
+      // API
+      // ==================================================
+
+      const response = await cashierOrderService.serveItem(orderItemId);
+
+      // response:
+      //
+      // {
+      //   status,
+      //   message,
+      //   data: OrderResponse
+      // }
+
+      const updatedOrder = normalizeOrder(response?.data);
+
+      if (!updatedOrder) {
+        throw new Error("Backend không trả về thông tin đơn hàng.");
+      }
+
+      // ==================================================
+      // UPDATE ORDERS
+      // ==================================================
 
       setOrders((prev) =>
         prev.map((order) =>
-          order.id === selectedOrder.id ? updatedOrder : order,
+          String(order.backendId) === String(updatedOrder.backendId)
+            ? updatedOrder
+            : order,
         ),
       );
 
-      if (selectedOrder.tableId) {
+      // ==================================================
+      // UPDATE SELECTED ORDER
+      // ==================================================
+
+      setSelectedOrder((prev) => {
+        if (!prev) {
+          return prev;
+        }
+
+        return String(prev.backendId) === String(updatedOrder.backendId)
+          ? updatedOrder
+          : prev;
+      });
+
+      // ==================================================
+      // UPDATE TABLE CARD
+      //
+      // TAKE_AWAY không có tableId
+      // nên tự bỏ qua đoạn này.
+      // ==================================================
+
+      if (updatedOrder.tableId) {
+        const itemCount = updatedOrder.items.reduce(
+          (total, item) => total + item.quantity,
+          0,
+        );
+
         setTables((prev) =>
           prev.map((table) =>
-            table.id === selectedOrder.tableId
+            String(table.id) === String(updatedOrder.tableId)
               ? {
                   ...table,
-                  itemCount: items.reduce(
-                    (sum, item) => sum + item.quantity,
-                    0,
-                  ),
-                  currentTotal: totalAmount,
+                  status: "occupied",
+                  itemCount,
+                  currentTotal: updatedOrder.totalAmount,
+                  currentOrderId: updatedOrder.id,
+                  activeOrder: updatedOrder,
                 }
               : table,
           ),
         );
       }
 
-      setSelectedOrder(updatedOrder);
+      toast.success("Đã xác nhận món được phục vụ.");
 
-      toast.success(`Đã cập nhật đơn ${updatedOrder.id}.`);
+      return updatedOrder;
+    } catch (error) {
+      console.error("CASHIER SERVE ITEM ERROR:", error);
 
-      closeModal();
-
-      return;
-    }
-
-    // ==============================
-    // CREATE ORDER
-    // ==============================
-    const orderPrefix =
-      draftOrderType === "take_away"
-        ? "TA"
-        : draftOrderType === "delivery"
-          ? "DL"
-          : "DI";
-
-    const newOrderId = `#${orderPrefix}${String(Date.now()).slice(-4)}`;
-
-    let tableName = "Đơn hàng mới";
-
-    if (draftOrderType === "dine_in") {
-      tableName = selectedTable ? `Bàn ${selectedTable.number}` : "Tại chỗ";
-    }
-
-    if (draftOrderType === "take_away") {
-      tableName = "Mang về";
-    }
-
-    if (draftOrderType === "delivery") {
-      tableName = "Giao hàng";
-    }
-
-    const now = new Date();
-
-    const newOrder = {
-      id: newOrderId,
-      orderType: draftOrderType,
-      tableId: draftOrderType === "dine_in" ? selectedTable?.id || null : null,
-      tableName,
-      customerName: "",
-      guestCount: draftGuestCount,
-      waiterName: "Thu ngân",
-      createdAt: now.toLocaleString("vi-VN"),
-      status: "new",
-      progressPercentage: 10,
-      progressLabel: "10% Mới tạo",
-      subtotal,
-      vatAmount,
-      totalAmount,
-      items,
-    };
-
-    setOrders((prev) => [newOrder, ...prev]);
-
-    if (draftOrderType === "dine_in" && selectedTable) {
-      setTables((prev) =>
-        prev.map((table) =>
-          table.id === selectedTable.id
-            ? {
-                ...table,
-                status: "occupied",
-                guestCount: draftGuestCount,
-                itemCount: items.reduce((sum, item) => sum + item.quantity, 0),
-                currentOrderId: newOrder.id,
-                currentTotal: totalAmount,
-              }
-            : table,
-        ),
+      toast.error(
+        error.response?.data?.message ||
+          error.message ||
+          "Không thể xác nhận phục vụ món.",
       );
+
+      return null;
     }
-
-    toast.success(`Đã tạo đơn ${newOrder.id}.`);
-
-    closeModal();
   };
+
+  // ==================================================
+  // COMPLETE PAYMENT
+  //
+  // LOCAL MOCK HIỆN TẠI
+  //
+  // Payment API làm sau.
+  // ==================================================
 
   const completePayment = ({
     paymentMethod,
+
     discountPercent,
+
     cashReceived,
   }) => {
     if (!selectedOrder) {
@@ -279,6 +1403,7 @@ const useCashierState = () => {
 
     const finalTotal = Math.max(
       0,
+
       selectedOrder.subtotal + selectedOrder.vatAmount - discountAmount,
     );
 
@@ -289,14 +1414,27 @@ const useCashierState = () => {
 
     const updatedOrder = {
       ...selectedOrder,
+
       status: "completed",
+
       progressPercentage: 100,
+
       progressLabel: "100% Hoàn thành",
+
       discountAmount,
+
       totalAmount: finalTotal,
+
       paymentMethod,
+
       cashReceived: received,
-      changeGiven: Math.max(0, received - finalTotal),
+
+      changeGiven: Math.max(
+        0,
+
+        received - finalTotal,
+      ),
+
       paidAt: now.toLocaleString("vi-VN"),
     };
 
@@ -306,17 +1444,28 @@ const useCashierState = () => {
       ),
     );
 
+    // ==================================================
+    // RELEASE TABLE LOCAL
+    // ==================================================
+
     if (updatedOrder.tableId) {
       setTables((prev) =>
         prev.map((table) =>
-          table.id === updatedOrder.tableId
+          String(table.id) === String(updatedOrder.tableId)
             ? {
                 ...table,
+
                 status: "empty",
+
                 guestCount: 0,
+
                 itemCount: 0,
+
                 currentOrderId: null,
+
                 currentTotal: 0,
+
+                activeOrder: null,
               }
             : table,
         ),
@@ -330,33 +1479,90 @@ const useCashierState = () => {
     setActiveModal("receipt");
   };
 
+  // ==================================================
+  // RETURN
+  // ==================================================
+
   return {
+    // ==================================================
+    // TAB
+    // ==================================================
+
     activeTab,
+
     setActiveTab,
 
+    // ==================================================
+    // TABLE
+    // ==================================================
+
     tables,
+
+    tablesLoading,
+
+    tablesError,
+
+    reloadTables: loadTables,
+
+    // ==================================================
+    // ORDERS
+    // ==================================================
+
     orders,
+
+    // ==================================================
+    // MENU
+    // ==================================================
+
     menuItems,
+
+    menuLoading,
+
+    menuError,
+
+    reloadMenu: loadMenu,
+
+    // ==================================================
+    // MODAL
+    // ==================================================
 
     activeModal,
 
     selectedTable,
+
     selectedOrder,
 
+    // ==================================================
+    // DRAFT
+    // ==================================================
+
     draftOrderType,
+
     draftGuestCount,
 
+    // ==================================================
+    // ACTIONS
+    // ==================================================
+
     closeModal,
+
     openNewOrder,
+
     startNewOrder,
 
     openTable,
+
     openQuickChannel,
 
     openOrderDetails,
+
     openBilling,
 
     saveOrderItems,
+
+    serveItem,
+    reloadTakeAwayOrders: loadTakeAwayOrders,
+
     completePayment,
   };
 };

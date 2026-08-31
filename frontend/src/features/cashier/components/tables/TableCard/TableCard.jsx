@@ -48,15 +48,16 @@ function TableCard({ table, onClick }) {
         <div>
           {occupied ? (
             <>
-              <p>
-                {table.guestCount} khách • {table.itemCount} món
-              </p>
+              <p>{table.itemCount} món đang phục vụ</p>
 
-              <strong>{table.currentTotal.toLocaleString("vi-VN")}đ</strong>
+              <strong>
+                {Number(table.currentTotal || 0).toLocaleString("vi-VN")}đ
+              </strong>
             </>
           ) : (
             <>
               <p>Bàn trống</p>
+
               <strong className={styles.mutedPrice}>0đ</strong>
             </>
           )}

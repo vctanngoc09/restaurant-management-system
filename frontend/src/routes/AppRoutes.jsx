@@ -20,6 +20,7 @@ import Orders from "../pages/admin/Orders/Orders";
 import Menu from "../pages/admin/Menu/Menu";
 import Staff from "../pages/admin/Staff/Staff";
 import Tables from "../pages/admin/Tables/Tables";
+import RestaurantManagement from "../pages/admin/RestaurantManagement/RestaurantManagement";
 
 import CashierDashboard from "../pages/cashier/CashierDashboard/CashierDashboard";
 
@@ -71,6 +72,8 @@ function AppRoutes() {
               <Route path="staff" element={<Staff />} />
 
               <Route path="tables" element={<Tables />} />
+
+              <Route path="restaurant" element={<RestaurantManagement />} />
             </Route>
           </Route>
 

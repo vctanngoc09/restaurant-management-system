@@ -90,6 +90,17 @@ public class CashierServiceImpl
     }
 
     @Override
+    public Order requestPayment(
+            Long orderId
+    ) {
+
+        return orderService
+                .requestPayment(
+                        orderId
+                );
+    }
+
+    @Override
     public Order serveItem(
             Long orderItemId
     ) {

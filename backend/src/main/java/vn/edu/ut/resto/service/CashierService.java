@@ -35,4 +35,8 @@ public interface CashierService {
     Order serveItem(
             Long orderItemId
     );
+
+    Order requestPayment(
+            Long orderId
+    );
 }

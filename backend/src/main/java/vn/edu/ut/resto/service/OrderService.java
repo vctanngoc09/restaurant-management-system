@@ -58,4 +58,8 @@ public interface OrderService {
     KitchenTicket fireUnfiredItemsToKitchen(
             Long orderId
     );
+
+    Order requestPayment(
+            Long orderId
+    );
 }

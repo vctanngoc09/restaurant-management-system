@@ -61,6 +61,16 @@ public class WaiterServiceImpl
                 );
     }
 
+    @Override
+    public Order requestPayment(
+            Long orderId
+    ) {
+
+        return orderService
+                .requestPayment(
+                        orderId
+                );
+    }
 
     @Override
     public Order addItems(
