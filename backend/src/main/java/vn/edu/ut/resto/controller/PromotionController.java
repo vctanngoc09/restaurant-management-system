@@ -27,7 +27,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/admin/promotions")
-@PreAuthorize("hasRole('ADMIN')")
 public class PromotionController {
 
     @Autowired
@@ -38,6 +37,7 @@ public class PromotionController {
 
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<PromotionResponse>>
     create(
             @Valid
@@ -60,6 +60,7 @@ public class PromotionController {
 
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'CASHIER')")
     public ResponseEntity<ApiResponse<List<PromotionResponse>>>
     getAll() {
 
@@ -81,6 +82,7 @@ public class PromotionController {
 
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<PromotionResponse>>
     getById(
             @PathVariable Long id
@@ -100,6 +102,7 @@ public class PromotionController {
 
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<PromotionResponse>>
     update(
             @PathVariable Long id,
@@ -125,6 +128,7 @@ public class PromotionController {
 
 
     @PatchMapping("/{id}/active")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<PromotionResponse>>
     setActive(
             @PathVariable Long id,

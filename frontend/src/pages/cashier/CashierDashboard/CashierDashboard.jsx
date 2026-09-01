@@ -178,9 +178,14 @@ function CashierDashboard() {
         selectedOrder={cashier.selectedOrder}
         orderType={cashier.draftOrderType}
         guestCount={cashier.draftGuestCount}
+        shippingDetail={cashier.draftShippingDetail}
         menuItems={cashier.menuItems}
+        restaurantSetting={cashier.restaurantSetting}
+        promotions={cashier.promotions}
         onClose={cashier.closeModal}
         onSave={cashier.saveOrderItems}
+        onCreatePrepaidOrder={cashier.createPrepaidOrder}
+        onPayCash={cashier.payCash}
       />
 
       {/* ==================================================
@@ -202,6 +207,7 @@ function CashierDashboard() {
         open={cashier.activeModal === "receipt"}
         selectedOrder={cashier.selectedOrder}
         currentUserName={currentUserName}
+        restaurantSetting={cashier.restaurantSetting}
         onClose={cashier.closeModal}
       />
     </div>

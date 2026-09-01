@@ -258,6 +258,9 @@ public class Payment {
     // QR có thể hết hạn.
     private LocalDateTime expiresAt;
 
+    @Column(nullable = false, length = 100)
+    private String cashierName;
+
 
     public Payment() {
     }
@@ -597,5 +600,13 @@ public class Payment {
             LocalDateTime expiresAt
     ) {
         this.expiresAt = expiresAt;
+    }
+
+    public String getCashierName() {
+        return cashierName;
+    }
+
+    public void setCashierName(String cashierName) {
+        this.cashierName = cashierName;
     }
 }

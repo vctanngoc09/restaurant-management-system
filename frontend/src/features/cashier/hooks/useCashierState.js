@@ -5,6 +5,10 @@ import cashierMenuService from "../services/cashierMenuService";
 import cashierTableService from "../services/cashierTableService";
 import cashierOrderService from "../services/cashierOrderService";
 
+import restaurantSettingService from "../../../services/restaurantSettingService";
+
+import promotionService from "../../../services/promotionService";
+
 // ==================================================
 // NORMALIZE PRODUCT STATUS
 // ==================================================
@@ -429,6 +433,18 @@ const useCashierState = () => {
   const [menuError, setMenuError] = useState(null);
 
   // ==================================================
+  // RESTAURANT SETTING
+  // ==================================================
+
+  const [restaurantSetting, setRestaurantSetting] = useState(null);
+
+  // ==================================================
+  // PROMOTIONS
+  // ==================================================
+
+  const [promotions, setPromotions] = useState([]);
+
+  // ==================================================
   // MODAL
   // ==================================================
 
@@ -446,6 +462,35 @@ const useCashierState = () => {
 
   const [draftGuestCount, setDraftGuestCount] = useState(2);
 
+  const [draftShippingDetail, setDraftShippingDetail] = useState(null);
+
+  const loadRestaurantSetting = useCallback(async () => {
+    try {
+      const response = await restaurantSettingService.getCurrent();
+
+      setRestaurantSetting(response?.data || null);
+    } catch (error) {
+      console.error("LOAD RESTAURANT SETTING ERROR:", error);
+
+      toast.error(
+        error.response?.data?.message || "Không thể tải cấu hình nhà hàng.",
+      );
+    }
+  }, []);
+
+  const loadPromotions = useCallback(async () => {
+    try {
+      const response = await promotionService.getAll();
+
+      const list = Array.isArray(response?.data) ? response.data : [];
+
+      setPromotions(list);
+    } catch (error) {
+      console.error("LOAD PROMOTIONS ERROR:", error);
+
+      setPromotions([]);
+    }
+  }, []);
   // ==================================================
   // LOAD ACTIVE DINE-IN ORDERS
   // ==================================================
@@ -579,19 +624,38 @@ const useCashierState = () => {
 
   const loadTakeAwayOrders = useCallback(async () => {
     try {
-      const response = await cashierOrderService.getActiveByType("TAKE_AWAY");
+      const [takeAwayResult, deliveryResult] = await Promise.allSettled([
+        cashierOrderService.getActiveByType("TAKE_AWAY"),
 
-      const orderList = Array.isArray(response?.data) ? response.data : [];
+        cashierOrderService.getActiveByType("DELIVERY"),
+      ]);
 
-      const normalizedOrders = orderList.map(normalizeOrder).filter(Boolean);
+      const takeAwayList =
+        takeAwayResult.status === "fulfilled" &&
+        Array.isArray(takeAwayResult.value?.data)
+          ? takeAwayResult.value.data
+          : [];
+
+      const deliveryList =
+        deliveryResult.status === "fulfilled" &&
+        Array.isArray(deliveryResult.value?.data)
+          ? deliveryResult.value.data
+          : [];
+
+      const normalizedOrders = [...takeAwayList, ...deliveryList]
+        .map(normalizeOrder)
+        .filter(Boolean);
 
       setOrders((prev) => [
-        ...prev.filter((order) => order.orderType !== "take_away"),
+        ...prev.filter(
+          (order) =>
+            order.orderType !== "take_away" && order.orderType !== "delivery",
+        ),
 
         ...normalizedOrders,
       ]);
     } catch (error) {
-      console.error("LOAD TAKE AWAY ORDERS ERROR:", error);
+      console.error("LOAD TAKE AWAY / DELIVERY ORDERS ERROR:", error);
     }
   }, []);
 
@@ -686,7 +750,17 @@ const useCashierState = () => {
     loadMenu();
 
     loadTakeAwayOrders();
-  }, [loadTables, loadMenu, loadTakeAwayOrders]);
+
+    loadRestaurantSetting();
+
+    loadPromotions();
+  }, [
+    loadTables,
+    loadMenu,
+    loadTakeAwayOrders,
+    loadRestaurantSetting,
+    loadPromotions,
+  ]);
 
   // ==================================================
   // CLOSE MODAL
@@ -710,6 +784,8 @@ const useCashierState = () => {
     setDraftGuestCount(2);
 
     setActiveModal("newOrder");
+
+    setDraftShippingDetail(null);
   };
 
   // ==================================================
@@ -722,20 +798,17 @@ const useCashierState = () => {
 
   const startNewOrder = ({
     orderType,
-
     tableId = null,
-
     guestCount = 1,
+    shippingDetail = null,
   }) => {
     setDraftOrderType(orderType);
 
     setDraftGuestCount(guestCount);
 
-    setSelectedOrder(null);
+    setDraftShippingDetail(shippingDetail);
 
-    // ==================================================
-    // DINE IN
-    // ==================================================
+    setSelectedOrder(null);
 
     if (orderType === "dine_in") {
       const table = tables.find((item) => String(item.id) === String(tableId));
@@ -754,7 +827,6 @@ const useCashierState = () => {
 
       setSelectedTable(table);
     } else {
-      // TAKE_AWAY
       setSelectedTable(null);
     }
 
@@ -845,51 +917,47 @@ const useCashierState = () => {
   // ==================================================
 
   const openQuickChannel = (orderType) => {
+    // ==================================================
+    // RESET OLD SELECTION
+    // ==================================================
+
     setSelectedTable(null);
+
+    setSelectedOrder(null);
 
     setDraftOrderType(orderType);
 
     setDraftGuestCount(1);
 
+    setDraftShippingDetail(null);
+
     // ==================================================
-    // DELIVERY
+    // TAKE AWAY
     // ==================================================
 
-    if (orderType === "delivery") {
-      setSelectedOrder(null);
-
-      setActiveModal("newOrder");
+    if (orderType === "take_away") {
+      setActiveModal("ordering");
 
       return;
     }
 
     // ==================================================
-    // TAKE AWAY
+    // DELIVERY
     //
-    // Nếu đã có order chờ thanh toán,
-    // mở order đó.
+    // cần nhập:
+    // customerName
+    // phone
+    // address
+    // ...
     // ==================================================
 
-    const existingOrder = orders.find(
-      (order) =>
-        order.orderType === orderType &&
-        order.status !== "completed" &&
-        order.status !== "cancelled",
-    );
+    if (orderType === "delivery") {
+      setActiveModal("newOrder");
 
-    if (existingOrder) {
-      setSelectedOrder(existingOrder);
-
-      if (existingOrder.status === "pending_payment") {
-        setActiveModal("billing");
-
-        return;
-      }
-    } else {
-      setSelectedOrder(null);
+      return;
     }
 
-    setActiveModal("ordering");
+    toast.warning("Loại đơn hàng không hợp lệ.");
   };
 
   // ==================================================
@@ -1273,6 +1341,207 @@ const useCashierState = () => {
     }
   };
 
+  const createPrepaidOrder = async ({
+    orderType,
+    cartItems,
+    orderNote = "",
+    shippingDetail = null,
+  }) => {
+    if (orderType !== "take_away" && orderType !== "delivery") {
+      toast.error("Chỉ áp dụng cho đơn mang về hoặc giao hàng.");
+
+      return null;
+    }
+
+    if (!Array.isArray(cartItems) || cartItems.length === 0) {
+      toast.warning("Vui lòng chọn ít nhất một món.");
+
+      return null;
+    }
+
+    const backendOrderType = toBackendOrderType(orderType);
+
+    const requestItems = buildOrderItemsRequest(cartItems);
+
+    const createRequest = {
+      orderType: backendOrderType,
+
+      tableId: null,
+
+      note: orderNote?.trim() || null,
+
+      items: requestItems,
+
+      shippingDetail: orderType === "delivery" ? shippingDetail : null,
+    };
+
+    try {
+      console.log("CREATE PREPAID ORDER REQUEST:", createRequest);
+
+      const response = await cashierOrderService.createOrder(createRequest);
+
+      const createdOrder = normalizeOrder(response?.data);
+
+      if (!createdOrder) {
+        throw new Error("Backend không trả về đơn hàng vừa tạo.");
+      }
+
+      // ==============================================
+      // Backend phải tạo TAKE_AWAY / DELIVERY
+      // ở AWAITING_PAYMENT
+      //
+      // FE normalize:
+      // AWAITING_PAYMENT -> pending_payment
+      // ==============================================
+
+      if (createdOrder.status !== "pending_payment") {
+        throw new Error("Đơn hàng chưa ở trạng thái chờ thanh toán.");
+      }
+
+      // ==============================================
+      // UPDATE ORDER LIST
+      // ==============================================
+
+      setOrders((prev) => [
+        createdOrder,
+
+        ...prev.filter(
+          (order) => String(order.backendId) !== String(createdOrder.backendId),
+        ),
+      ]);
+
+      toast.success(
+        createdOrder.orderType === "delivery"
+          ? `Đã tạo đơn giao hàng ${createdOrder.id}.`
+          : `Đã tạo đơn mang về ${createdOrder.id}.`,
+      );
+
+      return createdOrder;
+    } catch (error) {
+      console.error("CREATE PREPAID ORDER ERROR:", error);
+
+      toast.error(
+        error.response?.data?.message ||
+          error.message ||
+          "Không thể tạo đơn hàng.",
+      );
+
+      return null;
+    }
+  };
+
+  // ==================================================
+  // CASH PAYMENT
+  //
+  // POST
+  // /api/cashier/orders/{orderId}/payments/cash
+  //
+  // TAKE_AWAY / DELIVERY:
+  //
+  // AWAITING_PAYMENT
+  // -> PENDING
+  // -> KitchenTicket
+  // ==================================================
+
+  const payCash = async ({ orderId, promotionCode = null, cashReceived }) => {
+    if (!orderId) {
+      toast.error("Không tìm thấy ID đơn hàng.");
+
+      return null;
+    }
+
+    const received = Number(cashReceived);
+
+    if (!Number.isFinite(received) || received <= 0) {
+      toast.warning("Vui lòng nhập số tiền khách đưa.");
+
+      return null;
+    }
+
+    const payload = {
+      promotionCode: promotionCode?.trim()
+        ? promotionCode.trim().toUpperCase()
+        : null,
+
+      cashReceived: received,
+    };
+
+    try {
+      console.log("CASH PAYMENT REQUEST:", {
+        orderId,
+        payload,
+      });
+
+      const response = await cashierOrderService.payCash(orderId, payload);
+
+      /*
+       * response:
+       *
+       * {
+       *   status: 201,
+       *   message: "...",
+       *   data: PaymentReceiptResponse
+       * }
+       */
+
+      const receipt = response?.data;
+
+      if (!receipt) {
+        throw new Error("Backend không trả về thông tin thanh toán.");
+      }
+
+      if (receipt.paymentStatus !== "SUCCESS") {
+        throw new Error("Thanh toán chưa thành công.");
+      }
+
+      // ==============================================
+      // Backend lúc này đã:
+      //
+      // AWAITING_PAYMENT
+      // -> PENDING
+      // -> fire KitchenTicket
+      //
+      // reload để lấy trạng thái thật từ BE.
+      // ==============================================
+
+      await loadTakeAwayOrders();
+
+      // ==================================================
+      // CLEAR CURRENT SELECTION
+      //
+      // Payment đã xong.
+      // Không để order vừa thanh toán trở thành
+      // "selectedOrder" cho đơn tiếp theo.
+      // ==================================================
+
+      setSelectedOrder(null);
+
+      setSelectedTable(null);
+
+      setDraftShippingDetail(null);
+
+      // ==================================================
+      // BACK TO ORDER QUEUE
+      // ==================================================
+
+      setActiveTab("orders");
+
+      toast.success("Thanh toán tiền mặt thành công.");
+
+      return receipt;
+    } catch (error) {
+      console.error("CASH PAYMENT ERROR:", error);
+
+      toast.error(
+        error.response?.data?.message ||
+          error.message ||
+          "Không thể thanh toán tiền mặt.",
+      );
+
+      return null;
+    }
+  };
+
   // ==================================================
   // SERVE ITEM
   //
@@ -1484,87 +1753,52 @@ const useCashierState = () => {
   // ==================================================
 
   return {
-    // ==================================================
-    // TAB
-    // ==================================================
-
     activeTab,
-
     setActiveTab,
 
-    // ==================================================
-    // TABLE
-    // ==================================================
-
     tables,
-
     tablesLoading,
-
     tablesError,
-
     reloadTables: loadTables,
-
-    // ==================================================
-    // ORDERS
-    // ==================================================
 
     orders,
 
-    // ==================================================
-    // MENU
-    // ==================================================
-
     menuItems,
-
     menuLoading,
-
     menuError,
-
     reloadMenu: loadMenu,
 
-    // ==================================================
-    // MODAL
-    // ==================================================
+    // NEW
+    restaurantSetting,
+    promotions,
 
     activeModal,
-
     selectedTable,
-
     selectedOrder,
 
-    // ==================================================
-    // DRAFT
-    // ==================================================
-
     draftOrderType,
-
     draftGuestCount,
-
-    // ==================================================
-    // ACTIONS
-    // ==================================================
+    draftShippingDetail,
 
     closeModal,
-
     openNewOrder,
-
     startNewOrder,
-
     openTable,
-
     openQuickChannel,
-
     openOrderDetails,
-
     openBilling,
 
     saveOrderItems,
 
+    createPrepaidOrder,
+    payCash,
+
     serveItem,
+
     reloadTakeAwayOrders: loadTakeAwayOrders,
 
     completePayment,
   };
-};
+};;
 
 export default useCashierState;

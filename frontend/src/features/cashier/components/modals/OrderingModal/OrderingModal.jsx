@@ -1,4 +1,5 @@
 import {
+  ArrowRight,
   CreditCard,
   ImageIcon,
   MessageSquare,
@@ -14,6 +15,7 @@ import { useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 
 import styles from "./OrderingModal.module.css";
+import TakeawayDeliveryCheckout from "../TakeawayDeliveryCheckout/TakeawayDeliveryCheckout";
 
 // ==================================================
 // ITEM STATUS
@@ -59,10 +61,18 @@ function OrderingModal({
   orderType,
   guestCount,
 
+  shippingDetail,
+
   menuItems,
+
+  restaurantSetting,
+  promotions,
 
   onClose,
   onSave,
+
+  onCreatePrepaidOrder,
+  onPayCash,
 }) {
   // ==================================================
   // FILTER
@@ -100,6 +110,7 @@ function OrderingModal({
   // ==================================================
 
   const [orderNote, setOrderNote] = useState("");
+  const [showCheckout, setShowCheckout] = useState(false);
 
   const isOrderNoteLocked = Boolean(
     selectedOrder && selectedOrder.items?.length > 0,
@@ -147,24 +158,11 @@ function OrderingModal({
     setNoteIndex(null);
     setNoteValue("");
 
-    /*
-     * Nếu order đã tồn tại:
-     * hiển thị note hiện tại.
-     *
-     * Hiện chỉ là UI.
-     */
     setOrderNote(selectedOrder?.note || "");
 
-    /*
-     * Không preload món cũ vào cart.
-     *
-     * selectedOrder.items
-     * = món đã gọi.
-     *
-     * items
-     * = món gọi thêm.
-     */
     setItems([]);
+
+    setShowCheckout(false);
   }, [open, selectedOrder?.backendId]);
 
   // ==================================================
@@ -349,7 +347,11 @@ function OrderingModal({
    * Đơn mới:
    * giữ VAT UI cũ.
    */
-  const vatAmount = selectedOrder ? 0 : Math.round(newItemsSubtotal * 0.08);
+  const vatRate = Number(restaurantSetting?.vatRate) || 0;
+
+  const vatAmount = selectedOrder
+    ? 0
+    : Math.round(newItemsSubtotal * (vatRate / 100));
 
   const finalTotal = selectedOrder
     ? currentOrderTotal + newItemsSubtotal
@@ -390,6 +392,19 @@ function OrderingModal({
   // ==================================================
   // SAVE
   // ==================================================
+
+  const isPrepaidOrder =
+    !selectedOrder && (orderType === "take_away" || orderType === "delivery");
+
+  const handleContinueCheckout = () => {
+    if (items.length === 0) {
+      toast.warning("Vui lòng chọn ít nhất một món.");
+
+      return;
+    }
+
+    setShowCheckout(true);
+  };
 
   const handleSave = () => {
     if (items.length === 0) {
@@ -434,6 +449,27 @@ function OrderingModal({
       "Nút Thanh Toán hiện mới là giao diện. API sẽ được gắn ở bước tiếp theo.",
     );
   };
+
+  // ==================================================
+  // TAKE AWAY / DELIVERY CHECKOUT
+  // ==================================================
+
+  if (showCheckout && isPrepaidOrder) {
+    return (
+      <TakeawayDeliveryCheckout
+        orderType={orderType}
+        items={items}
+        orderNote={orderNote}
+        shippingDetail={shippingDetail}
+        restaurantSetting={restaurantSetting}
+        promotions={promotions}
+        onCreateOrder={onCreatePrepaidOrder}
+        onPayCash={onPayCash}
+        onBackToMenu={() => setShowCheckout(false)}
+        onClose={onClose}
+      />
+    );
+  }
 
   // ==================================================
   // RENDER
@@ -969,7 +1005,7 @@ function OrderingModal({
 
                 {!selectedOrder && (
                   <p>
-                    <span>Thuế VAT (8%):</span>
+                    <span>Thuế VAT ({vatRate}%):</span>
 
                     <span>{vatAmount.toLocaleString("vi-VN")}đ</span>
                   </p>
@@ -994,10 +1030,6 @@ function OrderingModal({
 
               {selectedOrder ? (
                 <div className={styles.orderActions}>
-                  {/* ==============================================
-                      ADD MORE
-                  ============================================== */}
-
                   <button
                     type="button"
                     className={styles.submitButton}
@@ -1007,11 +1039,6 @@ function OrderingModal({
                     <Plus size={15} />
                     Gửi Thêm Món
                   </button>
-
-                  {/* ==============================================
-                      PAYMENT
-                      UI ONLY
-                  ============================================== */}
 
                   <button
                     type="button"
@@ -1027,10 +1054,19 @@ function OrderingModal({
                   type="button"
                   className={styles.submitButton}
                   disabled={items.length === 0}
-                  onClick={handleSave}
+                  onClick={isPrepaidOrder ? handleContinueCheckout : handleSave}
                 >
-                  <Plus size={15} />
-                  Tạo Đơn Hàng
+                  {isPrepaidOrder ? (
+                    <>
+                      Tiếp Tục
+                      <ArrowRight size={15} />
+                    </>
+                  ) : (
+                    <>
+                      <Plus size={15} />
+                      Tạo Đơn Hàng
+                    </>
+                  )}
                 </button>
               )}
             </div>

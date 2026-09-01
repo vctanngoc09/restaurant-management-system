@@ -5,6 +5,7 @@ const CASHIER_ORDER_URL = "/api/cashier/orders";
 const cashierOrderService = {
   async createOrder(payload) {
     const response = await api.post(CASHIER_ORDER_URL, payload);
+
     return response.data;
   },
 
@@ -35,6 +36,23 @@ const cashierOrderService = {
   async serveItem(orderItemId) {
     const response = await api.patch(
       `${CASHIER_ORDER_URL}/items/${orderItemId}/serve`,
+    );
+
+    return response.data;
+  },
+
+  async requestPayment(orderId) {
+    const response = await api.patch(
+      `${CASHIER_ORDER_URL}/${orderId}/request-payment`,
+    );
+
+    return response.data;
+  },
+
+  async payCash(orderId, payload) {
+    const response = await api.post(
+      `${CASHIER_ORDER_URL}/${orderId}/payments/cash`,
+      payload,
     );
 
     return response.data;

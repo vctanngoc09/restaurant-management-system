@@ -1,0 +1,1207 @@
+/* ==================================================
+   OVERLAY
+================================================== */
+
+.overlay {
+  position: fixed;
+  inset: 0;
+
+  z-index: var(--z-modal-backdrop);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 18px;
+
+  background: rgba(15, 23, 42, 0.55);
+
+  backdrop-filter: blur(3px);
+}
+
+/* ==================================================
+   MODAL
+================================================== */
+
+.modal {
+  width: min(1180px, 100%);
+  height: min(88dvh, 760px);
+
+  display: flex;
+  flex-direction: column;
+
+  overflow: hidden;
+
+  background: var(--color-background-soft);
+
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+
+  box-shadow: var(--shadow-xl);
+}
+
+/* ==================================================
+   HEADER
+================================================== */
+
+.header {
+  min-height: 60px;
+
+  display: grid;
+  grid-template-columns: 40px 1fr 40px;
+  align-items: center;
+
+  gap: 12px;
+
+  padding: 10px 14px;
+
+  background: var(--color-surface);
+
+  border-bottom: 1px solid var(--color-border);
+}
+
+.backButton,
+.closeButton {
+  width: 34px;
+  height: 34px;
+
+  display: grid;
+  place-items: center;
+
+  color: var(--color-text-secondary);
+
+  background: var(--color-background-soft);
+
+  border: 1px solid var(--color-border);
+  border-radius: 9px;
+}
+
+.backButton:hover,
+.closeButton:hover {
+  color: var(--color-primary);
+
+  background: var(--color-primary-light);
+}
+
+.headerTitle {
+  min-width: 0;
+
+  display: flex;
+  align-items: center;
+
+  gap: 22px;
+}
+
+.headerTitle > strong {
+  color: var(--color-text-primary);
+
+  font-size: 13px;
+  font-weight: var(--font-weight-extrabold);
+
+  white-space: nowrap;
+}
+
+/* ==================================================
+   STEPS
+================================================== */
+
+.steps {
+  display: flex;
+  align-items: center;
+
+  gap: 6px;
+}
+
+.steps > span {
+  width: 23px;
+  height: 23px;
+
+  display: grid;
+  place-items: center;
+
+  color: var(--color-text-muted);
+
+  background: var(--color-background-soft);
+
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+
+  font-size: 9px;
+  font-weight: var(--font-weight-bold);
+}
+
+.steps > b {
+  width: 40px;
+  height: 2px;
+
+  background: var(--color-border);
+}
+
+.steps .stepActive {
+  color: #ffffff;
+
+  background: var(--color-primary);
+
+  border-color: var(--color-primary);
+}
+
+.steps .stepDone {
+  color: #ffffff;
+
+  background: var(--color-success);
+
+  border-color: var(--color-success);
+}
+
+.steps .stepLineDone {
+  background: var(--color-success);
+}
+
+.steps small {
+  margin-left: 3px;
+
+  color: var(--color-text-muted);
+
+  font-size: 9px;
+}
+
+/* ==================================================
+   SUMMARY BODY
+================================================== */
+
+.summaryBody {
+  min-height: 0;
+
+  flex: 1;
+
+  display: grid;
+
+  grid-template-columns:
+    minmax(0, 1fr)
+    340px;
+
+  gap: 12px;
+
+  padding: 12px;
+
+  overflow: hidden;
+}
+
+.summaryPanel,
+.customerPanel,
+.paymentOrderPanel,
+.paymentPanel {
+  min-height: 0;
+
+  background: var(--color-surface);
+
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+
+  box-shadow: var(--shadow-xs);
+}
+
+/* ==================================================
+   SECTION TITLE
+================================================== */
+
+.sectionTitle {
+  min-height: 55px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 9px;
+
+  padding: 12px 14px;
+
+  color: var(--color-primary);
+
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.sectionTitle > div {
+  display: flex;
+  flex-direction: column;
+
+  gap: 2px;
+}
+
+.sectionTitle strong {
+  color: var(--color-text-primary);
+
+  font-size: 11px;
+}
+
+.sectionTitle span {
+  color: var(--color-text-muted);
+
+  font-size: 8px;
+}
+
+/* ==================================================
+   SUMMARY ITEMS
+================================================== */
+
+.summaryItems {
+  max-height: calc(100% - 110px);
+
+  display: grid;
+
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+
+  gap: 8px;
+
+  padding: 12px;
+
+  overflow-y: auto;
+}
+
+.summaryItem {
+  min-width: 0;
+
+  display: grid;
+
+  grid-template-columns:
+    60px
+    minmax(0, 1fr)
+    auto;
+
+  gap: 9px;
+
+  padding: 8px;
+
+  position: relative;
+
+  background: #ffffff;
+
+  border: 1px solid var(--color-border);
+  border-radius: 9px;
+}
+
+.itemImage {
+  width: 60px;
+  height: 60px;
+
+  display: grid;
+  place-items: center;
+
+  overflow: hidden;
+
+  color: var(--color-text-muted);
+
+  background: var(--color-background-soft);
+
+  border-radius: 7px;
+}
+
+.itemImage img {
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+}
+
+.itemInfo {
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 3px;
+}
+
+.itemInfo strong {
+  overflow: hidden;
+
+  color: var(--color-text-primary);
+
+  font-size: 10px;
+
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.itemInfo span {
+  overflow: hidden;
+
+  color: var(--color-text-muted);
+
+  font-size: 8px;
+
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.itemInfo small {
+  margin-top: auto;
+
+  color: var(--color-text-secondary);
+
+  font-size: 9px;
+}
+
+.quantityBadge {
+  position: absolute;
+
+  right: 7px;
+  bottom: 7px;
+
+  min-width: 26px;
+  height: 22px;
+
+  display: grid;
+  place-items: center;
+
+  padding: 0 5px;
+
+  color: var(--color-text-secondary);
+
+  background: var(--color-background-soft);
+
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+
+  font-size: 8px;
+  font-weight: var(--font-weight-bold);
+}
+
+.itemTotal {
+  color: var(--color-text-primary);
+
+  font-size: 10px;
+
+  white-space: nowrap;
+}
+
+/* ==================================================
+   ORDER NOTE
+================================================== */
+
+.orderNote {
+  margin: 0 12px 12px;
+  padding: 9px 10px;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 3px;
+
+  background: var(--color-background-soft);
+
+  border-radius: 8px;
+}
+
+.orderNote span {
+  color: var(--color-text-muted);
+
+  font-size: 8px;
+}
+
+.orderNote strong {
+  color: var(--color-text-secondary);
+
+  font-size: 9px;
+}
+
+/* ==================================================
+   CUSTOMER
+================================================== */
+
+.customerPanel {
+  display: flex;
+  flex-direction: column;
+
+  overflow: hidden;
+}
+
+.customerInfo {
+  padding: 12px;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 8px;
+}
+
+.customerInfo > div {
+  display: grid;
+
+  grid-template-columns:
+    18px
+    75px
+    minmax(0, 1fr);
+
+  align-items: start;
+
+  gap: 7px;
+
+  padding: 8px;
+
+  background: var(--color-background-soft);
+
+  border-radius: 8px;
+}
+
+.customerInfo svg {
+  color: var(--color-primary);
+}
+
+.customerInfo span {
+  color: var(--color-text-muted);
+
+  font-size: 8px;
+}
+
+.customerInfo strong {
+  overflow-wrap: anywhere;
+
+  color: var(--color-text-primary);
+
+  font-size: 9px;
+}
+
+.customerInfo .shippingMeta {
+  grid-template-columns:
+    1fr
+    auto;
+}
+
+.takeawayInfo {
+  flex: 1;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  gap: 7px;
+
+  padding: 25px;
+
+  color: var(--color-primary);
+
+  text-align: center;
+}
+
+.takeawayInfo strong {
+  color: var(--color-text-primary);
+
+  font-size: 11px;
+}
+
+.takeawayInfo span {
+  max-width: 230px;
+
+  color: var(--color-text-muted);
+
+  font-size: 9px;
+
+  line-height: 1.5;
+}
+
+/* ==================================================
+   MONEY
+================================================== */
+
+.moneySummary {
+  margin-top: auto;
+
+  padding: 12px 14px;
+
+  border-top: 1px solid var(--color-border-light);
+}
+
+.moneySummary > div {
+  display: flex;
+  justify-content: space-between;
+
+  gap: 10px;
+
+  margin-bottom: 5px;
+
+  color: var(--color-text-secondary);
+
+  font-size: 9px;
+}
+
+.moneySummary .totalRow {
+  padding-top: 9px;
+  margin-top: 8px;
+  margin-bottom: 0;
+
+  color: var(--color-text-primary);
+
+  border-top: 1px solid var(--color-border);
+
+  font-size: 11px;
+}
+
+.totalRow strong {
+  font-size: 14px;
+  font-weight: var(--font-weight-extrabold);
+}
+
+.primaryButton,
+.payButton {
+  width: calc(100% - 28px);
+  min-height: 40px;
+
+  margin: 0 14px 14px;
+
+  color: #ffffff;
+
+  background: var(--color-primary);
+
+  border-radius: 8px;
+
+  font-size: 10px;
+  font-weight: var(--font-weight-bold);
+}
+
+.primaryButton:hover,
+.payButton:hover {
+  background: var(--color-primary-hover);
+}
+
+/* ==================================================
+   PAYMENT BODY
+================================================== */
+
+.paymentBody {
+  min-height: 0;
+
+  flex: 1;
+
+  display: grid;
+
+  grid-template-columns:
+    minmax(0, 1.25fr)
+    minmax(330px, 0.75fr);
+
+  gap: 12px;
+
+  padding: 12px;
+
+  overflow: hidden;
+}
+
+.paymentOrderPanel {
+  display: flex;
+  flex-direction: column;
+
+  overflow: hidden;
+}
+
+.paymentOrderHeader {
+  display: flex;
+  justify-content: space-between;
+
+  gap: 20px;
+
+  padding: 14px;
+
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.paymentOrderHeader > div {
+  display: flex;
+  flex-direction: column;
+
+  gap: 3px;
+}
+
+.paymentOrderHeader span {
+  color: var(--color-text-muted);
+
+  font-size: 8px;
+}
+
+.paymentOrderHeader strong {
+  color: var(--color-text-primary);
+
+  font-size: 10px;
+}
+
+/* ==================================================
+   PROMOTION
+================================================== */
+
+.promotionBox {
+  padding: 12px 14px;
+
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.promotionBox label {
+  display: block;
+
+  margin-bottom: 6px;
+
+  color: var(--color-text-secondary);
+
+  font-size: 9px;
+  font-weight: var(--font-weight-bold);
+}
+
+.promotionBox > div {
+  display: flex;
+
+  gap: 7px;
+}
+
+.promotionBox input {
+  min-width: 0;
+  height: 35px;
+
+  flex: 1;
+
+  padding: 0 10px;
+
+  background: var(--color-background-soft);
+
+  border: 1px solid var(--color-border);
+  border-radius: 7px;
+
+  font-size: 9px;
+}
+
+.promotionBox button {
+  padding: 0 14px;
+
+  color: #ffffff;
+
+  background: var(--color-primary);
+
+  border-radius: 7px;
+
+  font-size: 9px;
+  font-weight: var(--font-weight-bold);
+}
+
+/* ==================================================
+   ORDER DETAILS
+================================================== */
+
+.orderDetailsTitle {
+  padding: 10px 14px;
+
+  color: var(--color-text-secondary);
+
+  background: var(--color-background-soft);
+
+  border-bottom: 1px solid var(--color-border);
+
+  font-size: 9px;
+  font-weight: var(--font-weight-bold);
+}
+
+.paymentItems {
+  min-height: 0;
+
+  flex: 1;
+
+  padding: 5px 14px;
+
+  overflow-y: auto;
+}
+
+.paymentItems > div {
+  display: flex;
+  justify-content: space-between;
+
+  gap: 15px;
+
+  padding: 8px 0;
+
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.paymentItems > div > div {
+  display: flex;
+  flex-direction: column;
+
+  gap: 2px;
+}
+
+.paymentItems strong {
+  color: var(--color-text-primary);
+
+  font-size: 9px;
+}
+
+.paymentItems span {
+  color: var(--color-text-muted);
+
+  font-size: 8px;
+}
+
+.paymentTotals {
+  padding: 11px 14px;
+
+  border-top: 1px solid var(--color-border);
+}
+
+.paymentTotals > div {
+  display: flex;
+  justify-content: space-between;
+
+  margin-bottom: 4px;
+
+  color: var(--color-text-secondary);
+
+  font-size: 9px;
+}
+
+.paymentTotals .paymentTotal {
+  padding-top: 8px;
+  margin-top: 7px;
+
+  color: var(--color-text-primary);
+
+  border-top: 1px solid var(--color-border);
+
+  font-size: 11px;
+}
+
+.paymentTotal strong:last-child {
+  font-size: 14px;
+}
+
+/* ==================================================
+   PAYMENT PANEL
+================================================== */
+
+.paymentPanel {
+  display: flex;
+  flex-direction: column;
+
+  padding: 12px;
+
+  overflow-y: auto;
+}
+
+.paymentMethods {
+  display: grid;
+
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+
+  gap: 6px;
+
+  padding: 4px;
+
+  background: var(--color-background-soft);
+
+  border-radius: 8px;
+}
+
+.paymentMethods button {
+  min-height: 32px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 5px;
+
+  color: var(--color-text-muted);
+
+  border-radius: 6px;
+
+  font-size: 9px;
+  font-weight: var(--font-weight-semibold);
+}
+
+.paymentMethods .paymentMethodActive {
+  color: var(--color-primary);
+
+  background: #ffffff;
+
+  border: 1px solid var(--color-border);
+
+  box-shadow: var(--shadow-xs);
+}
+
+/* ==================================================
+   CASH
+================================================== */
+
+.cashHeader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  gap: 5px;
+
+  padding: 22px 10px 15px;
+
+  text-align: center;
+}
+
+.cashHeader > span {
+  color: var(--color-text-primary);
+
+  font-size: 11px;
+  font-weight: var(--font-weight-bold);
+}
+
+.cashHeader small {
+  color: var(--color-text-muted);
+
+  font-size: 8px;
+}
+
+.cashHeader strong {
+  margin-top: 5px;
+
+  color: var(--color-text-primary);
+
+  font-size: 27px;
+  font-weight: var(--font-weight-extrabold);
+}
+
+.quickCash {
+  display: grid;
+
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+
+  gap: 5px;
+
+  margin-bottom: 12px;
+}
+
+.quickCash button {
+  min-height: 31px;
+
+  color: var(--color-text-secondary);
+
+  background: #ffffff;
+
+  border: 1px solid var(--color-border);
+  border-radius: 7px;
+
+  font-size: 8px;
+  font-weight: var(--font-weight-semibold);
+}
+
+.quickCash button:hover {
+  color: var(--color-primary);
+
+  border-color: var(--color-primary);
+}
+
+/* ==================================================
+   KEYPAD
+================================================== */
+
+.keypad {
+  display: grid;
+
+  grid-template-columns: repeat(3, 1fr);
+
+  gap: 4px;
+
+  margin-bottom: 10px;
+}
+
+.keypad button {
+  min-height: 45px;
+
+  color: var(--color-text-primary);
+
+  border-radius: 7px;
+
+  font-size: 17px;
+  font-weight: var(--font-weight-semibold);
+}
+
+.keypad button:hover {
+  background: var(--color-background-soft);
+}
+
+.changeBox {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 10px;
+
+  margin-bottom: 10px;
+
+  background: var(--color-success-light);
+
+  border: 1px solid #a7f3d0;
+  border-radius: 8px;
+}
+
+.changeBox span {
+  color: var(--color-text-secondary);
+
+  font-size: 9px;
+}
+
+.changeBox strong {
+  color: #047857;
+
+  font-size: 12px;
+}
+
+.payButton {
+  width: 100%;
+
+  margin: auto 0 0;
+}
+
+/* ==================================================
+   QR PLACEHOLDER
+================================================== */
+
+.qrPlaceholder {
+  min-height: 360px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  gap: 8px;
+
+  padding: 25px;
+
+  text-align: center;
+}
+
+.qrPlaceholder > div {
+  width: 110px;
+  height: 110px;
+
+  display: grid;
+  place-items: center;
+
+  color: var(--color-primary);
+
+  background: var(--color-primary-light);
+
+  border: 1px dashed var(--color-primary);
+  border-radius: 12px;
+}
+
+.qrPlaceholder strong {
+  color: var(--color-text-primary);
+
+  font-size: 12px;
+}
+
+.qrPlaceholder span {
+  max-width: 230px;
+
+  color: var(--color-text-muted);
+
+  font-size: 9px;
+
+  line-height: 1.5;
+}
+
+.qrPlaceholder b {
+  margin-top: 7px;
+
+  color: var(--color-primary);
+
+  font-size: 18px;
+}
+
+/* ==================================================
+   SUCCESS
+================================================== */
+
+.headerSpacer {
+  width: 34px;
+}
+
+.successBody {
+  min-height: 0;
+
+  flex: 1;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  gap: 14px;
+
+  padding: 25px;
+}
+
+.successCard {
+  width: min(350px, 100%);
+
+  overflow: hidden;
+
+  background: #ffffff;
+
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+
+  box-shadow: var(--shadow-sm);
+
+  text-align: center;
+}
+
+.successIcon {
+  width: 56px;
+  height: 56px;
+
+  display: grid;
+  place-items: center;
+
+  margin: 22px auto 10px;
+
+  color: #ffffff;
+
+  background: var(--color-primary);
+
+  border-radius: 999px;
+}
+
+.successCard h2 {
+  font-size: 13px;
+}
+
+.successCard > p {
+  margin: 4px 0 15px;
+
+  color: var(--color-text-muted);
+
+  font-size: 8px;
+}
+
+.successDetails {
+  border-top: 1px solid var(--color-border);
+}
+
+.successDetails > div {
+  display: flex;
+  justify-content: space-between;
+
+  gap: 15px;
+
+  padding: 8px 12px;
+
+  border-bottom: 1px solid var(--color-border-light);
+
+  font-size: 9px;
+}
+
+.successDetails span {
+  color: var(--color-text-secondary);
+}
+
+.successDetails strong {
+  color: var(--color-text-primary);
+}
+
+.successDetails .successChange {
+  padding-top: 10px;
+  padding-bottom: 10px;
+
+  font-size: 11px;
+}
+
+.successChange strong {
+  color: var(--color-success);
+}
+
+.successActions {
+  width: min(350px, 100%);
+
+  display: grid;
+
+  grid-template-columns:
+    1fr
+    1fr;
+
+  gap: 7px;
+}
+
+.printButton,
+.confirmButton {
+  min-height: 38px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 6px;
+
+  border-radius: 8px;
+
+  font-size: 9px;
+  font-weight: var(--font-weight-bold);
+}
+
+.printButton {
+  color: var(--color-text-secondary);
+
+  background: #ffffff;
+
+  border: 1px solid var(--color-border);
+}
+
+.confirmButton {
+  color: #ffffff;
+
+  background: var(--color-primary);
+}
+
+/* ==================================================
+   RESPONSIVE
+================================================== */
+
+@media (max-width: 900px) {
+  .modal {
+    height: 94dvh;
+  }
+
+  .summaryBody,
+  .paymentBody {
+    grid-template-columns: 1fr;
+
+    overflow-y: auto;
+  }
+
+  .summaryPanel,
+  .customerPanel,
+  .paymentOrderPanel,
+  .paymentPanel {
+    min-height: auto;
+  }
+
+  .summaryItems {
+    max-height: none;
+  }
+}
+
+@media (max-width: 620px) {
+  .overlay {
+    padding: 6px;
+  }
+
+  .modal {
+    height: 97dvh;
+
+    border-radius: 10px;
+  }
+
+  .summaryItems {
+    grid-template-columns: 1fr;
+  }
+
+  .headerTitle {
+    gap: 8px;
+  }
+
+  .steps small {
+    display: none;
+  }
+}

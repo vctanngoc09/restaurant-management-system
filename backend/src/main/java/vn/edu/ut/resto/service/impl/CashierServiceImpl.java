@@ -4,8 +4,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import vn.edu.ut.resto.dto.request.AddOrderItemsRequest;
+import vn.edu.ut.resto.dto.request.CashPaymentRequest;
 import vn.edu.ut.resto.dto.request.CreateOrderRequest;
 
+import vn.edu.ut.resto.dto.response.PaymentReceiptResponse;
 import vn.edu.ut.resto.exception.InvalidOperationException;
 
 import vn.edu.ut.resto.model.Order;
@@ -14,6 +16,7 @@ import vn.edu.ut.resto.model.enums.EOrderType;
 
 import vn.edu.ut.resto.service.CashierService;
 import vn.edu.ut.resto.service.OrderService;
+import vn.edu.ut.resto.service.PaymentService;
 
 import java.util.EnumSet;
 import java.util.List;
@@ -26,6 +29,9 @@ public class CashierServiceImpl
 
     @Autowired
     private OrderService orderService;
+
+    @Autowired
+    private PaymentService paymentService;
 
 
     @Override
@@ -114,6 +120,20 @@ public class CashierServiceImpl
                                 EOrderType.TAKE_AWAY,
                                 EOrderType.DELIVERY
                         )
+                );
+    }
+
+
+    @Override
+    public PaymentReceiptResponse payCash(
+            Long orderId,
+            CashPaymentRequest request
+    ) {
+
+        return paymentService
+                .payCash(
+                        orderId,
+                        request
                 );
     }
 }

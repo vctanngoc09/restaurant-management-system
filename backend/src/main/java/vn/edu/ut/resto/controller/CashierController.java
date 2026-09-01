@@ -12,11 +12,13 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import vn.edu.ut.resto.dto.request.AddOrderItemsRequest;
+import vn.edu.ut.resto.dto.request.CashPaymentRequest;
 import vn.edu.ut.resto.dto.request.CreateOrderRequest;
 
 import vn.edu.ut.resto.dto.response.ApiResponse;
 import vn.edu.ut.resto.dto.response.OrderResponse;
 
+import vn.edu.ut.resto.dto.response.PaymentReceiptResponse;
 import vn.edu.ut.resto.mapper.OrderMapper;
 
 import vn.edu.ut.resto.model.Order;
@@ -288,5 +290,37 @@ public class CashierController {
                         response
                 )
         );
+    }
+
+
+    @PostMapping("/{orderId}/payments/cash")
+    public ResponseEntity<ApiResponse<PaymentReceiptResponse>> payCash(
+            @PathVariable
+            Long orderId,
+
+            @Valid
+            @RequestBody
+            CashPaymentRequest request
+    ) {
+
+        PaymentReceiptResponse response =
+                cashierService
+                        .payCash(
+                                orderId,
+                                request
+                        );
+
+
+        return ResponseEntity
+                .status(
+                        HttpStatus.CREATED
+                )
+                .body(
+                        new ApiResponse<>(
+                                201,
+                                "Thanh toán tiền mặt thành công!",
+                                response
+                        )
+                );
     }
 }

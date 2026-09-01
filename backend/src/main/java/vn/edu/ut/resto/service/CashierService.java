@@ -1,8 +1,10 @@
 package vn.edu.ut.resto.service;
 
 import vn.edu.ut.resto.dto.request.AddOrderItemsRequest;
+import vn.edu.ut.resto.dto.request.CashPaymentRequest;
 import vn.edu.ut.resto.dto.request.CreateOrderRequest;
 
+import vn.edu.ut.resto.dto.response.PaymentReceiptResponse;
 import vn.edu.ut.resto.model.Order;
 
 import vn.edu.ut.resto.model.enums.EOrderType;
@@ -38,5 +40,10 @@ public interface CashierService {
 
     Order requestPayment(
             Long orderId
+    );
+
+    PaymentReceiptResponse payCash(
+            Long orderId,
+            CashPaymentRequest request
     );
 }
