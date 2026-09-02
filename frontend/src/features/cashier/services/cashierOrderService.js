@@ -57,6 +57,19 @@ const cashierOrderService = {
 
     return response.data;
   },
+
+  // ==================================================
+  // GET RECEIPT
+  //
+  // GET
+  // /api/cashier/orders/{orderId}/receipt
+  // ==================================================
+
+  async getReceipt(orderId) {
+    const response = await api.get(`${CASHIER_ORDER_URL}/${orderId}/receipt`);
+
+    return response.data;
+  },
 };
 
 export default cashierOrderService;

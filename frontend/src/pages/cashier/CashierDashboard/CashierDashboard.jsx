@@ -18,6 +18,8 @@ import BillingModal from "../../../features/cashier/components/modals/BillingMod
 
 import ReceiptPrintModal from "../../../features/cashier/components/modals/ReceiptPrintModal/ReceiptPrintModal";
 
+import CashierOrderDetailModal from "../../../features/cashier/components/modals/CashierOrderDetailModal/CashierOrderDetailModal";
+
 import styles from "./CashierDashboard.module.css";
 
 function CashierDashboard() {
@@ -36,7 +38,8 @@ function CashierDashboard() {
   // ==================================================
   // SERVING ITEM
   //
-  // Chặn double click READY -> SERVED
+  // Chặn double click
+  // READY -> SERVED
   // ==================================================
 
   const [servingItemId, setServingItemId] = useState(null);
@@ -55,9 +58,15 @@ function CashierDashboard() {
   // READY COUNT
   // ==================================================
 
-  const readyItemCount = activeOrders.reduce((total, order) => {
-    return total + order.items.filter((item) => item.status === "ready").length;
-  }, 0);
+  const readyItemCount = activeOrders.reduce(
+    (total, order) => {
+      return (
+        total + order.items.filter((item) => item.status === "ready").length
+      );
+    },
+
+    0,
+  );
 
   // ==================================================
   // CURRENT USER
@@ -69,6 +78,7 @@ function CashierDashboard() {
   // POLLING
   //
   // Khi đang ở tab Đơn Hàng:
+  //
   // refresh 5 giây / lần
   //
   // để nhận trạng thái READY từ bếp.
@@ -126,7 +136,6 @@ function CashierDashboard() {
         tableCount={cashier.tables.length}
         orderCount={activeOrderCount}
         readyItemCount={readyItemCount}
-        onNewOrder={cashier.openNewOrder}
       />
 
       {/* ==================================================
@@ -139,7 +148,6 @@ function CashierDashboard() {
           orders={cashier.orders}
           onTableClick={cashier.openTable}
           onQuickChannelClick={cashier.openQuickChannel}
-          onNewOrder={cashier.openNewOrder}
         />
       )}
 
@@ -157,13 +165,24 @@ function CashierDashboard() {
         />
       )}
 
+      <CashierOrderDetailModal
+        open={cashier.activeModal === "orderDetail"}
+        order={cashier.selectedOrder}
+        menuItems={cashier.menuItems}
+        servingItemId={servingItemId}
+        onServeItem={handleServeItem}
+        onAddItems={cashier.openAddItems}
+        onPayment={cashier.openBilling}
+        onPrintReceipt={cashier.openReceipt}
+        onClose={cashier.closeModal}
+      />
+
       {/* ==================================================
           NEW ORDER
       ================================================== */}
 
       <NewOrderModal
         open={cashier.activeModal === "newOrder"}
-        tables={cashier.tables}
         onClose={cashier.closeModal}
         onStart={cashier.startNewOrder}
       />
@@ -195,8 +214,11 @@ function CashierDashboard() {
       <BillingModal
         open={cashier.activeModal === "billing"}
         selectedOrder={cashier.selectedOrder}
+        preparing={cashier.billingPreparing}
+        restaurantSetting={cashier.restaurantSetting}
+        promotions={cashier.promotions}
+        onPayCash={cashier.payCash}
         onClose={cashier.closeModal}
-        onComplete={cashier.completePayment}
       />
 
       {/* ==================================================
@@ -205,6 +227,7 @@ function CashierDashboard() {
 
       <ReceiptPrintModal
         open={cashier.activeModal === "receipt"}
+        orderId={cashier.selectedOrder?.backendId}
         selectedOrder={cashier.selectedOrder}
         currentUserName={currentUserName}
         restaurantSetting={cashier.restaurantSetting}

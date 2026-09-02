@@ -1,4 +1,8 @@
-.modalOverlay {
+/* ==================================================
+   OVERLAY
+================================================== */
+
+.overlay {
   position: fixed;
   inset: 0;
   z-index: var(--z-modal-backdrop);
@@ -7,454 +11,1034 @@
   align-items: center;
   justify-content: center;
 
-  padding: 20px;
+  padding: 18px;
 
   background: rgba(15, 23, 42, 0.55);
-
-  backdrop-filter: blur(2px);
+  backdrop-filter: blur(3px);
 }
 
-.modalBox {
-  width: 100%;
+/* ==================================================
+   MODAL
+================================================== */
+
+.modal {
+  width: min(1180px, 100%);
+  height: min(88dvh, 760px);
 
   display: flex;
   flex-direction: column;
 
   overflow: hidden;
 
-  background: var(--color-surface);
+  background: var(--color-background-soft);
 
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-xl);
+  border-radius: 14px;
 
   box-shadow: var(--shadow-xl);
 }
 
-.billingModal {
-  max-width: 680px;
-  max-height: 90vh;
+/* ==================================================
+   HEADER
+================================================== */
+
+.header {
+  min-height: 60px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 12px;
+
+  padding: 10px 14px;
+
+  flex-shrink: 0;
+
+  background: var(--color-surface);
+
+  border-bottom: 1px solid var(--color-border);
 }
 
-.modalHeader {
-  min-height: 62px;
+.headerTitle {
+  display: flex;
+  align-items: center;
 
+  gap: 14px;
+}
+
+.headerTitle strong {
+  color: var(--color-text-primary);
+
+  font-size: 13px;
+  font-weight: var(--font-weight-extrabold);
+}
+
+.headerTitle span {
+  padding: 5px 8px;
+
+  color: var(--color-primary);
+  background: var(--color-primary-light);
+
+  border-radius: 7px;
+
+  font-size: 9px;
+  font-weight: var(--font-weight-bold);
+}
+
+.closeButton {
+  width: 34px;
+  height: 34px;
+
+  display: grid;
+  place-items: center;
+
+  padding: 0;
+
+  color: var(--color-text-secondary);
+  background: var(--color-background-soft);
+
+  border: 1px solid var(--color-border);
+  border-radius: 9px;
+
+  cursor: pointer;
+}
+
+.closeButton:hover {
+  color: var(--color-primary);
+  background: var(--color-primary-light);
+}
+
+/* ==================================================
+   PAYMENT BODY
+================================================== */
+
+.paymentBody {
+  min-height: 0;
+
+  flex: 1;
+
+  display: grid;
+
+  grid-template-columns:
+    minmax(0, 1.25fr)
+    minmax(330px, 0.75fr);
+
+  gap: 12px;
+
+  padding: 12px;
+
+  overflow: hidden;
+}
+
+.paymentOrderPanel,
+.paymentPanel {
+  min-height: 0;
+
+  background: var(--color-surface);
+
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+
+  box-shadow: var(--shadow-xs);
+}
+
+/* ==================================================
+   LEFT PANEL
+================================================== */
+
+.paymentOrderPanel {
+  display: flex;
+  flex-direction: column;
+
+  overflow: hidden;
+}
+
+/* ==================================================
+   ORDER HEADER
+================================================== */
+
+.paymentOrderHeader {
+  display: grid;
+
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+
+  gap: 20px;
+
+  padding: 14px;
+
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.paymentOrderHeader > div {
+  display: flex;
+  flex-direction: column;
+
+  gap: 3px;
+}
+
+.paymentOrderHeader span {
+  color: var(--color-text-muted);
+
+  font-size: 8px;
+}
+
+.paymentOrderHeader strong {
+  color: var(--color-text-primary);
+
+  font-size: 10px;
+}
+
+/* ==================================================
+   PROMOTION
+================================================== */
+
+.promotionBox {
+  padding: 12px 14px;
+
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.promotionBox > label {
+  display: block;
+
+  margin-bottom: 6px;
+
+  color: var(--color-text-secondary);
+
+  font-size: 9px;
+  font-weight: var(--font-weight-bold);
+}
+
+.promotionInputRow {
+  display: flex;
+
+  gap: 7px;
+}
+
+.promotionInputWrap {
+  position: relative;
+
+  min-width: 0;
+
+  flex: 1;
+}
+
+.promotionInputWrap input {
+  width: 100%;
+  height: 35px;
+
+  padding: 0 10px;
+
+  color: var(--color-text-primary);
+  background: var(--color-background-soft);
+
+  border: 1px solid var(--color-border);
+  border-radius: 7px;
+
+  outline: none;
+
+  font-family: inherit;
+  font-size: 9px;
+}
+
+.promotionInputWrap input:focus {
+  background: var(--color-surface);
+
+  border-color: var(--color-primary);
+
+  box-shadow: 0 0 0 3px var(--color-primary-light);
+}
+
+.applyPromotionButton {
+  min-width: 78px;
+
+  padding: 0 14px;
+
+  color: #ffffff;
+  background: var(--color-primary);
+
+  border: none;
+  border-radius: 7px;
+
+  font-size: 9px;
+  font-weight: var(--font-weight-bold);
+
+  cursor: pointer;
+}
+
+.applyPromotionButton:hover {
+  background: var(--color-primary-hover);
+}
+
+/* ==================================================
+   PROMOTION SUGGESTIONS
+================================================== */
+
+.promotionSuggestions {
+  position: absolute;
+
+  top: calc(100% + 5px);
+  left: 0;
+  right: 0;
+
+  z-index: 20;
+
+  max-height: 210px;
+
+  overflow-y: auto;
+
+  padding: 5px;
+
+  background: var(--color-surface);
+
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+
+  box-shadow: var(--shadow-lg);
+}
+
+.promotionSuggestions button {
+  width: 100%;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 10px;
+
+  padding: 8px 9px;
+
+  color: var(--color-text-primary);
+  background: transparent;
+
+  border: none;
+  border-radius: 6px;
+
+  text-align: left;
+
+  cursor: pointer;
+}
+
+.promotionSuggestions button:hover {
+  background: var(--color-primary-light);
+}
+
+.promotionSuggestions button > div {
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 2px;
+}
+
+.promotionSuggestions strong {
+  color: var(--color-primary);
+
+  font-size: 9px;
+}
+
+.promotionSuggestions span {
+  overflow: hidden;
+
+  color: var(--color-text-muted);
+
+  font-size: 8px;
+
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.promotionSuggestions b {
+  flex-shrink: 0;
+
+  color: var(--color-success-hover);
+
+  font-size: 9px;
+}
+
+/* ==================================================
+   ORDER DETAILS
+================================================== */
+
+.orderDetailsTitle {
+  padding: 10px 14px;
+
+  color: var(--color-text-secondary);
+  background: var(--color-background-soft);
+
+  border-bottom: 1px solid var(--color-border);
+
+  font-size: 9px;
+  font-weight: var(--font-weight-bold);
+}
+
+.paymentItems {
+  min-height: 0;
+
+  flex: 1;
+
+  padding: 5px 14px;
+
+  overflow-y: auto;
+}
+
+.paymentItems::-webkit-scrollbar {
+  width: 5px;
+}
+
+.paymentItems::-webkit-scrollbar-thumb {
+  background: var(--color-border-dark);
+
+  border-radius: 999px;
+}
+
+.paymentItems > div {
+  display: flex;
+  justify-content: space-between;
+
+  gap: 15px;
+
+  padding: 9px 0;
+
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.paymentItems > div:last-child {
+  border-bottom: none;
+}
+
+.paymentItems > div > div {
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 2px;
+}
+
+.paymentItems strong {
+  color: var(--color-text-primary);
+
+  font-size: 9px;
+}
+
+.paymentItems span {
+  color: var(--color-text-muted);
+
+  font-size: 8px;
+}
+
+/* ==================================================
+   TOTALS
+================================================== */
+
+.paymentTotals {
+  padding: 11px 14px;
+
+  flex-shrink: 0;
+
+  border-top: 1px solid var(--color-border);
+}
+
+.paymentTotals > div {
   display: flex;
   align-items: center;
   justify-content: space-between;
 
   gap: 15px;
 
-  padding: 14px 20px;
+  margin-bottom: 5px;
 
-  flex-shrink: 0;
+  color: var(--color-text-secondary);
 
-  background: var(--color-background-soft);
-
-  border-bottom: 1px solid var(--color-border-light);
+  font-size: 9px;
 }
 
-.modalHeader h2 {
+.paymentTotals > div:last-child {
+  margin-bottom: 0;
+}
+
+.discountValue {
+  color: var(--color-success-hover);
+}
+
+.paymentTotals .paymentTotal {
+  padding-top: 9px;
+  margin-top: 8px;
+
   color: var(--color-text-primary);
 
-  font-size: var(--font-size-md);
-  font-weight: var(--font-weight-extrabold);
+  border-top: 1px solid var(--color-border);
+
+  font-size: 11px;
 }
 
-.modalHeader p {
-  margin-top: 3px;
-
-  color: var(--color-text-muted);
-
-  font-size: var(--font-size-xs);
+.paymentTotal strong:last-child {
+  font-size: 16px;
 }
 
-.modalCloseButton {
-  width: 34px;
-  height: 34px;
+/* ==================================================
+   RIGHT PAYMENT PANEL
+================================================== */
 
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  flex-shrink: 0;
-
-  color: var(--color-text-muted);
-
-  border-radius: var(--radius-full);
-}
-
-.modalCloseButton:hover {
-  color: var(--color-text-primary);
-  background: var(--color-border-light);
-}
-
-.modalBody {
+.paymentPanel {
   display: flex;
   flex-direction: column;
 
-  gap: 20px;
-
-  padding: 22px;
+  padding: 12px;
 
   overflow-y: auto;
 }
 
-.formLabel {
-  display: block;
-
-  margin-bottom: 7px;
-
-  color: var(--color-text-secondary);
-
-  font-size: 10px;
-  font-weight: var(--font-weight-bold);
-
-  letter-spacing: 0.03em;
-}
-
-.billingOrderItems {
-  padding: 13px;
-
-  background: var(--color-background-soft);
-
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-}
-
-.billingOrderItems > div {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-
-  gap: 12px;
-
-  padding: 5px 0;
-
-  color: var(--color-text-primary);
-
-  border-bottom: 1px solid var(--color-border-light);
-
-  font-size: var(--font-size-xs);
-}
-
-.billingOrderItems > div:last-child {
-  border-bottom: none;
-}
-
-.discountSelector {
-  display: grid;
-
-  grid-template-columns:
-    repeat(4, 1fr);
-
-  gap: 7px;
-}
-
-.discountSelector button {
-  min-height: 36px;
-
-  color: var(--color-text-secondary);
-  background: var(--color-background-soft);
-
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-
-  font-size: 10px;
-  font-weight: var(--font-weight-semibold);
-}
-
-.discountSelector .discountActive {
-  color: #ffffff;
-  background: var(--color-primary);
-
-  border-color: var(--color-primary);
-}
+/* ==================================================
+   METHODS
+================================================== */
 
 .paymentMethods {
   display: grid;
 
-  grid-template-columns:
-    repeat(3, 1fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 
-  gap: 8px;
+  gap: 6px;
+
+  padding: 4px;
+
+  flex-shrink: 0;
+
+  background: var(--color-background-soft);
+
+  border-radius: 8px;
 }
 
 .paymentMethods button {
-  min-height: 70px;
+  min-height: 32px;
 
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
 
   gap: 5px;
 
-  color: var(--color-text-secondary);
-  background: var(--color-background-soft);
+  padding: 0 8px;
 
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
+  color: var(--color-text-muted);
+  background: transparent;
 
-  font-size: 10px;
-  font-weight: var(--font-weight-bold);
-}
-
-.paymentMethods .paymentActive {
-  color: var(--color-primary);
-  background: var(--color-primary-light);
-
-  border-color: var(--color-primary);
-
-  box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.08);
-}
-
-.formControl {
-  width: 100%;
-  min-height: 41px;
-
-  padding: 0 12px;
-
-  color: var(--color-text-primary);
-  background: var(--color-background-soft);
-
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-medium);
-}
-
-.formControl:focus {
-  border-color: var(--color-border-focus);
-
-  box-shadow: 0 0 0 3px var(--color-primary-light);
-}
-
-.cashPaymentBox {
-  padding: 13px;
-
-  background: var(--color-background-soft);
-
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-}
-
-.quickCash {
-  display: flex;
-
-  gap: 6px;
-
-  margin-top: 8px;
-
-  flex-wrap: wrap;
-}
-
-.quickCash button {
-  padding: 5px 8px;
-
-  color: var(--color-text-secondary);
-  background: var(--color-surface);
-
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  border-radius: 6px;
 
   font-size: 9px;
   font-weight: var(--font-weight-semibold);
+
+  cursor: pointer;
 }
 
-.changeMoney {
+.paymentMethods button:hover {
+  color: var(--color-primary);
+}
+
+.paymentMethods .paymentMethodActive {
+  color: var(--color-primary);
+  background: #ffffff;
+
+  border-color: var(--color-border);
+
+  box-shadow: var(--shadow-xs);
+}
+
+/* ==================================================
+   PREPARING
+================================================== */
+
+.preparingNotice {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
 
-  margin-top: 10px;
-  padding-top: 10px;
+  gap: 6px;
 
-  color: var(--color-text-secondary);
+  margin-top: 9px;
+  padding: 8px 10px;
 
-  border-top: 1px solid var(--color-border);
-
-  font-size: var(--font-size-xs);
-}
-
-.changeMoney strong {
-  color: var(--color-success);
-
-  font-size: var(--font-size-sm);
-}
-
-.qrBox {
-  display: flex;
-  align-items: center;
-
-  gap: 16px;
-
-  padding: 14px;
-
+  color: var(--color-primary);
   background: var(--color-primary-light);
 
   border: 1px solid #c7d2fe;
-  border-radius: var(--radius-lg);
+  border-radius: 7px;
+
+  font-size: 8px;
+  font-weight: var(--font-weight-semibold);
 }
 
-.fakeQr {
-  width: 110px;
-  height: 110px;
+/* ==================================================
+   CASH HEADER
+================================================== */
 
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  flex-shrink: 0;
-
-  color: var(--color-text-primary);
-  background: #ffffff;
-
-  border: 1px solid #c7d2fe;
-  border-radius: var(--radius-md);
-}
-
-.qrBox > div:last-child {
+.cashHeader {
   display: flex;
   flex-direction: column;
+  align-items: center;
 
-  gap: 3px;
+  gap: 5px;
+
+  padding: 22px 10px 15px;
+
+  text-align: center;
+}
+
+.cashHeader > span {
+  color: var(--color-text-primary);
+
+  font-size: 11px;
+  font-weight: var(--font-weight-bold);
+}
+
+.cashHeader small {
+  color: var(--color-text-muted);
+
+  font-size: 8px;
+}
+
+.cashHeader strong {
+  margin-top: 5px;
+
+  color: var(--color-text-primary);
+
+  font-size: 27px;
+  font-weight: var(--font-weight-extrabold);
+}
+
+/* ==================================================
+   QUICK CASH
+================================================== */
+
+.quickCash {
+  display: grid;
+
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+
+  gap: 5px;
+
+  margin-bottom: 12px;
+}
+
+.quickCash button {
+  min-height: 31px;
+
+  padding: 0 5px;
 
   color: var(--color-text-secondary);
+  background: #ffffff;
 
-  font-size: 10px;
+  border: 1px solid var(--color-border);
+  border-radius: 7px;
+
+  font-size: 8px;
+  font-weight: var(--font-weight-semibold);
+
+  cursor: pointer;
 }
 
-.qrBox > div:last-child strong {
-  color: #312e81;
-
-  font-size: var(--font-size-xs);
-}
-
-.qrBox b {
-  margin-top: 3px;
-
+.quickCash button:hover:not(:disabled) {
   color: var(--color-primary);
 
-  font-size: var(--font-size-sm);
+  border-color: var(--color-primary);
 }
 
-.billingCalculation {
-  padding-top: 12px;
+.quickCash button:disabled {
+  opacity: 0.5;
 
-  border-top: 1px solid var(--color-border);
+  cursor: not-allowed;
 }
 
-.billingCalculation > div {
+/* ==================================================
+   KEYPAD
+================================================== */
+
+.keypad {
+  display: grid;
+
+  grid-template-columns: repeat(3, 1fr);
+
+  gap: 4px;
+
+  margin-bottom: 10px;
+}
+
+.keypad button {
+  min-height: 45px;
+
+  padding: 0;
+
+  color: var(--color-text-primary);
+  background: transparent;
+
+  border: none;
+  border-radius: 7px;
+
+  font-size: 17px;
+  font-weight: var(--font-weight-semibold);
+
+  cursor: pointer;
+}
+
+.keypad button:hover:not(:disabled) {
+  background: var(--color-background-soft);
+}
+
+.keypad button:disabled {
+  opacity: 0.45;
+
+  cursor: not-allowed;
+}
+
+/* ==================================================
+   CHANGE
+================================================== */
+
+.changeBox {
   display: flex;
   align-items: center;
   justify-content: space-between;
 
-  margin-bottom: 6px;
-
-  color: var(--color-text-secondary);
-
-  font-size: var(--font-size-xs);
-}
-
-.billingCalculation .discountLine {
-  color: var(--color-danger);
-}
-
-.billingCalculation .billingTotal {
-  padding-top: 10px;
-  margin-top: 9px;
-
-  color: var(--color-text-primary);
-
-  border-top: 1px solid var(--color-border);
-
-  font-size: var(--font-size-md);
-}
-
-.billingTotal strong:last-child {
-  color: var(--color-primary);
-}
-
-.modalFooter {
-  display: flex;
-  align-items: center;
-
   gap: 12px;
 
-  padding: 14px 20px;
+  padding: 10px;
 
-  background: var(--color-background-soft);
+  margin-bottom: 10px;
 
-  border-top: 1px solid var(--color-border);
+  background: var(--color-success-light);
+
+  border: 1px solid #a7f3d0;
+  border-radius: 8px;
 }
 
-.secondaryButton {
-  min-height: 38px;
-
-  padding: 0 16px;
-
+.changeBox span {
   color: var(--color-text-secondary);
-  background: var(--color-border);
 
-  border-radius: var(--radius-md);
-
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-bold);
+  font-size: 9px;
 }
 
-.secondaryButton:hover {
-  background: var(--color-border-dark);
+.changeBox strong {
+  color: #047857;
+
+  font-size: 12px;
 }
 
-.modalPrimaryButton {
-  min-height: 40px;
+/* ==================================================
+   PAY BUTTON
+================================================== */
 
-  flex: 1;
+.payButton {
+  width: 100%;
+  min-height: 42px;
 
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  margin: auto 0 0;
 
-  gap: 7px;
+  flex-shrink: 0;
 
-  padding: 9px 16px;
-
-  color: var(--color-text-inverse);
+  color: #ffffff;
   background: var(--color-primary);
 
-  border-radius: var(--radius-md);
+  border: none;
+  border-radius: 8px;
 
-  font-size: var(--font-size-xs);
+  font-size: 10px;
   font-weight: var(--font-weight-bold);
+
+  cursor: pointer;
+
+  box-shadow: var(--shadow-sm);
 }
 
-.modalPrimaryButton:hover {
+.payButton:hover:not(:disabled) {
   background: var(--color-primary-hover);
 }
 
-@media (max-width: 650px) {
-  .modalOverlay {
-    padding: 8px;
+.payButton:disabled {
+  color: var(--color-text-muted);
+  background: #e2e8f0;
+
+  box-shadow: none;
+
+  cursor: not-allowed;
+}
+
+/* ==================================================
+   QR
+================================================== */
+
+.qrPlaceholder {
+  min-height: 360px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  gap: 8px;
+
+  padding: 25px;
+
+  text-align: center;
+}
+
+.qrPlaceholder > div {
+  width: 110px;
+  height: 110px;
+
+  display: grid;
+  place-items: center;
+
+  color: var(--color-primary);
+  background: var(--color-primary-light);
+
+  border: 1px dashed var(--color-primary);
+  border-radius: 12px;
+}
+
+.qrPlaceholder strong {
+  color: var(--color-text-primary);
+
+  font-size: 12px;
+}
+
+.qrPlaceholder span {
+  max-width: 230px;
+
+  color: var(--color-text-muted);
+
+  font-size: 9px;
+  line-height: 1.5;
+}
+
+.qrPlaceholder b {
+  margin-top: 7px;
+
+  color: var(--color-primary);
+
+  font-size: 18px;
+}
+
+/* ==================================================
+   SUCCESS
+================================================== */
+
+.successBody {
+  min-height: 0;
+
+  flex: 1;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  gap: 14px;
+
+  padding: 25px;
+}
+
+.successCard {
+  width: min(350px, 100%);
+
+  overflow: hidden;
+
+  background: #ffffff;
+
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+
+  box-shadow: var(--shadow-sm);
+
+  text-align: center;
+}
+
+.successIcon {
+  width: 58px;
+  height: 58px;
+
+  display: grid;
+  place-items: center;
+
+  margin: 20px auto 9px;
+
+  color: #ffffff;
+  background: var(--color-success);
+
+  border-radius: 999px;
+}
+
+.successCard h2 {
+  margin: 0;
+
+  color: var(--color-text-primary);
+
+  font-size: 14px;
+  font-weight: var(--font-weight-extrabold);
+}
+
+.successCard > p {
+  margin: 5px 10px 17px;
+
+  color: var(--color-text-muted);
+
+  font-size: 9px;
+}
+
+.successDetails {
+  border-top: 1px solid var(--color-border);
+}
+
+.successDetails > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 14px;
+
+  padding: 8px 12px;
+
+  color: var(--color-text-secondary);
+
+  border-bottom: 1px solid var(--color-border-light);
+
+  font-size: 9px;
+}
+
+.successDetails > div:last-child {
+  border-bottom: none;
+}
+
+.successDetails strong {
+  color: var(--color-text-primary);
+}
+
+.successDetails .successChange strong {
+  color: var(--color-success-hover);
+
+  font-size: 12px;
+}
+
+/* ==================================================
+   SUCCESS ACTIONS
+================================================== */
+
+.successActions {
+  width: min(350px, 100%);
+
+  display: grid;
+
+  grid-template-columns:
+    1fr
+    1fr;
+
+  gap: 8px;
+}
+
+.printButton,
+.confirmButton {
+  min-height: 39px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 6px;
+
+  border-radius: 8px;
+
+  font-size: 9px;
+  font-weight: var(--font-weight-bold);
+
+  cursor: pointer;
+}
+
+.printButton {
+  color: var(--color-text-primary);
+  background: var(--color-surface);
+
+  border: 1px solid var(--color-border-dark);
+}
+
+.printButton:hover:not(:disabled) {
+  color: var(--color-primary);
+
+  border-color: var(--color-primary);
+}
+
+.printButton:disabled {
+  opacity: 0.5;
+
+  cursor: not-allowed;
+}
+
+.confirmButton {
+  color: #ffffff;
+  background: var(--color-primary);
+
+  border: 1px solid var(--color-primary);
+}
+
+.confirmButton:hover {
+  background: var(--color-primary-hover);
+}
+
+/* ==================================================
+   RESPONSIVE
+================================================== */
+
+@media (max-width: 900px) {
+  .modal {
+    height: 94dvh;
   }
 
-  .modalBox {
-    border-radius: var(--radius-lg);
-  }
-
-  .paymentMethods {
+  .paymentBody {
     grid-template-columns: 1fr;
+
+    overflow-y: auto;
   }
 
-  .discountSelector {
-    grid-template-columns:
-      repeat(2, 1fr);
+  .paymentOrderPanel,
+  .paymentPanel {
+    min-height: auto;
   }
 
-  .qrBox {
-    align-items: center;
-    flex-direction: column;
+  .paymentItems {
+    max-height: 280px;
+  }
+}
 
-    text-align: center;
+@media (max-width: 620px) {
+  .overlay {
+    padding: 6px;
+  }
+
+  .modal {
+    height: 97dvh;
+
+    border-radius: 10px;
+  }
+
+  .paymentBody {
+    padding: 7px;
+
+    gap: 7px;
+  }
+
+  .paymentOrderHeader {
+    grid-template-columns: 1fr;
+
+    gap: 8px;
+  }
+
+  .quickCash {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .successActions {
+    grid-template-columns: 1fr;
   }
 }

@@ -323,4 +323,29 @@ public class CashierController {
                         )
                 );
     }
+
+    @GetMapping("/{orderId}/receipt")
+    public ResponseEntity<
+            ApiResponse<PaymentReceiptResponse>
+            >
+    getReceipt(
+            @PathVariable
+            Long orderId
+    ) {
+
+        PaymentReceiptResponse response =
+                cashierService
+                        .getReceipt(
+                                orderId
+                        );
+
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        200,
+                        "Lấy hóa đơn thanh toán thành công!",
+                        response
+                )
+        );
+    }
 }

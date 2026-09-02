@@ -136,4 +136,15 @@ public class CashierServiceImpl
                         request
                 );
     }
+
+    @Override
+    public PaymentReceiptResponse getReceipt(
+            Long orderId
+    ) {
+
+        return paymentService
+                .getReceipt(
+                        orderId
+                );
+    }
 }

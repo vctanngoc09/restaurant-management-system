@@ -25,15 +25,13 @@
 
 .modal {
   width: min(560px, 100%);
-  max-height: min(820px, 92dvh);
+  max-height: 90dvh;
   min-height: 0;
 
   display: flex;
   flex-direction: column;
 
   overflow: hidden;
-
-  color: var(--color-text-primary);
 
   background: var(--color-surface);
 
@@ -53,8 +51,6 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-
-  gap: 12px;
 
   padding: 10px 14px;
 
@@ -83,10 +79,6 @@
   font-weight: var(--font-weight-bold);
 }
 
-/* ======================================================
-   CLOSE
-====================================================== */
-
 .closeButton {
   width: 34px;
   height: 34px;
@@ -104,20 +96,10 @@
   border-radius: 9px;
 
   cursor: pointer;
-
-  transition:
-    color var(--transition-fast),
-    background var(--transition-fast);
-}
-
-.closeButton:hover {
-  color: var(--color-text-primary);
-
-  background: var(--color-background);
 }
 
 /* ======================================================
-   ORDER META
+   META
 ====================================================== */
 
 .orderMeta {
@@ -139,12 +121,10 @@
 }
 
 .orderMeta > div {
-  min-width: 0;
-
   display: flex;
   align-items: center;
 
-  gap: 4px;
+  gap: 5px;
 }
 
 .orderMeta span,
@@ -169,18 +149,12 @@
   font-style: normal;
 }
 
-.orderMeta time {
-  flex-shrink: 0;
-
-  white-space: nowrap;
-}
-
 /* ======================================================
-   ORDER SUMMARY
+   SUMMARY
 ====================================================== */
 
-.orderSummary {
-  min-height: 92px;
+.summary {
+  min-height: 96px;
 
   display: flex;
   align-items: center;
@@ -195,11 +169,7 @@
   border-bottom: 1px solid var(--color-border);
 }
 
-/* ======================================================
-   TABLE
-====================================================== */
-
-.tableArea {
+.orderIdentity {
   min-width: 0;
 
   display: flex;
@@ -208,16 +178,16 @@
   gap: 10px;
 }
 
-.tableAvatar {
-  width: 48px;
-  height: 48px;
+.avatar {
+  width: 50px;
+  height: 50px;
 
   display: grid;
   place-items: center;
 
   flex-shrink: 0;
 
-  color: var(--color-text-inverse);
+  color: #ffffff;
 
   background: var(--color-primary);
 
@@ -225,11 +195,9 @@
 
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-bold);
-
-  box-shadow: var(--shadow-sm);
 }
 
-.tableInfo {
+.identityInfo {
   min-width: 0;
 
   display: flex;
@@ -238,37 +206,35 @@
   gap: 2px;
 }
 
-.tableInfo > span {
+.identityInfo > span {
   color: var(--color-text-muted);
 
   font-size: var(--font-size-2xs);
 }
 
-.tableInfo > strong {
+.identityInfo > strong {
   color: var(--color-text-primary);
 
   font-size: var(--font-size-md);
   font-weight: var(--font-weight-bold);
 }
 
-.tableInfo small {
+.identityInfo small {
   color: var(--color-text-secondary);
 
   font-size: var(--font-size-2xs);
 }
 
-.tableInfo small b {
+.identityInfo small b {
   color: var(--color-text-primary);
-
-  font-weight: var(--font-weight-semibold);
 }
 
 /* ======================================================
-   MAIN STATUS
+   PROGRESS
 ====================================================== */
 
-.mainStatus {
-  min-width: 145px;
+.progressBox {
+  min-width: 148px;
 
   display: flex;
   align-items: center;
@@ -281,7 +247,7 @@
   border-radius: 11px;
 }
 
-.mainStatusProcessing {
+.processingProgress {
   color: var(--color-warning-hover);
 
   background: var(--color-warning-light);
@@ -289,7 +255,7 @@
   border-color: #fcd58b;
 }
 
-.mainStatusServed {
+.servedProgress {
   color: var(--color-success-hover);
 
   background: var(--color-success-light);
@@ -297,7 +263,7 @@
   border-color: #a7f3d0;
 }
 
-.mainStatusPayment {
+.paymentProgress {
   color: var(--color-primary);
 
   background: var(--color-primary-light);
@@ -305,39 +271,13 @@
   border-color: #c7d2fe;
 }
 
-.mainStatus > div:last-child {
-  min-width: 0;
-
-  display: flex;
-  flex-direction: column;
-
-  gap: 2px;
-}
-
-.mainStatus strong {
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-bold);
-
-  white-space: nowrap;
-}
-
-.mainStatus > div:last-child > span {
-  color: var(--color-text-secondary);
-
-  font-size: var(--font-size-2xs);
-}
-
-/* ======================================================
-   PROGRESS CIRCLE
-====================================================== */
-
 .progressCircle {
   --progress: 0%;
 
   position: relative;
 
-  width: 40px;
-  height: 40px;
+  width: 42px;
+  height: 42px;
 
   display: grid;
   place-items: center;
@@ -375,6 +315,26 @@
   font-weight: var(--font-weight-bold);
 }
 
+.progressInfo {
+  display: flex;
+  flex-direction: column;
+
+  gap: 2px;
+}
+
+.progressInfo strong {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+
+  white-space: nowrap;
+}
+
+.progressInfo span {
+  color: var(--color-text-secondary);
+
+  font-size: var(--font-size-2xs);
+}
+
 /* ======================================================
    BODY
 ====================================================== */
@@ -392,7 +352,6 @@
   padding: 12px 14px;
 
   overflow-y: auto;
-  overflow-x: hidden;
 
   background: var(--color-background);
 }
@@ -408,7 +367,7 @@
 }
 
 /* ======================================================
-   ITEM CARD
+   ITEM
 ====================================================== */
 
 .itemCard {
@@ -424,18 +383,12 @@
   box-shadow: var(--shadow-xs);
 }
 
-/* ======================================================
-   ITEM STATUS
-====================================================== */
-
 .itemStatus {
-  min-height: 37px;
+  min-height: 36px;
 
   display: flex;
   align-items: center;
   justify-content: space-between;
-
-  gap: 10px;
 
   padding: 7px 10px;
 
@@ -449,14 +402,10 @@
   gap: 6px;
 }
 
-.itemStatus strong {
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-bold);
-}
-
-.itemStatus > span {
+.itemStatus strong,
+.itemStatus span {
   font-size: var(--font-size-2xs);
-  font-weight: var(--font-weight-semibold);
+  font-weight: var(--font-weight-bold);
 }
 
 .itemStatusProcessing {
@@ -488,7 +437,7 @@
 ====================================================== */
 
 .itemContent {
-  min-height: 68px;
+  min-height: 76px;
 
   display: grid;
 
@@ -509,8 +458,6 @@
   height: 58px;
 
   overflow: hidden;
-
-  flex-shrink: 0;
 
   background: var(--color-background-soft);
 
@@ -549,15 +496,10 @@
 }
 
 .itemInfo > strong {
-  overflow: hidden;
-
   color: var(--color-text-primary);
 
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-bold);
-
-  white-space: nowrap;
-  text-overflow: ellipsis;
 }
 
 .itemInfo small {
@@ -566,18 +508,7 @@
   font-size: var(--font-size-2xs);
 }
 
-/* ======================================================
-   ITEM NOTE
-====================================================== */
-
 .itemNote {
-  min-width: 0;
-
-  display: flex;
-  align-items: center;
-
-  gap: 4px;
-
   overflow: hidden;
 
   color: var(--color-text-secondary);
@@ -588,20 +519,14 @@
   text-overflow: ellipsis;
 }
 
-.itemNote svg {
-  flex-shrink: 0;
-
-  color: var(--color-primary);
-}
-
 /* ======================================================
-   SERVE BUTTON
+   SERVE
 ====================================================== */
 
 .serveButton {
-  min-height: 31px;
+  min-height: 32px;
 
-  display: inline-flex;
+  display: flex;
   align-items: center;
   justify-content: center;
 
@@ -622,21 +547,15 @@
   cursor: pointer;
 }
 
-.serveButton:hover:not(:disabled) {
-  color: #ffffff;
-
-  background: var(--color-success);
-}
-
 .serveButton:disabled {
   opacity: 0.55;
 
   cursor: not-allowed;
 }
 
-.servedCheck {
-  width: 29px;
-  height: 29px;
+.servedIcon {
+  width: 31px;
+  height: 31px;
 
   display: grid;
   place-items: center;
@@ -649,33 +568,29 @@
 }
 
 /* ======================================================
-   ITEM PRICE
+   ITEM BOTTOM
 ====================================================== */
 
-.itemPrice {
+.itemBottom {
   min-height: 38px;
 
   display: flex;
   align-items: center;
   justify-content: space-between;
 
-  gap: 10px;
-
   padding: 7px 10px;
 
   border-top: 1px solid var(--color-border-light);
 }
 
-.itemPrice strong {
+.itemBottom strong {
   color: var(--color-text-primary);
 
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-bold);
 }
 
-.itemPrice span {
-  min-width: 28px;
-
+.itemBottom span {
   padding: 4px 7px;
 
   color: var(--color-text-secondary);
@@ -686,9 +601,6 @@
   border-radius: 6px;
 
   font-size: var(--font-size-2xs);
-  font-weight: var(--font-weight-semibold);
-
-  text-align: center;
 }
 
 /* ======================================================
@@ -708,10 +620,6 @@
   color: var(--color-text-muted);
 }
 
-.empty strong {
-  font-size: var(--font-size-xs);
-}
-
 /* ======================================================
    FOOTER
 ====================================================== */
@@ -724,57 +632,46 @@
   border-top: 1px solid var(--color-border);
 }
 
-/* ======================================================
-   TOTAL
-====================================================== */
-
-.totalRow {
-  min-height: 55px;
+.total {
+  min-height: 57px;
 
   display: flex;
   align-items: center;
   justify-content: space-between;
-
-  gap: 12px;
 
   padding: 10px 14px;
 
   border-bottom: 1px solid var(--color-border-light);
 }
 
-.totalRow span {
+.total span {
   color: var(--color-text-secondary);
 
   font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
 }
 
-.totalRow strong {
+.total strong {
   color: var(--color-text-primary);
 
-  font-size: 19px;
+  font-size: 20px;
   font-weight: var(--font-weight-extrabold);
 }
 
 /* ======================================================
-   ACTIONS
+   ACTION
 ====================================================== */
 
 .actions {
-  display: grid;
-
-  grid-template-columns:
-    1fr
-    1.15fr;
-
-  gap: 9px;
+  display: flex;
 
   padding: 10px 14px 14px;
 }
 
 .addButton,
-.paymentButton {
-  min-height: 42px;
+.paymentButton,
+.printButton {
+  width: 100%;
+  min-height: 43px;
 
   display: flex;
   align-items: center;
@@ -782,24 +679,13 @@
 
   gap: 7px;
 
-  padding: 0 12px;
-
   border-radius: 9px;
 
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-bold);
 
   cursor: pointer;
-
-  transition:
-    color var(--transition-fast),
-    background var(--transition-fast),
-    border-color var(--transition-fast);
 }
-
-/* ======================================================
-   ADD BUTTON
-====================================================== */
 
 .addButton {
   color: var(--color-text-primary);
@@ -809,56 +695,43 @@
   border: 1px solid var(--color-border-dark);
 }
 
-.addButton:hover:not(:disabled) {
+.addButton:hover {
   color: var(--color-primary);
 
-  border-color: var(--color-primary);
-
   background: var(--color-primary-light);
+
+  border-color: var(--color-primary);
 }
 
-/* ======================================================
-   PAYMENT BUTTON
-====================================================== */
-
 .paymentButton {
-  color: var(--color-text-inverse);
+  color: #ffffff;
 
   background: var(--color-primary);
 
   border: 1px solid var(--color-primary);
 }
 
-.paymentButton:hover:not(:disabled) {
+.paymentButton:hover {
   background: var(--color-primary-hover);
+}
 
-  border-color: var(--color-primary-hover);
+.printButton {
+  color: #ffffff;
+
+  background: var(--color-success);
+
+  border: 1px solid var(--color-success);
+}
+
+.printButton:hover {
+  filter: brightness(0.95);
 }
 
 /* ======================================================
-   DISABLED
+   MOBILE
 ====================================================== */
 
-.addButton:disabled,
-.paymentButton:disabled {
-  color: var(--color-text-muted);
-
-  background: #e9eef5;
-
-  border-color: #e2e8f0;
-
-  box-shadow: none;
-
-  cursor: not-allowed;
-
-  opacity: 0.8;
-}
-
-/* ======================================================
-   TABLET
-====================================================== */
-
-@media (max-width: 700px) {
+@media (max-width: 600px) {
   .overlay {
     padding: 8px;
   }
@@ -867,47 +740,13 @@
     max-height: 96dvh;
   }
 
-  .orderSummary {
+  .summary {
     align-items: flex-start;
 
     flex-direction: column;
   }
 
-  .mainStatus {
+  .progressBox {
     width: 100%;
-  }
-}
-
-/* ======================================================
-   MOBILE
-====================================================== */
-
-@media (max-width: 480px) {
-  .orderMeta {
-    align-items: flex-start;
-
-    flex-direction: column;
-  }
-
-  .actions {
-    grid-template-columns: 1fr;
-  }
-
-  .itemContent {
-    grid-template-columns:
-      42px
-      minmax(0, 1fr);
-  }
-
-  .itemIcon {
-    width: 42px;
-    height: 42px;
-  }
-
-  .serveButton,
-  .servedCheck {
-    grid-column: 2;
-
-    justify-self: flex-start;
   }
 }

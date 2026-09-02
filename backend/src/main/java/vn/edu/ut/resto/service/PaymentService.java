@@ -12,4 +12,8 @@ public interface PaymentService {
             Long orderId,
             CashPaymentRequest request
     );
+
+    PaymentReceiptResponse getReceipt(
+            Long orderId
+    );
 }

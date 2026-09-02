@@ -605,4 +605,73 @@ public class PaymentServiceImpl
                 .trim()
                 .toUpperCase();
     }
+
+    // ==================================================
+// GET RECEIPT
+//
+// Dùng để:
+// - in lại hóa đơn
+// - refresh trang vẫn in được
+// - không phụ thuộc sessionStorage FE
+// ==================================================
+
+    @Override
+    @Transactional(readOnly = true)
+    public PaymentReceiptResponse getReceipt(
+            Long orderId
+    ) {
+
+        // ==================================================
+        // SUCCESS PAYMENT
+        //
+        // Chỉ Payment SUCCESS mới được xem là
+        // hóa đơn đã thanh toán.
+        // ==================================================
+
+        Payment payment =
+                paymentRepository
+                        .findByOrder_IdAndPaymentStatus(
+                                orderId,
+                                EPaymentStatus.SUCCESS
+                        )
+                        .orElseThrow(() ->
+                                new ResourceNotFoundException(
+                                        "Không tìm thấy hóa đơn đã thanh toán của đơn hàng có ID: "
+                                                + orderId
+                                )
+                        );
+
+
+        // ==================================================
+        // RESTAURANT SETTING
+        // ==================================================
+
+        RestaurantSetting setting =
+                restaurantSettingRepository
+                        .findFirstByOrderByIdAsc()
+                        .orElseThrow(() ->
+                                new ResourceNotFoundException(
+                                        "Nhà hàng chưa được cấu hình."
+                                )
+                        );
+
+
+        // ==================================================
+        // RECEIPT RESPONSE
+        //
+        // Không tính lại:
+        // subtotal
+        // discount
+        // VAT
+        // total
+        //
+        // Các giá trị đó lấy từ Payment snapshot.
+        // ==================================================
+
+        return paymentMapper
+                .toReceiptResponse(
+                        payment,
+                        setting
+                );
+    }
 }

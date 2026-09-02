@@ -454,6 +454,12 @@ const useCashierState = () => {
 
   const [selectedOrder, setSelectedOrder] = useState(null);
 
+  const [billingPreparing, setBillingPreparing] = useState(false);
+
+  // ==================================================
+  // SELECTED RECEIPT
+  // ==================================================
+
   // ==================================================
   // DRAFT
   // ==================================================
@@ -768,6 +774,8 @@ const useCashierState = () => {
 
   const closeModal = () => {
     setActiveModal("none");
+
+    setBillingPreparing(false);
   };
 
   // ==================================================
@@ -961,11 +969,21 @@ const useCashierState = () => {
   };
 
   // ==================================================
-  // OPEN ORDER DETAILS
+  // OPEN ORDER DETAIL
   // ==================================================
 
   const openOrderDetails = (order) => {
+    if (!order) {
+      toast.warning("Không tìm thấy đơn hàng.");
+
+      return;
+    }
+
     setSelectedOrder(order);
+
+    // ==================================================
+    // TABLE
+    // ==================================================
 
     if (order.tableId) {
       const table = tables.find(
@@ -982,14 +1000,90 @@ const useCashierState = () => {
     setDraftGuestCount(order.guestCount || 1);
 
     // ==================================================
+    // LUÔN MỞ DETAIL
+    //
+    // Không tự nhảy sang:
+    // - billing
+    // - ordering
+    // ==================================================
+
+    setActiveModal("orderDetail");
+  };
+
+  // ==================================================
+  // OPEN ADD ITEMS
+  //
+  // CashierOrderDetailModal
+  // -> Gọi món
+  // -> OrderingModal
+  // ==================================================
+
+  const openAddItems = (order) => {
+    if (!order) {
+      toast.warning("Không tìm thấy đơn hàng.");
+
+      return;
+    }
+
+    // ==================================================
+    // DINE IN ONLY
+    // ==================================================
+
+    if (order.orderType !== "dine_in") {
+      toast.warning("Chỉ đơn tại bàn mới được gọi thêm món.");
+
+      return;
+    }
+
+    // ==================================================
     // WAITING PAYMENT
     // ==================================================
 
     if (order.status === "pending_payment") {
-      setActiveModal("billing");
+      toast.warning("Đơn đã yêu cầu thanh toán, không thể gọi thêm món.");
 
       return;
     }
+
+    // ==================================================
+    // STATUS
+    // ==================================================
+
+    if (order.status !== "new" && order.status !== "cooking") {
+      toast.warning("Trạng thái đơn hiện tại không cho phép gọi thêm món.");
+
+      return;
+    }
+
+    // ==================================================
+    // SELECT ORDER
+    // ==================================================
+
+    setSelectedOrder(order);
+
+    setDraftOrderType("dine_in");
+
+    setDraftGuestCount(order.guestCount || 1);
+
+    // ==================================================
+    // TABLE
+    // ==================================================
+
+    const table = tables.find(
+      (item) => String(item.id) === String(order.tableId),
+    );
+
+    if (!table) {
+      toast.error("Không tìm thấy bàn của đơn hàng.");
+
+      return;
+    }
+
+    setSelectedTable(table);
+
+    // ==================================================
+    // OPEN ORDERING
+    // ==================================================
 
     setActiveModal("ordering");
   };
@@ -998,14 +1092,82 @@ const useCashierState = () => {
   // OPEN BILLING
   // ==================================================
 
-  const openBilling = (order) => {
+  const openReceipt = (order) => {
+    if (!order?.backendId) {
+      toast.error("Không tìm thấy mã đơn hàng.");
+
+      return;
+    }
+
+    setSelectedOrder(order);
+
+    setActiveModal("receipt");
+  };
+
+  // ==================================================
+  // OPEN BILLING
+  //
+  // DINE_IN:
+  //
+  // CASE 1
+  // PROCESSING + ALL SERVED
+  // -> mở BillingModal ngay
+  // -> PATCH request-payment
+  // -> AWAITING_PAYMENT
+  //
+  // CASE 2
+  // AWAITING_PAYMENT
+  // -> mở BillingModal luôn
+  //
+  // TAKE_AWAY / DELIVERY
+  // -> không dùng flow này
+  // ==================================================
+
+  const openBilling = async (order) => {
+    // ==================================================
+    // VALIDATE ORDER
+    // ==================================================
+
     if (!order) {
       toast.warning("Không tìm thấy đơn hàng.");
 
       return;
     }
 
+    // ==================================================
+    // DINE IN ONLY
+    // ==================================================
+
+    if (order.orderType !== "dine_in") {
+      toast.warning("Đơn mang về hoặc giao hàng đã thanh toán trước.");
+
+      return;
+    }
+
+    // ==================================================
+    // ALL SERVED
+    // ==================================================
+
+    const allServed =
+      Array.isArray(order.items) &&
+      order.items.length > 0 &&
+      order.items.every((item) => item.status === "served");
+
+    if (!allServed) {
+      toast.warning("Cần phục vụ tất cả món trước khi thanh toán.");
+
+      return;
+    }
+
+    // ==================================================
+    // SELECT ORDER
+    // ==================================================
+
     setSelectedOrder(order);
+
+    // ==================================================
+    // TABLE
+    // ==================================================
 
     if (order.tableId) {
       const table = tables.find(
@@ -1017,7 +1179,137 @@ const useCashierState = () => {
       setSelectedTable(null);
     }
 
+    // ==================================================
+    // OPEN BILLING IMMEDIATELY
+    // ==================================================
+
     setActiveModal("billing");
+
+    // ==================================================
+    // ALREADY AWAITING PAYMENT
+    //
+    // Waiter đã request trước đó.
+    // Không PATCH lần nữa.
+    // ==================================================
+
+    if (order.status === "pending_payment") {
+      setBillingPreparing(false);
+
+      return;
+    }
+
+    // ==================================================
+    // MUST BE PROCESSING
+    //
+    // Frontend:
+    // cooking = Backend PROCESSING
+    // ==================================================
+
+    if (order.status !== "cooking") {
+      setBillingPreparing(false);
+
+      setActiveModal("none");
+
+      toast.warning("Trạng thái đơn hiện tại chưa thể thanh toán.");
+
+      return;
+    }
+
+    // ==================================================
+    // PROCESSING
+    // ->
+    // AWAITING_PAYMENT
+    // ==================================================
+
+    setBillingPreparing(true);
+
+    try {
+      const response = await cashierOrderService.requestPayment(
+        order.backendId,
+      );
+
+      // ApiResponse<OrderResponse>
+      const updatedOrder = normalizeOrder(response?.data);
+
+      if (!updatedOrder) {
+        throw new Error("Backend không trả về thông tin đơn hàng.");
+      }
+
+      // ==================================================
+      // EXPECT AWAITING_PAYMENT
+      // ==================================================
+
+      if (updatedOrder.status !== "pending_payment") {
+        throw new Error("Đơn hàng chưa chuyển sang trạng thái chờ thanh toán.");
+      }
+
+      // ==================================================
+      // UPDATE ORDER LIST
+      // ==================================================
+
+      setOrders((prev) =>
+        prev.map((currentOrder) =>
+          String(currentOrder.backendId) === String(updatedOrder.backendId)
+            ? updatedOrder
+            : currentOrder,
+        ),
+      );
+
+      // ==================================================
+      // UPDATE SELECTED ORDER
+      //
+      // BillingModal từ đây nhận order:
+      // status = pending_payment
+      // ==================================================
+
+      setSelectedOrder(updatedOrder);
+
+      // ==================================================
+      // UPDATE TABLE ACTIVE ORDER
+      // ==================================================
+
+      if (updatedOrder.tableId) {
+        const itemCount = updatedOrder.items.reduce(
+          (total, item) => total + Number(item.quantity || 0),
+
+          0,
+        );
+
+        setTables((prev) =>
+          prev.map((table) =>
+            String(table.id) === String(updatedOrder.tableId)
+              ? {
+                  ...table,
+
+                  status: "occupied",
+
+                  itemCount,
+
+                  currentTotal: updatedOrder.totalAmount,
+
+                  currentOrderId: updatedOrder.id,
+
+                  activeOrder: updatedOrder,
+                }
+              : table,
+          ),
+        );
+      }
+    } catch (error) {
+      console.error("CASHIER REQUEST PAYMENT ERROR:", error);
+
+      // PATCH thất bại thì không cho
+      // tiếp tục thanh toán.
+      setActiveModal("none");
+
+      toast.error(
+        error.response?.data?.message ||
+          error.message ||
+          "Không thể chuyển đơn sang chờ thanh toán.",
+      );
+    } finally {
+      setBillingPreparing(false);
+    }
   };
 
   // ==================================================
@@ -1436,19 +1728,34 @@ const useCashierState = () => {
   // POST
   // /api/cashier/orders/{orderId}/payments/cash
   //
-  // TAKE_AWAY / DELIVERY:
-  //
-  // AWAITING_PAYMENT
-  // -> PENDING
-  // -> KitchenTicket
+  // Dùng chung:
+  // - DINE_IN
+  // - TAKE_AWAY
+  // - DELIVERY
   // ==================================================
 
-  const payCash = async ({ orderId, promotionCode = null, cashReceived }) => {
+  const payCash = async ({
+    orderId,
+
+    promotionCode = null,
+
+    cashReceived,
+
+    keepBillingOpen = false,
+  }) => {
+    // ==================================================
+    // ORDER ID
+    // ==================================================
+
     if (!orderId) {
       toast.error("Không tìm thấy ID đơn hàng.");
 
       return null;
     }
+
+    // ==================================================
+    // CASH RECEIVED
+    // ==================================================
 
     const received = Number(cashReceived);
 
@@ -1457,6 +1764,18 @@ const useCashierState = () => {
 
       return null;
     }
+
+    // ==================================================
+    // REQUEST
+    //
+    // FE KHÔNG gửi:
+    // - subtotal
+    // - VAT
+    // - discountAmount
+    // - final total
+    //
+    // Backend tự tính.
+    // ==================================================
 
     const payload = {
       promotionCode: promotionCode?.trim()
@@ -1472,17 +1791,11 @@ const useCashierState = () => {
         payload,
       });
 
-      const response = await cashierOrderService.payCash(orderId, payload);
+      // ==================================================
+      // API
+      // ==================================================
 
-      /*
-       * response:
-       *
-       * {
-       *   status: 201,
-       *   message: "...",
-       *   data: PaymentReceiptResponse
-       * }
-       */
+      const response = await cashierOrderService.payCash(orderId, payload);
 
       const receipt = response?.data;
 
@@ -1490,41 +1803,57 @@ const useCashierState = () => {
         throw new Error("Backend không trả về thông tin thanh toán.");
       }
 
+      // ==================================================
+      // SUCCESS
+      // ==================================================
+
       if (receipt.paymentStatus !== "SUCCESS") {
         throw new Error("Thanh toán chưa thành công.");
       }
 
-      // ==============================================
-      // Backend lúc này đã:
+      // ==================================================
+      // RELOAD DINE IN
       //
-      // AWAITING_PAYMENT
-      // -> PENDING
-      // -> fire KitchenTicket
+      // CASH DINE_IN thành công:
+      // Order -> COMPLETED
+      // Table -> AVAILABLE
       //
-      // reload để lấy trạng thái thật từ BE.
-      // ==============================================
+      // loadTables() sẽ lấy lại state thật từ BE.
+      // ==================================================
+
+      await loadTables();
+
+      // ==================================================
+      // RELOAD TAKE AWAY / DELIVERY
+      // ==================================================
 
       await loadTakeAwayOrders();
 
       // ==================================================
-      // CLEAR CURRENT SELECTION
+      // TAKE AWAY / DELIVERY FLOW
       //
-      // Payment đã xong.
-      // Không để order vừa thanh toán trở thành
-      // "selectedOrder" cho đơn tiếp theo.
+      // Giữ hành vi cũ.
       // ==================================================
 
-      setSelectedOrder(null);
+      if (!keepBillingOpen) {
+        setSelectedOrder(null);
 
-      setSelectedTable(null);
+        setSelectedTable(null);
 
-      setDraftShippingDetail(null);
+        setDraftShippingDetail(null);
 
-      // ==================================================
-      // BACK TO ORDER QUEUE
-      // ==================================================
+        setActiveTab("orders");
+      }
 
-      setActiveTab("orders");
+      /*
+       * DINE_IN:
+       *
+       * keepBillingOpen = true
+       *
+       * Không clear selectedOrder,
+       * vì BillingModal cần giữ màn
+       * "Thanh toán thành công".
+       */
 
       toast.success("Thanh toán tiền mặt thành công.");
 
@@ -1648,107 +1977,6 @@ const useCashierState = () => {
   };
 
   // ==================================================
-  // COMPLETE PAYMENT
-  //
-  // LOCAL MOCK HIỆN TẠI
-  //
-  // Payment API làm sau.
-  // ==================================================
-
-  const completePayment = ({
-    paymentMethod,
-
-    discountPercent,
-
-    cashReceived,
-  }) => {
-    if (!selectedOrder) {
-      return;
-    }
-
-    const discountAmount = Math.round(
-      (selectedOrder.subtotal * discountPercent) / 100,
-    );
-
-    const finalTotal = Math.max(
-      0,
-
-      selectedOrder.subtotal + selectedOrder.vatAmount - discountAmount,
-    );
-
-    const received =
-      paymentMethod === "cash" ? cashReceived || finalTotal : finalTotal;
-
-    const now = new Date();
-
-    const updatedOrder = {
-      ...selectedOrder,
-
-      status: "completed",
-
-      progressPercentage: 100,
-
-      progressLabel: "100% Hoàn thành",
-
-      discountAmount,
-
-      totalAmount: finalTotal,
-
-      paymentMethod,
-
-      cashReceived: received,
-
-      changeGiven: Math.max(
-        0,
-
-        received - finalTotal,
-      ),
-
-      paidAt: now.toLocaleString("vi-VN"),
-    };
-
-    setOrders((prev) =>
-      prev.map((order) =>
-        order.id === updatedOrder.id ? updatedOrder : order,
-      ),
-    );
-
-    // ==================================================
-    // RELEASE TABLE LOCAL
-    // ==================================================
-
-    if (updatedOrder.tableId) {
-      setTables((prev) =>
-        prev.map((table) =>
-          String(table.id) === String(updatedOrder.tableId)
-            ? {
-                ...table,
-
-                status: "empty",
-
-                guestCount: 0,
-
-                itemCount: 0,
-
-                currentOrderId: null,
-
-                currentTotal: 0,
-
-                activeOrder: null,
-              }
-            : table,
-        ),
-      );
-    }
-
-    setSelectedOrder(updatedOrder);
-
-    toast.success("Thanh toán thành công.");
-
-    setActiveModal("receipt");
-  };
-
-  // ==================================================
   // RETURN
   // ==================================================
 
@@ -1768,13 +1996,14 @@ const useCashierState = () => {
     menuError,
     reloadMenu: loadMenu,
 
-    // NEW
     restaurantSetting,
     promotions,
 
     activeModal,
     selectedTable,
     selectedOrder,
+
+    billingPreparing,
 
     draftOrderType,
     draftGuestCount,
@@ -1785,8 +2014,11 @@ const useCashierState = () => {
     startNewOrder,
     openTable,
     openQuickChannel,
+
     openOrderDetails,
+    openAddItems,
     openBilling,
+    openReceipt,
 
     saveOrderItems,
 
@@ -1796,9 +2028,7 @@ const useCashierState = () => {
     serveItem,
 
     reloadTakeAwayOrders: loadTakeAwayOrders,
-
-    completePayment,
   };
-};;
+};
 
 export default useCashierState;

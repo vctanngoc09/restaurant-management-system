@@ -301,6 +301,25 @@ function OrderView({
 
             const waitingPayment = order.status === "pending_payment";
 
+            const isPrepaidOrder =
+              order.orderType === "take_away" || order.orderType === "delivery";
+
+            const canPayment =
+              order.orderType === "dine_in" &&
+              allServed &&
+              (order.status === "cooking" || waitingPayment);
+            // ==================================================
+            // PAYMENT LABEL
+            // ==================================================
+
+            let paymentLabel = "Thanh toán";
+
+            if (isPrepaidOrder) {
+              paymentLabel = "Đã thanh toán";
+            } else if (!allServed) {
+              paymentLabel = "Chưa phục vụ xong";
+            }
+
             // ==================================================
             // PROGRESS
             // ==================================================
@@ -505,10 +524,6 @@ function OrderView({
                   </div>
                 </div>
 
-                {/* ==================================================
-                    ACTION
-                ================================================== */}
-
                 <div className={styles.actions}>
                   <button
                     type="button"
@@ -521,10 +536,25 @@ function OrderView({
                   <button
                     type="button"
                     className={styles.paymentButton}
-                    onClick={() => onPayment(order)}
+                    disabled={!canPayment}
+                    title={
+                      isPrepaidOrder
+                        ? "Đơn đã thanh toán trước khi gửi xuống bếp."
+                        : !allServed
+                          ? "Cần phục vụ tất cả món trước khi thanh toán."
+                          : "Thanh toán đơn hàng"
+                    }
+                    onClick={() => {
+                      if (!canPayment) {
+                        return;
+                      }
+
+                      onPayment(order);
+                    }}
                   >
                     <CreditCard size={16} />
-                    Thanh toán
+
+                    {paymentLabel}
                   </button>
                 </div>
               </article>

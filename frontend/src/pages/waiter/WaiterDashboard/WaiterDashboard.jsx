@@ -203,6 +203,26 @@ function WaiterDashboard() {
   };
 
   // ==================================================
+  // ADD ITEMS FROM DETAIL
+  //
+  // Modal Chi tiết
+  // -> Gọi món
+  // -> mở lại màn Ordering của đúng bàn
+  // ==================================================
+
+  const handleAddItemsFromDetail = (order) => {
+    if (!order?.tableId) {
+      return;
+    }
+
+    setSelectedDetailOrderId(null);
+
+    setSelectedTableId(order.tableId);
+
+    setViewMode("order");
+  };
+
+  // ==================================================
   // RENDER
   // ==================================================
 
@@ -288,8 +308,11 @@ function WaiterDashboard() {
 
       <WaiterOrderDetailModal
         order={detailOrder}
+        menuItems={waiter.menuItems}
         servingItemId={servingItemId}
         onServeItem={handleServeItem}
+        onAddItems={handleAddItemsFromDetail}
+        onRequestPayment={(orderId) => waiter.requestPayment(orderId)}
         onClose={() => setSelectedDetailOrderId(null)}
       />
     </div>

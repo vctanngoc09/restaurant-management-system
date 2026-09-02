@@ -1,4 +1,8 @@
-import { Printer, Soup, X } from "lucide-react";
+import { useEffect, useState } from "react";
+
+import { LoaderCircle, Printer, Soup, X } from "lucide-react";
+
+import cashierOrderService from "../../../services/cashierOrderService";
 
 import styles from "./ReceiptPrintModal.module.css";
 
@@ -53,7 +57,6 @@ function getPaymentLabel(method) {
       return "TIỀN MẶT";
 
     case "VIETQR":
-    case "BANK_TRANSFER":
       return "VIETQR";
 
     default:
@@ -62,13 +65,13 @@ function getPaymentLabel(method) {
 }
 
 // ==================================================
-// ORDER TYPE
+// ORDER TYPE LABEL
 // ==================================================
 
 function getOrderTypeLabel(orderType, tableNumber, tableName) {
   const value = String(orderType || "").toUpperCase();
 
-  if (value === "DINE_IN" || value === "DINE_IN") {
+  if (value === "DINE_IN") {
     if (tableNumber) {
       return `Bàn ${tableNumber}`;
     }
@@ -76,7 +79,7 @@ function getOrderTypeLabel(orderType, tableNumber, tableName) {
     return tableName || "Tại chỗ";
   }
 
-  if (value === "TAKE_AWAY" || value === "TAKE_AWAY") {
+  if (value === "TAKE_AWAY") {
     return "Mang về";
   }
 
@@ -89,15 +92,27 @@ function getOrderTypeLabel(orderType, tableNumber, tableName) {
 
 // ==================================================
 // RECEIPT PRINT MODAL
+//
+// FLOW 1:
+//
+// Thanh toán xong ngay lập tức
+// -> receiptProp đã có
+// -> dùng luôn response CASH.
+//
+// FLOW 2:
+//
+// Bấm "In hóa đơn" ở OrderView
+// -> có orderId
+// -> GET receipt từ backend.
 // ==================================================
 
 function ReceiptPrintModal({
   open,
 
-  // PaymentReceiptResponse thật
-  receipt = null,
+  orderId = null,
 
-  // giữ compatibility flow cũ
+  receipt: receiptProp = null,
+
   selectedOrder = null,
 
   currentUserName = null,
@@ -106,9 +121,242 @@ function ReceiptPrintModal({
 
   onClose,
 }) {
-  const source = receipt || selectedOrder;
+  // ==================================================
+  // API RECEIPT
+  //
+  // Đây chỉ là dữ liệu tạm trong modal.
+  //
+  // Không:
+  // - sessionStorage
+  // - localStorage
+  // - selectedReceipt global
+  // ==================================================
 
-  if (!open || !source) {
+  const [apiReceipt, setApiReceipt] = useState(null);
+
+  const [loading, setLoading] = useState(false);
+
+  const [error, setError] = useState("");
+
+  // ==================================================
+  // LOAD RECEIPT
+  // ==================================================
+
+  useEffect(() => {
+    // ==================================================
+    // MODAL CLOSED
+    // ==================================================
+
+    if (!open) {
+      setApiReceipt(null);
+
+      setLoading(false);
+
+      setError("");
+
+      return;
+    }
+
+    // ==================================================
+    // ALREADY HAVE RECEIPT
+    //
+    // Ví dụ vừa CASH thành công.
+    // Không cần GET lại.
+    // ==================================================
+
+    if (receiptProp) {
+      setApiReceipt(null);
+
+      setLoading(false);
+
+      setError("");
+
+      return;
+    }
+
+    // ==================================================
+    // ORDER ID
+    // ==================================================
+
+    const backendOrderId = orderId ?? selectedOrder?.backendId ?? null;
+
+    if (!backendOrderId) {
+      setApiReceipt(null);
+
+      setLoading(false);
+
+      setError("Không tìm thấy mã đơn hàng để lấy hóa đơn.");
+
+      return;
+    }
+
+    let cancelled = false;
+
+    // ==================================================
+    // REQUEST
+    // ==================================================
+
+    const loadReceipt = async () => {
+      try {
+        setLoading(true);
+
+        setError("");
+
+        const response = await cashierOrderService.getReceipt(backendOrderId);
+
+        if (cancelled) {
+          return;
+        }
+
+        /*
+         * ApiResponse:
+         *
+         * {
+         *   status: 200,
+         *   message: "...",
+         *   data: PaymentReceiptResponse
+         * }
+         */
+
+        const receipt = response?.data || null;
+
+        if (!receipt) {
+          throw new Error("Backend không trả về dữ liệu hóa đơn.");
+        }
+
+        setApiReceipt(receipt);
+      } catch (requestError) {
+        if (cancelled) {
+          return;
+        }
+
+        console.error("GET RECEIPT ERROR:", requestError);
+
+        setApiReceipt(null);
+
+        setError(
+          requestError.response?.data?.message ||
+            requestError.message ||
+            "Không thể lấy thông tin hóa đơn.",
+        );
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    };
+
+    loadReceipt();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [open, orderId, receiptProp, selectedOrder?.backendId]);
+
+  // ==================================================
+  // CLOSED
+  // ==================================================
+
+  if (!open) {
+    return null;
+  }
+
+  // ==================================================
+  // FINAL RECEIPT
+  //
+  // Ưu tiên:
+  //
+  // 1. receipt từ CASH response
+  // 2. receipt GET từ DB
+  // ==================================================
+
+  const receipt = receiptProp || apiReceipt;
+
+  // ==================================================
+  // LOADING
+  // ==================================================
+
+  if (loading && !receipt) {
+    return (
+      <div className={styles.modalOverlay}>
+        <div className={`${styles.modalBox} ${styles.receiptModal}`}>
+          <div className={styles.modalHeader}>
+            <h2>
+              <Printer size={18} />
+              Xem Trước Hóa Đơn
+            </h2>
+
+            <button
+              type="button"
+              className={styles.modalCloseButton}
+              onClick={onClose}
+            >
+              <X size={20} />
+            </button>
+          </div>
+
+          <div className={styles.receiptBackground}>
+            <div className={styles.receiptPaper}>
+              <div className={styles.receiptBrand}>
+                <LoaderCircle size={30} />
+
+                <strong>Đang tải hóa đơn...</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ==================================================
+  // ERROR
+  // ==================================================
+
+  if (error && !receipt) {
+    return (
+      <div className={styles.modalOverlay}>
+        <div className={`${styles.modalBox} ${styles.receiptModal}`}>
+          <div className={styles.modalHeader}>
+            <h2>
+              <Printer size={18} />
+              Xem Trước Hóa Đơn
+            </h2>
+
+            <button
+              type="button"
+              className={styles.modalCloseButton}
+              onClick={onClose}
+            >
+              <X size={20} />
+            </button>
+          </div>
+
+          <div className={styles.receiptBackground}>
+            <div className={styles.receiptPaper}>
+              <div className={styles.receiptBrand}>
+                <strong>Không thể tải hóa đơn</strong>
+
+                <p>{error}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className={styles.modalFooter}>
+            <button
+              type="button"
+              className={styles.secondaryButton}
+              onClick={onClose}
+            >
+              Đóng
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!receipt) {
     return null;
   }
 
@@ -116,7 +364,7 @@ function ReceiptPrintModal({
   // RESTAURANT
   // ==================================================
 
-  const restaurant = receipt?.restaurant || restaurantSetting || {};
+  const restaurant = receipt.restaurant || restaurantSetting || {};
 
   const currency = restaurant.currency || "VND";
 
@@ -124,65 +372,49 @@ function ReceiptPrintModal({
   // GENERAL
   // ==================================================
 
-  const receiptCode =
-    receipt?.receiptCode ||
-    selectedOrder?.receiptCode ||
-    selectedOrder?.id ||
-    "—";
+  const receiptCode = receipt.receiptCode || "—";
 
-  const orderId =
-    receipt?.orderId ?? selectedOrder?.backendId ?? selectedOrder?.id ?? "—";
+  const receiptOrderId =
+    receipt.orderId ?? orderId ?? selectedOrder?.backendId ?? "—";
 
-  const orderType = receipt?.orderType || selectedOrder?.orderType;
+  const orderType = receipt.orderType || selectedOrder?.orderType;
 
-  const tableNumber = receipt?.tableNumber || selectedOrder?.tableNumber;
+  const tableNumber = receipt.tableNumber || selectedOrder?.tableNumber;
 
   const tableName = selectedOrder?.tableName;
 
-  const cashierName = receipt?.cashierName || currentUserName || "—";
+  const cashierName = receipt.cashierName || currentUserName || "—";
 
   const paidAt =
-    receipt?.paidAt || selectedOrder?.paidAt || selectedOrder?.createdAt;
+    receipt.paidAt || selectedOrder?.paidAt || selectedOrder?.createdAt;
 
-  const paymentMethod = receipt?.paymentMethod || selectedOrder?.paymentMethod;
+  const paymentMethod = receipt.paymentMethod || selectedOrder?.paymentMethod;
 
   // ==================================================
   // ITEMS
   // ==================================================
 
-  const items = Array.isArray(receipt?.items)
-    ? receipt.items
-    : Array.isArray(selectedOrder?.items)
-      ? selectedOrder.items
-      : [];
+  const items = Array.isArray(receipt.items) ? receipt.items : [];
 
   // ==================================================
   // MONEY
   // ==================================================
 
-  const subtotal = Number(receipt?.subtotal ?? selectedOrder?.subtotal ?? 0);
+  const subtotal = Number(receipt.subtotal ?? 0);
 
-  const discountAmount = Number(
-    receipt?.discountAmount ?? selectedOrder?.discountAmount ?? 0,
-  );
+  const discountAmount = Number(receipt.discountAmount ?? 0);
 
-  const promotionCode = receipt?.promotionCode || null;
+  const promotionCode = receipt.promotionCode || null;
 
-  const vatRate = Number(receipt?.vatRate ?? restaurantSetting?.vatRate ?? 0);
+  const vatRate = Number(receipt.vatRate ?? restaurantSetting?.vatRate ?? 0);
 
-  const vatAmount = Number(receipt?.vatAmount ?? selectedOrder?.vatAmount ?? 0);
+  const vatAmount = Number(receipt.vatAmount ?? 0);
 
-  const totalAmount = Number(
-    receipt?.totalAmount ?? selectedOrder?.totalAmount ?? 0,
-  );
+  const totalAmount = Number(receipt.totalAmount ?? 0);
 
-  const cashReceived = Number(
-    receipt?.cashReceived ?? selectedOrder?.cashReceived ?? 0,
-  );
+  const cashReceived = Number(receipt.cashReceived ?? 0);
 
-  const changeAmount = Number(
-    receipt?.changeAmount ?? selectedOrder?.changeGiven ?? 0,
-  );
+  const changeAmount = Number(receipt.changeAmount ?? 0);
 
   const isCash = String(paymentMethod || "").toUpperCase() === "CASH";
 
@@ -248,7 +480,7 @@ function ReceiptPrintModal({
               </p>
 
               <p>
-                Mã đơn: <strong>#{orderId}</strong>
+                Mã đơn: <strong>#{receiptOrderId}</strong>
               </p>
 
               <p>
@@ -331,7 +563,10 @@ function ReceiptPrintModal({
               )}
 
               <div>
-                <span>VAT ({vatRate}%):</span>
+                <span>
+                  VAT ({vatRate}
+                  %):
+                </span>
 
                 <span>{formatMoney(vatAmount, currency)}</span>
               </div>
