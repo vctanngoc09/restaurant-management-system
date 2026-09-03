@@ -58,6 +58,21 @@ const cashierOrderService = {
     return response.data;
   },
 
+  async createVietQr(orderId, payload) {
+    const response = await api.post(
+      `${CASHIER_ORDER_URL}/${orderId}/payments/vietqr`,
+      payload,
+    );
+    return response.data;
+  },
+
+  async getVietQrStatus(orderId) {
+    const response = await api.get(
+      `${CASHIER_ORDER_URL}/${orderId}/payments/vietqr/status`,
+    );
+    return response.data;
+  },
+
   // ==================================================
   // GET RECEIPT
   //

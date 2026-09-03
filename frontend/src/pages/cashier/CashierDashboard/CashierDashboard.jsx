@@ -206,6 +206,9 @@ function CashierDashboard() {
         onSave={cashier.saveOrderItems}
         onCreatePrepaidOrder={cashier.createPrepaidOrder}
         onPayCash={cashier.payCash}
+        onCreateVietQr={cashier.createVietQr}
+        onGetVietQrStatus={cashier.getVietQrStatus}
+        onCompleteVietQr={cashier.completeVietQr}
       />
 
       {/* ==================================================
@@ -219,6 +222,9 @@ function CashierDashboard() {
         restaurantSetting={cashier.restaurantSetting}
         promotions={cashier.promotions}
         onPayCash={cashier.payCash}
+        onCreateVietQr={cashier.createVietQr}
+        onGetVietQrStatus={cashier.getVietQrStatus}
+        onCompleteVietQr={cashier.completeVietQr}
         onClose={cashier.closeModal}
       />
 

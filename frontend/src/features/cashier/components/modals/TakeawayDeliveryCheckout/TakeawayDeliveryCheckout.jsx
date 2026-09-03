@@ -13,7 +13,8 @@ import {
   X,
 } from "lucide-react";
 
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { QRCodeSVG } from "qrcode.react";
 import { toast } from "react-toastify";
 
 import styles from "./TakeawayDeliveryCheckout.module.css";
@@ -102,6 +103,9 @@ function TakeawayDeliveryCheckout({
 
   onCreateOrder,
   onPayCash,
+  onCreateVietQr,
+  onGetVietQrStatus,
+  onCompleteVietQr,
 
   onBackToMenu,
   onClose,
@@ -150,6 +154,12 @@ function TakeawayDeliveryCheckout({
   const [creatingOrder, setCreatingOrder] = useState(false);
 
   const [paying, setPaying] = useState(false);
+
+  const [vietQr, setVietQr] = useState(null);
+  const [qrLoading, setQrLoading] = useState(false);
+  const [qrChecking, setQrChecking] = useState(false);
+  const [qrError, setQrError] = useState("");
+  const qrFinishingRef = useRef(false);
 
   // ==================================================
   // SUBTOTAL
@@ -369,12 +379,6 @@ function TakeawayDeliveryCheckout({
   // ==================================================
 
   const handlePay = async () => {
-    if (paymentMethod === "vietqr") {
-      toast.info("VietQR sẽ được tích hợp PayOS ở bước tiếp theo.");
-
-      return;
-    }
-
     if (!createdOrder) {
       toast.error("Đơn hàng chưa được tạo.");
 
@@ -461,6 +465,120 @@ function TakeawayDeliveryCheckout({
       setPaying(false);
     }
   };
+
+  // ==================================================
+  // VIETQR / PAYOS
+  // ==================================================
+
+  const finishVietQr = useCallback(async () => {
+    if (qrFinishingRef.current || !createdOrder?.backendId || !onCompleteVietQr)
+      return null;
+
+    qrFinishingRef.current = true;
+    const receipt = await onCompleteVietQr({
+      orderId: createdOrder.backendId,
+      keepBillingOpen: false,
+    });
+
+    if (!receipt) {
+      qrFinishingRef.current = false;
+      return null;
+    }
+
+    setPaymentReceipt(receipt);
+    setStep("success");
+    return receipt;
+  }, [createdOrder?.backendId, onCompleteVietQr]);
+
+  const handleCreateVietQr = async () => {
+    if (!createdOrder?.backendId || createdOrder.status !== "pending_payment") {
+      toast.warning("Đơn hàng chưa sẵn sàng để tạo VietQR.");
+      return;
+    }
+
+    if (!onCreateVietQr || qrLoading) return;
+
+    try {
+      setQrLoading(true);
+      setQrError("");
+      const payment = await onCreateVietQr({
+        orderId: createdOrder.backendId,
+        promotionCode: appliedPromotion?.code || null,
+      });
+
+      if (!payment) return;
+      setVietQr(payment);
+
+      if (payment.paymentStatus === "SUCCESS") {
+        await finishVietQr();
+      } else if (
+        ["CANCELLED", "EXPIRED", "FAILED"].includes(payment.paymentStatus)
+      ) {
+        setQrError("Mã VietQR này không còn hiệu lực. Hãy tạo mã mới.");
+      }
+    } finally {
+      setQrLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (
+      step !== "payment" ||
+      paymentMethod !== "vietqr" ||
+      !vietQr ||
+      vietQr.paymentStatus !== "PENDING" ||
+      !createdOrder?.backendId ||
+      !onGetVietQrStatus
+    ) {
+      return undefined;
+    }
+
+    let stopped = false;
+    let checking = false;
+
+    const poll = async () => {
+      if (checking || qrFinishingRef.current) return;
+      checking = true;
+      if (!stopped) setQrChecking(true);
+
+      try {
+        const status = await onGetVietQrStatus(createdOrder.backendId);
+        if (stopped || !status) return;
+
+        setVietQr((current) => (current ? { ...current, ...status } : status));
+
+        if (status.paymentStatus === "SUCCESS") {
+          await finishVietQr();
+        } else if (
+          ["CANCELLED", "EXPIRED", "FAILED"].includes(status.paymentStatus)
+        ) {
+          setQrError(
+            status.paymentStatus === "EXPIRED"
+              ? "Mã VietQR đã hết hạn. Hãy tạo mã mới."
+              : "Giao dịch VietQR không còn hiệu lực. Hãy tạo mã mới.",
+          );
+        }
+      } finally {
+        checking = false;
+        if (!stopped) setQrChecking(false);
+      }
+    };
+
+    poll();
+    const timer = window.setInterval(poll, 3000);
+    return () => {
+      stopped = true;
+      window.clearInterval(timer);
+    };
+  }, [
+    step,
+    paymentMethod,
+    vietQr?.paymentId,
+    vietQr?.paymentStatus,
+    createdOrder?.backendId,
+    onGetVietQrStatus,
+    finishVietQr,
+  ]);
 
   // ==================================================
   // SUMMARY STEP
@@ -993,19 +1111,79 @@ function TakeawayDeliveryCheckout({
                 </>
               ) : (
                 /* =========================
-                   QR PLACEHOLDER
+                   VIETQR / PAYOS
                 ========================= */
 
                 <div className={styles.qrPlaceholder}>
-                  <div>
-                    <QrCode size={58} />
-                  </div>
+                  {vietQr?.qrCode ? (
+                    <div className={styles.qrCodeBox}>
+                      <QRCodeSVG value={vietQr.qrCode} size={190} level="M" />
+                    </div>
+                  ) : (
+                    <div className={styles.qrIconBox}>
+                      <QrCode size={58} />
+                    </div>
+                  )}
 
                   <strong>VietQR / PayOS</strong>
+                  <b>{formatMoney(vietQr?.amount ?? totalAmount)}</b>
 
-                  <span>Phần QR sẽ được nối PayOS ở bước tiếp theo.</span>
+                  {vietQr?.paymentStatus === "PENDING" ? (
+                    <span className={styles.qrWaiting}>
+                      {qrChecking
+                        ? "Đang kiểm tra thanh toán..."
+                        : "Đang chờ khách quét và chuyển khoản"}
+                    </span>
+                  ) : (
+                    <span>
+                      Nhấn tạo mã để lấy VietQR đúng số tiền từ backend.
+                    </span>
+                  )}
 
-                  <b>{formatMoney(totalAmount)}</b>
+                  {vietQr?.expiresAt && (
+                    <small className={styles.qrMeta}>
+                      Hết hạn:{" "}
+                      {new Date(vietQr.expiresAt).toLocaleTimeString("vi-VN", {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </small>
+                  )}
+
+                  {qrError && <p className={styles.qrError}>{qrError}</p>}
+
+                  {!qrError && vietQr?.failureReason && (
+                    <p className={styles.qrError}>{vietQr.failureReason}</p>
+                  )}
+
+                  {vietQr?.checkoutUrl && (
+                    <a
+                      className={styles.qrOpenLink}
+                      href={vietQr.checkoutUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      Mở trang thanh toán PayOS
+                    </a>
+                  )}
+
+                  {(!vietQr ||
+                    ["CANCELLED", "EXPIRED", "FAILED"].includes(
+                      vietQr.paymentStatus,
+                    )) && (
+                    <button
+                      type="button"
+                      className={styles.payButton}
+                      disabled={qrLoading}
+                      onClick={handleCreateVietQr}
+                    >
+                      {qrLoading
+                        ? "Đang tạo VietQR..."
+                        : vietQr
+                          ? "Tạo Mã VietQR Mới"
+                          : "Tạo Mã VietQR"}
+                    </button>
+                  )}
                 </div>
               )}
             </aside>
@@ -1064,21 +1242,30 @@ function TakeawayDeliveryCheckout({
 
                 <div>
                   <span>Phương thức</span>
-
-                  <strong>Tiền mặt</strong>
+                  <strong>
+                    {paymentReceipt?.paymentMethod === "VIETQR"
+                      ? "VietQR / PayOS"
+                      : "Tiền mặt"}
+                  </strong>
                 </div>
 
-                <div>
-                  <span>Khách đưa</span>
+                {paymentReceipt?.paymentMethod !== "VIETQR" && (
+                  <>
+                    <div>
+                      <span>Khách đưa</span>
+                      <strong>
+                        {formatMoney(paymentReceipt?.cashReceived)}
+                      </strong>
+                    </div>
 
-                  <strong>{formatMoney(paymentReceipt?.cashReceived)}</strong>
-                </div>
-
-                <div className={styles.successChange}>
-                  <span>Tiền thừa</span>
-
-                  <strong>{formatMoney(paymentReceipt?.changeAmount)}</strong>
-                </div>
+                    <div className={styles.successChange}>
+                      <span>Tiền thừa</span>
+                      <strong>
+                        {formatMoney(paymentReceipt?.changeAmount)}
+                      </strong>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
 

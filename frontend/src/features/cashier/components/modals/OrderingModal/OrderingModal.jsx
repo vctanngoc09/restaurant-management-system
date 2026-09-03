@@ -73,6 +73,9 @@ function OrderingModal({
 
   onCreatePrepaidOrder,
   onPayCash,
+  onCreateVietQr,
+  onGetVietQrStatus,
+  onCompleteVietQr,
 }) {
   // ==================================================
   // FILTER
@@ -465,6 +468,9 @@ function OrderingModal({
         promotions={promotions}
         onCreateOrder={onCreatePrepaidOrder}
         onPayCash={onPayCash}
+        onCreateVietQr={onCreateVietQr}
+        onGetVietQrStatus={onGetVietQrStatus}
+        onCompleteVietQr={onCompleteVietQr}
         onBackToMenu={() => setShowCheckout(false)}
         onClose={onClose}
       />

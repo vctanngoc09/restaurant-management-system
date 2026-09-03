@@ -1872,6 +1872,79 @@ const useCashierState = () => {
   };
 
   // ==================================================
+  // VIETQR / PAYOS
+  // ==================================================
+
+  const createVietQr = async ({ orderId, promotionCode = null }) => {
+    if (!orderId) {
+      toast.error("Không tìm thấy ID đơn hàng.");
+      return null;
+    }
+
+    try {
+      const payload = {
+        promotionCode: promotionCode?.trim()
+          ? promotionCode.trim().toUpperCase()
+          : null,
+      };
+      const response = await cashierOrderService.createVietQr(orderId, payload);
+      const payment = response?.data || null;
+      if (!payment) throw new Error("Backend không trả về dữ liệu VietQR.");
+      return payment;
+    } catch (error) {
+      console.error("CREATE VIETQR ERROR:", error);
+      toast.error(
+        error.response?.data?.message ||
+          error.message ||
+          "Không thể tạo mã VietQR.",
+      );
+      return null;
+    }
+  };
+
+  const getVietQrStatus = async (orderId) => {
+    if (!orderId) return null;
+
+    try {
+      const response = await cashierOrderService.getVietQrStatus(orderId);
+      return response?.data || null;
+    } catch (error) {
+      // Polling chạy lặp lại nên không toast liên tục khi mạng chập chờn.
+      console.error("GET VIETQR STATUS ERROR:", error);
+      return null;
+    }
+  };
+
+  const completeVietQr = async ({ orderId, keepBillingOpen = false }) => {
+    if (!orderId) return null;
+
+    try {
+      const response = await cashierOrderService.getReceipt(orderId);
+      const receipt = response?.data || null;
+
+      if (!receipt || receipt.paymentStatus !== "SUCCESS") {
+        return null;
+      }
+
+      await loadTables();
+      await loadTakeAwayOrders();
+
+      if (!keepBillingOpen) {
+        setSelectedOrder(null);
+        setSelectedTable(null);
+        setDraftShippingDetail(null);
+        setActiveTab("orders");
+      }
+
+      toast.success("Thanh toán VietQR thành công.");
+      return receipt;
+    } catch (error) {
+      console.error("COMPLETE VIETQR ERROR:", error);
+      return null;
+    }
+  };
+
+  // ==================================================
   // SERVE ITEM
   //
   // READY
@@ -2024,6 +2097,9 @@ const useCashierState = () => {
 
     createPrepaidOrder,
     payCash,
+    createVietQr,
+    getVietQrStatus,
+    completeVietQr,
 
     serveItem,
 
