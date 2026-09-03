@@ -183,6 +183,7 @@ function CashierDashboard() {
 
       <NewOrderModal
         open={cashier.activeModal === "newOrder"}
+        restaurantSetting={cashier.restaurantSetting}
         onClose={cashier.closeModal}
         onStart={cashier.startNewOrder}
       />

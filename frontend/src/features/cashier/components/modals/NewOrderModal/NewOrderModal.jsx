@@ -1,40 +1,96 @@
 import {
+  AlertTriangle,
   Bike,
+  CheckCircle2,
   ChevronRight,
   Clock3,
+  LoaderCircle,
   MapPin,
-  Navigation,
   Phone,
   Route,
+  Search,
   User,
   X,
 } from "lucide-react";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { toast } from "react-toastify";
 
+import geoapifyService from "../../../services/geoapifyService";
+
+import DeliveryRouteMap from "./DeliveryRouteMap";
+
 import styles from "./NewOrderModal.module.css";
 
-function NewOrderModal({ open, onClose, onStart }) {
+const AUTOCOMPLETE_MIN_LENGTH = 3;
+const AUTOCOMPLETE_DELAY_MS = 400;
+
+const configuredMaxDistance = Number(
+  import.meta.env.VITE_DELIVERY_MAX_DISTANCE_KM,
+);
+
+const MAX_DELIVERY_DISTANCE_KM =
+  Number.isFinite(configuredMaxDistance) && configuredMaxDistance > 0
+    ? configuredMaxDistance
+    : 7;
+
+function NewOrderModal({ open, restaurantSetting = null, onClose, onStart }) {
   // ==================================================
-  // SHIPPING DETAIL
+  // CUSTOMER
   // ==================================================
 
   const [customerName, setCustomerName] = useState("");
-
   const [customerPhone, setCustomerPhone] = useState("");
 
+  // ==================================================
+  // ADDRESS
+  // ==================================================
+
   const [address, setAddress] = useState("");
+  const [addressSuggestions, setAddressSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [isSearchingAddress, setIsSearchingAddress] = useState(false);
 
-  const [distance, setDistance] = useState(null);
+  // Tọa độ chỉ giữ tạm trong state để gọi Routing API.
+  // Không gửi xuống backend và không lưu DB.
+  const [restaurantLocation, setRestaurantLocation] = useState(null);
+  const [customerLocation, setCustomerLocation] = useState(null);
 
-  const [estimatedTime, setEstimatedTime] = useState(null);
-
-  const [isEstimating, setIsEstimating] = useState(false);
+  const [restaurantLocationLoading, setRestaurantLocationLoading] =
+    useState(false);
+  const [restaurantLocationError, setRestaurantLocationError] = useState("");
 
   // ==================================================
-  // RESET
+  // ROUTE
+  // ==================================================
+
+  const [distance, setDistance] = useState(null);
+  const [estimatedTime, setEstimatedTime] = useState(null);
+  const [routeGeoJson, setRouteGeoJson] = useState(null);
+  const [isEstimating, setIsEstimating] = useState(false);
+  const [routeError, setRouteError] = useState("");
+
+  // ==================================================
+  // DERIVED
+  // ==================================================
+
+  const routeReady = distance !== null && estimatedTime !== null;
+
+  const isWithinDeliveryArea =
+    routeReady && Number(distance) <= MAX_DELIVERY_DISTANCE_KM;
+
+  const restaurantAddress = restaurantSetting?.address?.trim() || "";
+
+  const canContinue =
+    Boolean(customerLocation) &&
+    Boolean(restaurantLocation) &&
+    routeReady &&
+    isWithinDeliveryArea &&
+    !isEstimating;
+
+  // ==================================================
+  // RESET WHEN OPEN
   // ==================================================
 
   useEffect(() => {
@@ -43,17 +99,229 @@ function NewOrderModal({ open, onClose, onStart }) {
     }
 
     setCustomerName("");
-
     setCustomerPhone("");
 
     setAddress("");
+    setAddressSuggestions([]);
+    setShowSuggestions(false);
+    setIsSearchingAddress(false);
+
+    setCustomerLocation(null);
 
     setDistance(null);
-
     setEstimatedTime(null);
-
+    setRouteGeoJson(null);
     setIsEstimating(false);
+    setRouteError("");
   }, [open]);
+
+  // ==================================================
+  // RESTAURANT ADDRESS -> TEMP COORDINATES
+  //
+  // Chỉ dùng để tính route.
+  // geoapifyService có cache nên cùng một địa chỉ
+  // sẽ không bị geocode lại liên tục.
+  // ==================================================
+
+  useEffect(() => {
+    if (!open) {
+      return undefined;
+    }
+
+    if (!restaurantAddress) {
+      setRestaurantLocation(null);
+      setRestaurantLocationError(
+        "Chưa có địa chỉ nhà hàng trong cấu hình RestaurantSetting.",
+      );
+
+      return undefined;
+    }
+
+    const controller = new AbortController();
+
+    const loadRestaurantLocation = async () => {
+      try {
+        setRestaurantLocationLoading(true);
+        setRestaurantLocationError("");
+
+        const location = await geoapifyService.geocodeAddress(
+          restaurantAddress,
+          {
+            signal: controller.signal,
+          },
+        );
+
+        setRestaurantLocation(location);
+      } catch (error) {
+        if (error.name === "AbortError") {
+          return;
+        }
+
+        console.error("GEOCODE RESTAURANT ERROR:", error);
+
+        setRestaurantLocation(null);
+        setRestaurantLocationError(
+          error.message || "Không xác định được vị trí nhà hàng.",
+        );
+      } finally {
+        if (!controller.signal.aborted) {
+          setRestaurantLocationLoading(false);
+        }
+      }
+    };
+
+    loadRestaurantLocation();
+
+    return () => {
+      controller.abort();
+    };
+  }, [open, restaurantAddress]);
+
+  // ==================================================
+  // ADDRESS AUTOCOMPLETE
+  //
+  // - ít nhất 3 ký tự
+  // - debounce 400ms
+  // - chỉ tìm trong Việt Nam
+  // - bias gần nhà hàng nếu origin đã có
+  // ==================================================
+
+  useEffect(() => {
+    if (!open) {
+      return undefined;
+    }
+
+    const query = address.trim();
+
+    if (query.length < AUTOCOMPLETE_MIN_LENGTH) {
+      setAddressSuggestions([]);
+      setIsSearchingAddress(false);
+
+      return undefined;
+    }
+
+    // Đã chọn đúng suggestion rồi thì không search lại.
+    if (customerLocation?.formatted === query) {
+      setAddressSuggestions([]);
+      setIsSearchingAddress(false);
+
+      return undefined;
+    }
+
+    const controller = new AbortController();
+
+    const timer = window.setTimeout(async () => {
+      try {
+        setIsSearchingAddress(true);
+
+        const suggestions = await geoapifyService.autocompleteAddress(query, {
+          limit: 5,
+          bias: restaurantLocation,
+          signal: controller.signal,
+        });
+
+        setAddressSuggestions(suggestions);
+        setShowSuggestions(true);
+      } catch (error) {
+        if (error.name === "AbortError") {
+          return;
+        }
+
+        console.error("ADDRESS AUTOCOMPLETE ERROR:", error);
+
+        setAddressSuggestions([]);
+      } finally {
+        if (!controller.signal.aborted) {
+          setIsSearchingAddress(false);
+        }
+      }
+    }, AUTOCOMPLETE_DELAY_MS);
+
+    return () => {
+      window.clearTimeout(timer);
+      controller.abort();
+    };
+  }, [open, address, restaurantLocation, customerLocation]);
+
+  // ==================================================
+  // ROUTE AUTO CALCULATION
+  //
+  // Chọn suggestion xong -> tự tính route.
+  // Không cần nút "Tính khoảng cách" nữa.
+  // ==================================================
+
+  useEffect(() => {
+    if (!open || !restaurantLocation || !customerLocation) {
+      return undefined;
+    }
+
+    const controller = new AbortController();
+
+    const calculateRoute = async () => {
+      try {
+        setIsEstimating(true);
+        setRouteError("");
+
+        setDistance(null);
+        setEstimatedTime(null);
+        setRouteGeoJson(null);
+
+        const result = await geoapifyService.getRoute(
+          restaurantLocation,
+          customerLocation,
+          {
+            mode: "scooter",
+            traffic: "approximated",
+            signal: controller.signal,
+          },
+        );
+
+        const distanceKm = Number((result.distanceMeters / 1000).toFixed(2));
+        const timeMinutes = Math.max(1, Math.ceil(result.timeSeconds / 60));
+
+        setDistance(distanceKm);
+        setEstimatedTime(timeMinutes);
+        setRouteGeoJson(result.geoJson);
+
+        if (distanceKm > MAX_DELIVERY_DISTANCE_KM) {
+          toast.warning(
+            `Địa chỉ cách ${distanceKm} km, vượt phạm vi giao tối đa ${MAX_DELIVERY_DISTANCE_KM} km.`,
+          );
+        }
+      } catch (error) {
+        if (error.name === "AbortError") {
+          return;
+        }
+
+        console.error("DELIVERY ROUTE ERROR:", error);
+
+        setRouteError(error.message || "Không thể tính tuyến đường giao hàng.");
+      } finally {
+        if (!controller.signal.aborted) {
+          setIsEstimating(false);
+        }
+      }
+    };
+
+    calculateRoute();
+
+    return () => {
+      controller.abort();
+    };
+  }, [open, restaurantLocation, customerLocation]);
+
+  // ==================================================
+  // SUGGESTION LABELS
+  // ==================================================
+
+  const suggestionItems = useMemo(
+    () =>
+      addressSuggestions.map((item, index) => ({
+        ...item,
+        key: `${item.lat}-${item.lon}-${index}`,
+      })),
+    [addressSuggestions],
+  );
 
   if (!open) {
     return null;
@@ -61,58 +329,42 @@ function NewOrderModal({ open, onClose, onStart }) {
 
   // ==================================================
   // ADDRESS CHANGE
-  //
-  // Địa chỉ đổi
-  // -> khoảng cách cũ không còn hợp lệ.
   // ==================================================
 
   const handleAddressChange = (event) => {
-    setAddress(event.target.value);
+    const nextAddress = event.target.value;
 
+    setAddress(nextAddress);
+    setShowSuggestions(true);
+
+    // Người dùng sửa text sau khi đã chọn địa chỉ
+    // -> route cũ không còn hợp lệ.
+    setCustomerLocation(null);
     setDistance(null);
-
     setEstimatedTime(null);
+    setRouteGeoJson(null);
+    setRouteError("");
   };
 
   // ==================================================
-  // ESTIMATE SHIPPING
-  //
-  // Hiện tại vẫn dùng MOCK
-  // như code cũ của bạn.
-  //
-  // Sau này nối Google Maps / Mapbox.
+  // SELECT ADDRESS
   // ==================================================
 
-  const handleEstimateShipping = () => {
-    if (!address.trim()) {
-      toast.warning("Vui lòng nhập địa chỉ giao hàng trước.");
+  const handleSelectAddress = (suggestion) => {
+    setAddress(suggestion.formatted);
+    setCustomerLocation(suggestion);
 
-      return;
-    }
+    setAddressSuggestions([]);
+    setShowSuggestions(false);
 
-    setIsEstimating(true);
-
-    setTimeout(() => {
-      setDistance(3.8);
-
-      setEstimatedTime(12);
-
-      setIsEstimating(false);
-
-      toast.success("Đã tính khoảng cách giao hàng.");
-    }, 600);
+    setDistance(null);
+    setEstimatedTime(null);
+    setRouteGeoJson(null);
+    setRouteError("");
   };
 
   // ==================================================
   // VALIDATE
-  //
-  // Match với regex Backend:
-  //
-  // (0 | 84 | +84)
-  // +
-  // (3 | 5 | 7 | 8 | 9)
-  // +
-  // 8 digits
   // ==================================================
 
   const validateDelivery = () => {
@@ -144,8 +396,36 @@ function NewOrderModal({ open, onClose, onStart }) {
       return false;
     }
 
-    if (distance === null || estimatedTime === null) {
-      toast.warning("Vui lòng tính khoảng cách giao hàng trước.");
+    if (!customerLocation) {
+      toast.warning("Vui lòng chọn một địa chỉ trong danh sách gợi ý.");
+
+      return false;
+    }
+
+    if (!restaurantLocation) {
+      toast.error(
+        restaurantLocationError || "Chưa xác định được vị trí nhà hàng.",
+      );
+
+      return false;
+    }
+
+    if (isEstimating) {
+      toast.info("Hệ thống đang tính khoảng cách giao hàng.");
+
+      return false;
+    }
+
+    if (!routeReady) {
+      toast.warning("Chưa tính được khoảng cách và thời gian giao hàng.");
+
+      return false;
+    }
+
+    if (!isWithinDeliveryArea) {
+      toast.warning(
+        `Địa chỉ vượt phạm vi giao hàng tối đa ${MAX_DELIVERY_DISTANCE_KM} km.`,
+      );
 
       return false;
     }
@@ -156,11 +436,12 @@ function NewOrderModal({ open, onClose, onStart }) {
   // ==================================================
   // CONTINUE
   //
-  // DELIVERY INFO
-  // ->
-  // OrderingModal
+  // Chỉ lưu:
+  // - address
+  // - distance
+  // - estimatedTime
   //
-  // CHƯA tạo Order ở bước này.
+  // Không lưu lat/lon.
   // ==================================================
 
   const handleContinue = () => {
@@ -170,30 +451,19 @@ function NewOrderModal({ open, onClose, onStart }) {
 
     const shippingDetail = {
       customerName: customerName.trim(),
-
       customerPhone: customerPhone.replace(/\s/g, "").trim(),
-
       address: address.trim(),
-
       distance,
-
       estimatedTime,
     };
 
     onStart({
       orderType: "delivery",
-
       tableId: null,
-
       guestCount: 1,
-
       shippingDetail,
     });
   };
-
-  // ==================================================
-  // RENDER
-  // ==================================================
 
   return (
     <div className={styles.modalOverlay} onMouseDown={onClose}>
@@ -208,7 +478,6 @@ function NewOrderModal({ open, onClose, onStart }) {
         <div className={styles.modalHeader}>
           <div>
             <h2>Thông Tin Giao Hàng</h2>
-
             <p>Nhập thông tin người nhận trước khi chọn món</p>
           </div>
 
@@ -227,10 +496,6 @@ function NewOrderModal({ open, onClose, onStart }) {
 
         <div className={styles.modalBody}>
           <div className={styles.shippingSection}>
-            {/* ==================================================
-                SHIPPING HEADER
-            ================================================== */}
-
             <div className={styles.shippingHeader}>
               <div className={styles.shippingIcon}>
                 <Bike size={19} />
@@ -238,8 +503,7 @@ function NewOrderModal({ open, onClose, onStart }) {
 
               <div>
                 <h3>Thông Tin Người Nhận</h3>
-
-                <p>Điền thông tin khách hàng và địa chỉ giao món</p>
+                <p>Chọn địa chỉ để hệ thống tự tính tuyến giao hàng</p>
               </div>
             </div>
 
@@ -248,8 +512,6 @@ function NewOrderModal({ open, onClose, onStart }) {
             ================================================== */}
 
             <div className={styles.shippingGrid}>
-              {/* NAME */}
-
               <div className={styles.inputGroup}>
                 <label>
                   TÊN KHÁCH HÀNG
@@ -268,8 +530,6 @@ function NewOrderModal({ open, onClose, onStart }) {
                   />
                 </div>
               </div>
-
-              {/* PHONE */}
 
               <div className={styles.inputGroup}>
                 <label>
@@ -291,7 +551,7 @@ function NewOrderModal({ open, onClose, onStart }) {
             </div>
 
             {/* ==================================================
-                ADDRESS
+                ADDRESS AUTOCOMPLETE
             ================================================== */}
 
             <div className={styles.inputGroup}>
@@ -300,44 +560,98 @@ function NewOrderModal({ open, onClose, onStart }) {
                 <span>*</span>
               </label>
 
-              <div className={styles.addressRow}>
+              <div className={styles.addressAutocomplete}>
                 <div className={styles.addressInput}>
-                  <MapPin size={17} />
+                  {isSearchingAddress ? (
+                    <LoaderCircle className={styles.spin} size={17} />
+                  ) : (
+                    <Search size={17} />
+                  )}
 
                   <input
                     type="text"
                     maxLength={255}
-                    placeholder="Nhập số nhà, tên đường, phường/xã, quận/huyện..."
+                    autoComplete="off"
+                    placeholder="Ví dụ: 25 Võ Văn Ngân, Thủ Đức..."
                     value={address}
+                    onFocus={() => setShowSuggestions(true)}
+                    onBlur={() => {
+                      window.setTimeout(() => setShowSuggestions(false), 150);
+                    }}
                     onChange={handleAddressChange}
                   />
                 </div>
 
-                <button
-                  type="button"
-                  className={styles.estimateButton}
-                  disabled={isEstimating}
-                  onClick={handleEstimateShipping}
-                >
-                  <Navigation size={15} />
+                {showSuggestions &&
+                  address.trim().length >= AUTOCOMPLETE_MIN_LENGTH && (
+                    <div className={styles.suggestionDropdown}>
+                      {isSearchingAddress && suggestionItems.length === 0 ? (
+                        <div className={styles.suggestionState}>
+                          <LoaderCircle className={styles.spin} size={15} />
+                          Đang tìm địa chỉ...
+                        </div>
+                      ) : suggestionItems.length > 0 ? (
+                        suggestionItems.map((suggestion) => (
+                          <button
+                            type="button"
+                            key={suggestion.key}
+                            className={styles.suggestionItem}
+                            onMouseDown={(event) => event.preventDefault()}
+                            onClick={() => handleSelectAddress(suggestion)}
+                          >
+                            <MapPin size={15} />
 
-                  {isEstimating ? "Đang tính..." : "Tính khoảng cách"}
-                </button>
+                            <span>
+                              <strong>
+                                {suggestion.addressLine1 ||
+                                  suggestion.formatted}
+                              </strong>
+
+                              <small>
+                                {suggestion.addressLine2 ||
+                                  suggestion.formatted}
+                              </small>
+                            </span>
+                          </button>
+                        ))
+                      ) : (
+                        <div className={styles.suggestionState}>
+                          Không tìm thấy địa chỉ phù hợp.
+                        </div>
+                      )}
+                    </div>
+                  )}
               </div>
 
               <p className={styles.addressHint}>
-                Sau này có thể tích hợp gợi ý địa chỉ từ Google Maps hoặc
-                Mapbox.
+                Gõ ít nhất {AUTOCOMPLETE_MIN_LENGTH} ký tự rồi chọn một địa chỉ
+                được gợi ý. Hệ thống sẽ tự tính khoảng cách và thời gian.
               </p>
             </div>
 
             {/* ==================================================
-                ESTIMATE
+                RESTAURANT ORIGIN STATUS
+            ================================================== */}
+
+            {restaurantLocationLoading && (
+              <div className={styles.routeInfoNotice}>
+                <LoaderCircle className={styles.spin} size={15} />
+                Đang xác định vị trí nhà hàng...
+              </div>
+            )}
+
+            {restaurantLocationError && (
+              <div className={styles.routeErrorNotice}>
+                <AlertTriangle size={15} />
+                {restaurantLocationError}
+              </div>
+            )}
+
+            {/* ==================================================
+                ROUTE ESTIMATE
             ================================================== */}
 
             <div className={styles.shippingEstimate}>
-              {/* DISTANCE */}
-
               <div className={styles.estimateItem}>
                 <div className={styles.estimateIcon}>
                   <Route size={18} />
@@ -345,16 +659,17 @@ function NewOrderModal({ open, onClose, onStart }) {
 
                 <div>
                   <span>KHOẢNG CÁCH</span>
-
                   <strong>
-                    {distance !== null ? `${distance} km` : "-- km"}
+                    {isEstimating
+                      ? "Đang tính..."
+                      : distance !== null
+                        ? `${distance} km`
+                        : "-- km"}
                   </strong>
                 </div>
               </div>
 
               <div className={styles.estimateDivider} />
-
-              {/* TIME */}
 
               <div className={styles.estimateItem}>
                 <div className={styles.estimateIcon}>
@@ -363,39 +678,74 @@ function NewOrderModal({ open, onClose, onStart }) {
 
                 <div>
                   <span>THỜI GIAN DỰ KIẾN</span>
-
                   <strong>
-                    {estimatedTime !== null
-                      ? `~ ${estimatedTime} phút`
-                      : "-- phút"}
+                    {isEstimating
+                      ? "Đang tính..."
+                      : estimatedTime !== null
+                        ? `~ ${estimatedTime} phút`
+                        : "-- phút"}
                   </strong>
                 </div>
               </div>
             </div>
 
             {/* ==================================================
-                ESTIMATE SUCCESS
+                ROUTE STATUS
             ================================================== */}
 
-            {distance !== null && estimatedTime !== null && (
+            {routeError && (
+              <div className={styles.routeErrorNotice}>
+                <AlertTriangle size={15} />
+                {routeError}
+              </div>
+            )}
+
+            {routeReady && isWithinDeliveryArea && (
               <div className={styles.estimateSuccess}>
-                <MapPin size={15} />
+                <CheckCircle2 size={15} />
 
                 <span>
-                  Khoảng cách giao hàng <strong>{distance} km</strong>, thời
-                  gian dự kiến <strong>{estimatedTime} phút</strong>.
+                  Địa chỉ nằm trong phạm vi giao hàng. Khoảng cách{" "}
+                  <strong>{distance} km</strong>, thời gian dự kiến{" "}
+                  <strong>{estimatedTime} phút</strong>.
+                </span>
+              </div>
+            )}
+
+            {routeReady && !isWithinDeliveryArea && (
+              <div className={styles.outOfRangeNotice}>
+                <AlertTriangle size={16} />
+
+                <span>
+                  Khoảng cách <strong>{distance} km</strong> vượt phạm vi giao
+                  tối đa <strong>{MAX_DELIVERY_DISTANCE_KM} km</strong>. Không
+                  thể tạo đơn giao hàng cho địa chỉ này.
                 </span>
               </div>
             )}
 
             {/* ==================================================
-                NOTICE
+                MAP
             ================================================== */}
 
-            <div className={styles.mockNotice}>
-              Khoảng cách và thời gian hiện đang dùng dữ liệu giả lập. Sau này
-              sẽ nối API bản đồ để tính từ địa chỉ nhà hàng tới địa chỉ khách.
-            </div>
+            {restaurantLocation && customerLocation && routeGeoJson && (
+              <div className={styles.mapSection}>
+                <div className={styles.mapHeader}>
+                  <div>
+                    <strong>Tuyến giao hàng</strong>
+                    <span>{restaurantAddress}</span>
+                  </div>
+
+                  <MapPin size={17} />
+                </div>
+
+                <DeliveryRouteMap
+                  restaurantLocation={restaurantLocation}
+                  customerLocation={customerLocation}
+                  routeGeoJson={routeGeoJson}
+                />
+              </div>
+            )}
           </div>
 
           {/* ==================================================
@@ -405,9 +755,12 @@ function NewOrderModal({ open, onClose, onStart }) {
           <button
             type="button"
             className={styles.modalPrimaryButton}
+            disabled={!canContinue}
             onClick={handleContinue}
           >
-            Tiếp tục chọn món
+            {isEstimating
+              ? "Đang tính tuyến giao hàng..."
+              : "Tiếp tục chọn món"}
             <ChevronRight size={17} />
           </button>
         </div>
