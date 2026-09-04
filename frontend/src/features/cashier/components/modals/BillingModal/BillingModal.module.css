@@ -5,6 +5,7 @@
 .overlay {
   position: fixed;
   inset: 0;
+
   z-index: var(--z-modal-backdrop);
 
   display: flex;
@@ -14,6 +15,7 @@
   padding: 18px;
 
   background: rgba(15, 23, 42, 0.55);
+
   backdrop-filter: blur(3px);
 }
 
@@ -33,7 +35,7 @@
   background: var(--color-background-soft);
 
   border: 1px solid var(--color-border);
-  border-radius: 14px;
+  border-radius: var(--radius-lg);
 
   box-shadow: var(--shadow-xl);
 }
@@ -45,47 +47,20 @@
 .header {
   min-height: 60px;
 
-  display: flex;
+  display: grid;
+  grid-template-columns: 40px 1fr 40px;
   align-items: center;
-  justify-content: space-between;
 
   gap: 12px;
 
   padding: 10px 14px;
-
-  flex-shrink: 0;
 
   background: var(--color-surface);
 
   border-bottom: 1px solid var(--color-border);
 }
 
-.headerTitle {
-  display: flex;
-  align-items: center;
-
-  gap: 14px;
-}
-
-.headerTitle strong {
-  color: var(--color-text-primary);
-
-  font-size: 13px;
-  font-weight: var(--font-weight-extrabold);
-}
-
-.headerTitle span {
-  padding: 5px 8px;
-
-  color: var(--color-primary);
-  background: var(--color-primary-light);
-
-  border-radius: 7px;
-
-  font-size: 9px;
-  font-weight: var(--font-weight-bold);
-}
-
+.backButton,
 .closeButton {
   width: 34px;
   height: 34px;
@@ -93,20 +68,500 @@
   display: grid;
   place-items: center;
 
-  padding: 0;
-
   color: var(--color-text-secondary);
+
   background: var(--color-background-soft);
 
   border: 1px solid var(--color-border);
   border-radius: 9px;
-
-  cursor: pointer;
 }
 
+.backButton:hover,
 .closeButton:hover {
   color: var(--color-primary);
+
   background: var(--color-primary-light);
+}
+
+.headerTitle {
+  min-width: 0;
+
+  display: flex;
+  align-items: center;
+
+  gap: 22px;
+}
+
+.headerTitle > strong {
+  color: var(--color-text-primary);
+
+  font-size: 13px;
+  font-weight: var(--font-weight-extrabold);
+
+  white-space: nowrap;
+}
+
+/* ==================================================
+   STEPS
+================================================== */
+
+.steps {
+  display: flex;
+  align-items: center;
+
+  gap: 6px;
+}
+
+.steps > span {
+  width: 23px;
+  height: 23px;
+
+  display: grid;
+  place-items: center;
+
+  color: var(--color-text-muted);
+
+  background: var(--color-background-soft);
+
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+
+  font-size: 9px;
+  font-weight: var(--font-weight-bold);
+}
+
+.steps > b {
+  width: 40px;
+  height: 2px;
+
+  background: var(--color-border);
+}
+
+.steps .stepActive {
+  color: #ffffff;
+
+  background: var(--color-primary);
+
+  border-color: var(--color-primary);
+}
+
+.steps .stepDone {
+  color: #ffffff;
+
+  background: var(--color-success);
+
+  border-color: var(--color-success);
+}
+
+.steps .stepLineDone {
+  background: var(--color-success);
+}
+
+.steps small {
+  margin-left: 3px;
+
+  color: var(--color-text-muted);
+
+  font-size: 9px;
+}
+
+/* ==================================================
+   SUMMARY BODY
+================================================== */
+
+.summaryBody {
+  min-height: 0;
+
+  flex: 1;
+
+  display: grid;
+
+  grid-template-columns:
+    minmax(0, 1fr)
+    340px;
+
+  gap: 12px;
+
+  padding: 12px;
+
+  overflow: hidden;
+}
+
+.summaryPanel,
+.customerPanel,
+.paymentOrderPanel,
+.paymentPanel {
+  min-height: 0;
+
+  background: var(--color-surface);
+
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+
+  box-shadow: var(--shadow-xs);
+}
+
+/* ==================================================
+   SECTION TITLE
+================================================== */
+
+.sectionTitle {
+  min-height: 55px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 9px;
+
+  padding: 12px 14px;
+
+  color: var(--color-primary);
+
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.sectionTitle > div {
+  display: flex;
+  flex-direction: column;
+
+  gap: 2px;
+}
+
+.sectionTitle strong {
+  color: var(--color-text-primary);
+
+  font-size: 11px;
+}
+
+.sectionTitle span {
+  color: var(--color-text-muted);
+
+  font-size: 8px;
+}
+
+/* ==================================================
+   SUMMARY ITEMS
+================================================== */
+
+.summaryItems {
+  max-height: calc(100% - 110px);
+
+  display: grid;
+
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+
+  gap: 8px;
+
+  padding: 12px;
+
+  overflow-y: auto;
+}
+
+.summaryItem {
+  min-width: 0;
+
+  display: grid;
+
+  grid-template-columns:
+    60px
+    minmax(0, 1fr)
+    auto;
+
+  gap: 9px;
+
+  padding: 8px;
+
+  position: relative;
+
+  background: #ffffff;
+
+  border: 1px solid var(--color-border);
+  border-radius: 9px;
+}
+
+.itemImage {
+  width: 60px;
+  height: 60px;
+
+  display: grid;
+  place-items: center;
+
+  overflow: hidden;
+
+  color: var(--color-text-muted);
+
+  background: var(--color-background-soft);
+
+  border-radius: 7px;
+}
+
+.itemImage img {
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+}
+
+.itemInfo {
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 3px;
+}
+
+.itemInfo strong {
+  overflow: hidden;
+
+  color: var(--color-text-primary);
+
+  font-size: 10px;
+
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.itemInfo span {
+  overflow: hidden;
+
+  color: var(--color-text-muted);
+
+  font-size: 8px;
+
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.itemInfo small {
+  margin-top: auto;
+
+  color: var(--color-text-secondary);
+
+  font-size: 9px;
+}
+
+.quantityBadge {
+  position: absolute;
+
+  right: 7px;
+  bottom: 7px;
+
+  min-width: 26px;
+  height: 22px;
+
+  display: grid;
+  place-items: center;
+
+  padding: 0 5px;
+
+  color: var(--color-text-secondary);
+
+  background: var(--color-background-soft);
+
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+
+  font-size: 8px;
+  font-weight: var(--font-weight-bold);
+}
+
+.itemTotal {
+  color: var(--color-text-primary);
+
+  font-size: 10px;
+
+  white-space: nowrap;
+}
+
+/* ==================================================
+   ORDER NOTE
+================================================== */
+
+.orderNote {
+  margin: 0 12px 12px;
+  padding: 9px 10px;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 3px;
+
+  background: var(--color-background-soft);
+
+  border-radius: 8px;
+}
+
+.orderNote span {
+  color: var(--color-text-muted);
+
+  font-size: 8px;
+}
+
+.orderNote strong {
+  color: var(--color-text-secondary);
+
+  font-size: 9px;
+}
+
+/* ==================================================
+   CUSTOMER
+================================================== */
+
+.customerPanel {
+  display: flex;
+  flex-direction: column;
+
+  overflow: hidden;
+}
+
+.customerInfo {
+  padding: 12px;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 8px;
+}
+
+.customerInfo > div {
+  display: grid;
+
+  grid-template-columns:
+    18px
+    75px
+    minmax(0, 1fr);
+
+  align-items: start;
+
+  gap: 7px;
+
+  padding: 8px;
+
+  background: var(--color-background-soft);
+
+  border-radius: 8px;
+}
+
+.customerInfo svg {
+  color: var(--color-primary);
+}
+
+.customerInfo span {
+  color: var(--color-text-muted);
+
+  font-size: 8px;
+}
+
+.customerInfo strong {
+  overflow-wrap: anywhere;
+
+  color: var(--color-text-primary);
+
+  font-size: 9px;
+}
+
+.customerInfo .shippingMeta {
+  grid-template-columns:
+    1fr
+    auto;
+}
+
+.takeawayInfo {
+  flex: 1;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  gap: 7px;
+
+  padding: 25px;
+
+  color: var(--color-primary);
+
+  text-align: center;
+}
+
+.takeawayInfo strong {
+  color: var(--color-text-primary);
+
+  font-size: 11px;
+}
+
+.takeawayInfo span {
+  max-width: 230px;
+
+  color: var(--color-text-muted);
+
+  font-size: 9px;
+
+  line-height: 1.5;
+}
+
+/* ==================================================
+   MONEY
+================================================== */
+
+.moneySummary {
+  margin-top: auto;
+
+  padding: 12px 14px;
+
+  border-top: 1px solid var(--color-border-light);
+}
+
+.moneySummary > div {
+  display: flex;
+  justify-content: space-between;
+
+  gap: 10px;
+
+  margin-bottom: 5px;
+
+  color: var(--color-text-secondary);
+
+  font-size: 9px;
+}
+
+.moneySummary .totalRow {
+  padding-top: 9px;
+  margin-top: 8px;
+  margin-bottom: 0;
+
+  color: var(--color-text-primary);
+
+  border-top: 1px solid var(--color-border);
+
+  font-size: 11px;
+}
+
+.totalRow strong {
+  font-size: 14px;
+  font-weight: var(--font-weight-extrabold);
+}
+
+.primaryButton,
+.payButton {
+  width: calc(100% - 28px);
+  min-height: 40px;
+
+  margin: 0 14px 14px;
+
+  color: #ffffff;
+
+  background: var(--color-primary);
+
+  border-radius: 8px;
+
+  font-size: 10px;
+  font-weight: var(--font-weight-bold);
+}
+
+.primaryButton:hover,
+.payButton:hover {
+  background: var(--color-primary-hover);
 }
 
 /* ==================================================
@@ -131,22 +586,6 @@
   overflow: hidden;
 }
 
-.paymentOrderPanel,
-.paymentPanel {
-  min-height: 0;
-
-  background: var(--color-surface);
-
-  border: 1px solid var(--color-border);
-  border-radius: 12px;
-
-  box-shadow: var(--shadow-xs);
-}
-
-/* ==================================================
-   LEFT PANEL
-================================================== */
-
 .paymentOrderPanel {
   display: flex;
   flex-direction: column;
@@ -154,14 +593,9 @@
   overflow: hidden;
 }
 
-/* ==================================================
-   ORDER HEADER
-================================================== */
-
 .paymentOrderHeader {
-  display: grid;
-
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  display: flex;
+  justify-content: space-between;
 
   gap: 20px;
 
@@ -199,7 +633,7 @@
   border-bottom: 1px solid var(--color-border-light);
 }
 
-.promotionBox > label {
+.promotionBox label {
   display: block;
 
   margin-bottom: 6px;
@@ -210,152 +644,39 @@
   font-weight: var(--font-weight-bold);
 }
 
-.promotionInputRow {
+.promotionBox > div {
   display: flex;
 
   gap: 7px;
 }
 
-.promotionInputWrap {
-  position: relative;
-
+.promotionBox input {
   min-width: 0;
+  height: 35px;
 
   flex: 1;
-}
-
-.promotionInputWrap input {
-  width: 100%;
-  height: 35px;
 
   padding: 0 10px;
 
-  color: var(--color-text-primary);
   background: var(--color-background-soft);
 
   border: 1px solid var(--color-border);
   border-radius: 7px;
 
-  outline: none;
-
-  font-family: inherit;
   font-size: 9px;
 }
 
-.promotionInputWrap input:focus {
-  background: var(--color-surface);
-
-  border-color: var(--color-primary);
-
-  box-shadow: 0 0 0 3px var(--color-primary-light);
-}
-
-.applyPromotionButton {
-  min-width: 78px;
-
+.promotionBox button {
   padding: 0 14px;
 
   color: #ffffff;
+
   background: var(--color-primary);
 
-  border: none;
   border-radius: 7px;
 
   font-size: 9px;
   font-weight: var(--font-weight-bold);
-
-  cursor: pointer;
-}
-
-.applyPromotionButton:hover {
-  background: var(--color-primary-hover);
-}
-
-/* ==================================================
-   PROMOTION SUGGESTIONS
-================================================== */
-
-.promotionSuggestions {
-  position: absolute;
-
-  top: calc(100% + 5px);
-  left: 0;
-  right: 0;
-
-  z-index: 20;
-
-  max-height: 210px;
-
-  overflow-y: auto;
-
-  padding: 5px;
-
-  background: var(--color-surface);
-
-  border: 1px solid var(--color-border);
-  border-radius: 8px;
-
-  box-shadow: var(--shadow-lg);
-}
-
-.promotionSuggestions button {
-  width: 100%;
-
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-
-  gap: 10px;
-
-  padding: 8px 9px;
-
-  color: var(--color-text-primary);
-  background: transparent;
-
-  border: none;
-  border-radius: 6px;
-
-  text-align: left;
-
-  cursor: pointer;
-}
-
-.promotionSuggestions button:hover {
-  background: var(--color-primary-light);
-}
-
-.promotionSuggestions button > div {
-  min-width: 0;
-
-  display: flex;
-  flex-direction: column;
-
-  gap: 2px;
-}
-
-.promotionSuggestions strong {
-  color: var(--color-primary);
-
-  font-size: 9px;
-}
-
-.promotionSuggestions span {
-  overflow: hidden;
-
-  color: var(--color-text-muted);
-
-  font-size: 8px;
-
-  white-space: nowrap;
-  text-overflow: ellipsis;
-}
-
-.promotionSuggestions b {
-  flex-shrink: 0;
-
-  color: var(--color-success-hover);
-
-  font-size: 9px;
 }
 
 /* ==================================================
@@ -366,6 +687,7 @@
   padding: 10px 14px;
 
   color: var(--color-text-secondary);
+
   background: var(--color-background-soft);
 
   border-bottom: 1px solid var(--color-border);
@@ -384,34 +706,18 @@
   overflow-y: auto;
 }
 
-.paymentItems::-webkit-scrollbar {
-  width: 5px;
-}
-
-.paymentItems::-webkit-scrollbar-thumb {
-  background: var(--color-border-dark);
-
-  border-radius: 999px;
-}
-
 .paymentItems > div {
   display: flex;
   justify-content: space-between;
 
   gap: 15px;
 
-  padding: 9px 0;
+  padding: 8px 0;
 
   border-bottom: 1px solid var(--color-border-light);
 }
 
-.paymentItems > div:last-child {
-  border-bottom: none;
-}
-
 .paymentItems > div > div {
-  min-width: 0;
-
   display: flex;
   flex-direction: column;
 
@@ -430,43 +736,26 @@
   font-size: 8px;
 }
 
-/* ==================================================
-   TOTALS
-================================================== */
-
 .paymentTotals {
   padding: 11px 14px;
-
-  flex-shrink: 0;
 
   border-top: 1px solid var(--color-border);
 }
 
 .paymentTotals > div {
   display: flex;
-  align-items: center;
   justify-content: space-between;
 
-  gap: 15px;
-
-  margin-bottom: 5px;
+  margin-bottom: 4px;
 
   color: var(--color-text-secondary);
 
   font-size: 9px;
 }
 
-.paymentTotals > div:last-child {
-  margin-bottom: 0;
-}
-
-.discountValue {
-  color: var(--color-success-hover);
-}
-
 .paymentTotals .paymentTotal {
-  padding-top: 9px;
-  margin-top: 8px;
+  padding-top: 8px;
+  margin-top: 7px;
 
   color: var(--color-text-primary);
 
@@ -476,11 +765,11 @@
 }
 
 .paymentTotal strong:last-child {
-  font-size: 16px;
+  font-size: 14px;
 }
 
 /* ==================================================
-   RIGHT PAYMENT PANEL
+   PAYMENT PANEL
 ================================================== */
 
 .paymentPanel {
@@ -492,10 +781,6 @@
   overflow-y: auto;
 }
 
-/* ==================================================
-   METHODS
-================================================== */
-
 .paymentMethods {
   display: grid;
 
@@ -504,8 +789,6 @@
   gap: 6px;
 
   padding: 4px;
-
-  flex-shrink: 0;
 
   background: var(--color-background-soft);
 
@@ -521,59 +804,26 @@
 
   gap: 5px;
 
-  padding: 0 8px;
-
   color: var(--color-text-muted);
-  background: transparent;
 
-  border: 1px solid transparent;
   border-radius: 6px;
 
   font-size: 9px;
   font-weight: var(--font-weight-semibold);
-
-  cursor: pointer;
-}
-
-.paymentMethods button:hover {
-  color: var(--color-primary);
 }
 
 .paymentMethods .paymentMethodActive {
   color: var(--color-primary);
+
   background: #ffffff;
 
-  border-color: var(--color-border);
+  border: 1px solid var(--color-border);
 
   box-shadow: var(--shadow-xs);
 }
 
 /* ==================================================
-   PREPARING
-================================================== */
-
-.preparingNotice {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  gap: 6px;
-
-  margin-top: 9px;
-  padding: 8px 10px;
-
-  color: var(--color-primary);
-  background: var(--color-primary-light);
-
-  border: 1px solid #c7d2fe;
-  border-radius: 7px;
-
-  font-size: 8px;
-  font-weight: var(--font-weight-semibold);
-}
-
-/* ==================================================
-   CASH HEADER
+   CASH
 ================================================== */
 
 .cashHeader {
@@ -610,10 +860,6 @@
   font-weight: var(--font-weight-extrabold);
 }
 
-/* ==================================================
-   QUICK CASH
-================================================== */
-
 .quickCash {
   display: grid;
 
@@ -627,9 +873,8 @@
 .quickCash button {
   min-height: 31px;
 
-  padding: 0 5px;
-
   color: var(--color-text-secondary);
+
   background: #ffffff;
 
   border: 1px solid var(--color-border);
@@ -637,20 +882,12 @@
 
   font-size: 8px;
   font-weight: var(--font-weight-semibold);
-
-  cursor: pointer;
 }
 
-.quickCash button:hover:not(:disabled) {
+.quickCash button:hover {
   color: var(--color-primary);
 
   border-color: var(--color-primary);
-}
-
-.quickCash button:disabled {
-  opacity: 0.5;
-
-  cursor: not-allowed;
 }
 
 /* ==================================================
@@ -670,40 +907,22 @@
 .keypad button {
   min-height: 45px;
 
-  padding: 0;
-
   color: var(--color-text-primary);
-  background: transparent;
 
-  border: none;
   border-radius: 7px;
 
   font-size: 17px;
   font-weight: var(--font-weight-semibold);
-
-  cursor: pointer;
 }
 
-.keypad button:hover:not(:disabled) {
+.keypad button:hover {
   background: var(--color-background-soft);
 }
-
-.keypad button:disabled {
-  opacity: 0.45;
-
-  cursor: not-allowed;
-}
-
-/* ==================================================
-   CHANGE
-================================================== */
 
 .changeBox {
   display: flex;
   align-items: center;
   justify-content: space-between;
-
-  gap: 12px;
 
   padding: 10px;
 
@@ -727,47 +946,14 @@
   font-size: 12px;
 }
 
-/* ==================================================
-   PAY BUTTON
-================================================== */
-
 .payButton {
   width: 100%;
-  min-height: 42px;
 
   margin: auto 0 0;
-
-  flex-shrink: 0;
-
-  color: #ffffff;
-  background: var(--color-primary);
-
-  border: none;
-  border-radius: 8px;
-
-  font-size: 10px;
-  font-weight: var(--font-weight-bold);
-
-  cursor: pointer;
-
-  box-shadow: var(--shadow-sm);
-}
-
-.payButton:hover:not(:disabled) {
-  background: var(--color-primary-hover);
-}
-
-.payButton:disabled {
-  color: var(--color-text-muted);
-  background: #e2e8f0;
-
-  box-shadow: none;
-
-  cursor: not-allowed;
 }
 
 /* ==================================================
-   QR
+   QR PLACEHOLDER
 ================================================== */
 
 .qrPlaceholder {
@@ -793,6 +979,7 @@
   place-items: center;
 
   color: var(--color-primary);
+
   background: var(--color-primary-light);
 
   border: 1px dashed var(--color-primary);
@@ -811,6 +998,7 @@
   color: var(--color-text-muted);
 
   font-size: 9px;
+
   line-height: 1.5;
 }
 
@@ -825,6 +1013,10 @@
 /* ==================================================
    SUCCESS
 ================================================== */
+
+.headerSpacer {
+  width: 34px;
+}
 
 .successBody {
   min-height: 0;
@@ -849,7 +1041,7 @@
   background: #ffffff;
 
   border: 1px solid var(--color-border);
-  border-radius: 12px;
+  border-radius: 10px;
 
   box-shadow: var(--shadow-sm);
 
@@ -857,35 +1049,31 @@
 }
 
 .successIcon {
-  width: 58px;
-  height: 58px;
+  width: 56px;
+  height: 56px;
 
   display: grid;
   place-items: center;
 
-  margin: 20px auto 9px;
+  margin: 22px auto 10px;
 
   color: #ffffff;
-  background: var(--color-success);
+
+  background: var(--color-primary);
 
   border-radius: 999px;
 }
 
 .successCard h2 {
-  margin: 0;
-
-  color: var(--color-text-primary);
-
-  font-size: 14px;
-  font-weight: var(--font-weight-extrabold);
+  font-size: 13px;
 }
 
 .successCard > p {
-  margin: 5px 10px 17px;
+  margin: 4px 0 15px;
 
   color: var(--color-text-muted);
 
-  font-size: 9px;
+  font-size: 8px;
 }
 
 .successDetails {
@@ -894,37 +1082,35 @@
 
 .successDetails > div {
   display: flex;
-  align-items: center;
   justify-content: space-between;
 
-  gap: 14px;
+  gap: 15px;
 
   padding: 8px 12px;
-
-  color: var(--color-text-secondary);
 
   border-bottom: 1px solid var(--color-border-light);
 
   font-size: 9px;
 }
 
-.successDetails > div:last-child {
-  border-bottom: none;
+.successDetails span {
+  color: var(--color-text-secondary);
 }
 
 .successDetails strong {
   color: var(--color-text-primary);
 }
 
-.successDetails .successChange strong {
-  color: var(--color-success-hover);
+.successDetails .successChange {
+  padding-top: 10px;
+  padding-bottom: 10px;
 
-  font-size: 12px;
+  font-size: 11px;
 }
 
-/* ==================================================
-   SUCCESS ACTIONS
-================================================== */
+.successChange strong {
+  color: var(--color-success);
+}
 
 .successActions {
   width: min(350px, 100%);
@@ -935,12 +1121,12 @@
     1fr
     1fr;
 
-  gap: 8px;
+  gap: 7px;
 }
 
 .printButton,
 .confirmButton {
-  min-height: 39px;
+  min-height: 38px;
 
   display: flex;
   align-items: center;
@@ -952,38 +1138,20 @@
 
   font-size: 9px;
   font-weight: var(--font-weight-bold);
-
-  cursor: pointer;
 }
 
 .printButton {
-  color: var(--color-text-primary);
-  background: var(--color-surface);
+  color: var(--color-text-secondary);
 
-  border: 1px solid var(--color-border-dark);
-}
+  background: #ffffff;
 
-.printButton:hover:not(:disabled) {
-  color: var(--color-primary);
-
-  border-color: var(--color-primary);
-}
-
-.printButton:disabled {
-  opacity: 0.5;
-
-  cursor: not-allowed;
+  border: 1px solid var(--color-border);
 }
 
 .confirmButton {
   color: #ffffff;
+
   background: var(--color-primary);
-
-  border: 1px solid var(--color-primary);
-}
-
-.confirmButton:hover {
-  background: var(--color-primary-hover);
 }
 
 /* ==================================================
@@ -995,19 +1163,22 @@
     height: 94dvh;
   }
 
+  .summaryBody,
   .paymentBody {
     grid-template-columns: 1fr;
 
     overflow-y: auto;
   }
 
+  .summaryPanel,
+  .customerPanel,
   .paymentOrderPanel,
   .paymentPanel {
     min-height: auto;
   }
 
-  .paymentItems {
-    max-height: 280px;
+  .summaryItems {
+    max-height: none;
   }
 }
 
@@ -1022,23 +1193,166 @@
     border-radius: 10px;
   }
 
-  .paymentBody {
-    padding: 7px;
-
-    gap: 7px;
+  .summaryItems {
+    grid-template-columns: 1fr;
   }
 
-  .paymentOrderHeader {
-    grid-template-columns: 1fr;
-
+  .headerTitle {
     gap: 8px;
   }
 
-  .quickCash {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+  .steps small {
+    display: none;
   }
+}
 
-  .successActions {
-    grid-template-columns: 1fr;
-  }
+/* ==================================================
+   PAYOS / VIETQR
+================================================== */
+
+.qrPlaceholder > .qrCodeBox {
+  width: 206px;
+  height: 206px;
+  padding: 8px;
+  display: grid;
+  place-items: center;
+  background: #ffffff;
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  box-shadow: var(--shadow-sm);
+}
+
+.qrPlaceholder > .qrIconBox {
+  width: 110px;
+  height: 110px;
+  display: grid;
+  place-items: center;
+  color: var(--color-primary);
+  background: var(--color-primary-light);
+  border: 1px dashed var(--color-primary);
+  border-radius: 12px;
+}
+
+.qrWaiting {
+  color: var(--color-primary) !important;
+  font-weight: var(--font-weight-semibold);
+}
+
+.qrMeta {
+  color: var(--color-text-muted);
+  font-size: 8px;
+}
+
+.qrError {
+  max-width: 280px;
+  margin: 0;
+  color: var(--color-danger);
+  font-size: 9px;
+  line-height: 1.45;
+}
+
+.qrOpenLink {
+  color: var(--color-primary);
+  font-size: 9px;
+  font-weight: var(--font-weight-bold);
+  text-decoration: underline;
+}
+
+.qrPlaceholder .payButton {
+  width: min(280px, 100%);
+  margin-top: 8px;
+}
+
+/* BillingModal-only helpers */
+.promotionInputRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+}
+
+.promotionInputWrap {
+  position: relative;
+  flex: 1;
+}
+
+.promotionInputWrap input {
+  width: 100%;
+  min-height: 34px;
+  padding: 0 10px;
+  color: var(--color-text-primary);
+  background: #ffffff;
+  border: 1px solid var(--color-border);
+  border-radius: 7px;
+  font-size: 9px;
+}
+
+.promotionSuggestions {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  max-height: 180px;
+  overflow-y: auto;
+  background: #ffffff;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  box-shadow: var(--shadow-md);
+}
+
+.promotionSuggestions button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 10px;
+  text-align: left;
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.promotionSuggestions button:last-child {
+  border-bottom: 0;
+}
+.promotionSuggestions button:hover {
+  background: var(--color-background-soft);
+}
+.promotionSuggestions button > div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.promotionSuggestions span {
+  color: var(--color-text-muted);
+  font-size: 8px;
+}
+.promotionSuggestions b {
+  color: var(--color-primary);
+  font-size: 9px;
+}
+
+.applyPromotionButton {
+  min-height: 34px;
+  padding: 0 11px;
+  color: #ffffff;
+  background: var(--color-primary);
+  border-radius: 7px;
+  font-size: 9px;
+  font-weight: var(--font-weight-bold);
+}
+
+.discountValue {
+  color: var(--color-success);
+  font-weight: var(--font-weight-bold);
+}
+
+.preparingNotice {
+  margin-top: 10px;
+  padding: 9px 10px;
+  color: var(--color-primary);
+  background: var(--color-primary-light);
+  border: 1px solid #c7d2fe;
+  border-radius: 8px;
+  font-size: 9px;
+  line-height: 1.45;
 }

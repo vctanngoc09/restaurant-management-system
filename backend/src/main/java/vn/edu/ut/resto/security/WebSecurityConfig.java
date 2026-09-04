@@ -124,6 +124,7 @@ public class WebSecurityConfig {
                                 )
                                 .hasRole("ADMIN")
 
+                                .requestMatchers("/api/payments/payos/webhook").permitAll()
                                 .anyRequest()
                                 .authenticated()
                 );

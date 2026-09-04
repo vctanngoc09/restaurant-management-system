@@ -83,6 +83,9 @@ public class PaymentServiceImpl
     @Autowired
     private PaymentMapper paymentMapper;
 
+    @Autowired
+    private PayOSPaymentService payOSPaymentService;
+
 
     // ==================================================
     // CASH PAYMENT
@@ -147,6 +150,16 @@ public class PaymentServiceImpl
                     "Đơn hàng này đã được thanh toán thành công."
             );
         }
+
+
+        // ==================================================
+        // CANCEL PENDING VIETQR BEFORE CASH
+        //
+        // Tránh trường hợp QR vẫn còn hiệu lực nhưng thu ngân
+        // lại nhận thêm tiền mặt cho cùng một đơn.
+        // ==================================================
+
+        payOSPaymentService.cancelPendingForCash(order.getId());
 
 
         // ==================================================
